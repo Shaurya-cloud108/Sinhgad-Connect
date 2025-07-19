@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload } from "lucide-react";
+import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users } from "lucide-react";
 import { feedItems as initialFeedItems, ProfileData, FeedItem } from "@/lib/data";
 import { useState, useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -55,6 +55,7 @@ import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ProfileContext } from "@/context/ProfileContext";
+import { AppContext } from "@/context/AppContext";
 
 
 const profileFormSchema = z.object({
@@ -238,6 +239,7 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
 
 export default function ProfilePage() {
     const { profileData, setProfileData } = useContext(ProfileContext);
+    const { networkingGroups, setSelectedConversationByName } = useContext(AppContext);
     const [userPosts, setUserPosts] = useState<FeedItem[]>([]);
     
     useEffect(() => {
@@ -249,18 +251,26 @@ export default function ProfilePage() {
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const router = useRouter();
     
+    const adminGroups = networkingGroups.filter(group => 
+        group.members.some(member => member.id === profileData?.handle && member.role === 'admin')
+    );
+
     const handleProfileUpdate = (updatedData: Partial<ProfileData>) => {
         setProfileData(prev => ({...prev, ...updatedData}));
     };
 
     const handleLogout = () => {
-        // In a real app, you'd clear auth tokens here
         router.push("/register");
     }
 
     const handleDeletePost = (postId: number) => {
         setUserPosts(prev => prev.filter(item => item.id !== postId));
     };
+
+    const handleGroupClick = (groupName: string) => {
+        setSelectedConversationByName(groupName);
+        router.push("/messages");
+    }
 
     if (!profileData) {
         return <div>Loading...</div>;
@@ -383,7 +393,7 @@ export default function ProfilePage() {
                   </Card>
                 )) : <p className="text-center text-muted-foreground py-8">You haven't posted anything yet.</p>}
               </TabsContent>
-              <TabsContent value="about" className="mt-6">
+              <TabsContent value="about" className="mt-6 space-y-6">
                 <Card>
                   <CardHeader>
                     <CardTitle className="font-headline text-xl">About</CardTitle>
@@ -392,7 +402,7 @@ export default function ProfilePage() {
                     <p className="text-sm text-muted-foreground">{profileData.about}</p>
                   </CardContent>
                 </Card>
-                 <Card className="mt-6">
+                 <Card>
                   <CardHeader>
                     <CardTitle className="font-headline text-xl">Experience</CardTitle>
                   </CardHeader>
@@ -409,7 +419,7 @@ export default function ProfilePage() {
                     ))}
                   </CardContent>
                 </Card>
-                 <Card className="mt-6">
+                 <Card>
                   <CardHeader>
                     <CardTitle className="font-headline text-xl">Education</CardTitle>
                   </CardHeader>
@@ -424,6 +434,32 @@ export default function ProfilePage() {
                     </div>
                   </CardContent>
                 </Card>
+                 {adminGroups.length > 0 && (
+                    <Card>
+                    <CardHeader>
+                        <CardTitle className="font-headline text-xl">Groups Administered</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {adminGroups.map(group => (
+                            <div key={group.title} className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-muted rounded-md">
+                                        <Users className="h-5 w-5 text-muted-foreground"/>
+                                    </div>
+                                    <p className="font-semibold text-sm">{group.title}</p>
+                                </div>
+                                <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => handleGroupClick(group.title)}
+                                >
+                                    Go to Chat
+                                </Button>
+                            </div>
+                        ))}
+                    </CardContent>
+                    </Card>
+                )}
               </TabsContent>
             </Tabs>
           </CardContent>
@@ -433,3 +469,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    
