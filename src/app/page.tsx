@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, Send, Plus, Image as ImageIcon, Award, Briefcase, X, MoreHorizontal, Trash2, Eye } from "lucide-react";
+import { Heart, MessageCircle, Send, Plus, Image as ImageIcon, Award, Briefcase, X, MoreHorizontal, Trash2, Eye, Video } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -51,7 +51,7 @@ import { useState, useContext, useRef, useEffect } from "react";
 import { useSearchParams } from 'next/navigation'
 import React from 'react';
 import { useToast } from "@/hooks/use-toast";
-import { stories as initialStories, feedItems as initialFeedItems, FeedItem, Story, Comment, StoryViewer, JobListing } from "@/lib/data.tsx";
+import { stories as initialStories, feedItems as initialFeedItems, FeedItem, Story, Comment, StoryViewer, JobListing, StoryMedia } from "@/lib/data.tsx";
 import Image from "next/image";
 import { ProfileContext } from "@/context/ProfileContext";
 import { ShareDialog } from "@/components/share-dialog";
@@ -170,42 +170,48 @@ function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean,
   );
 }
 
-function CreateStoryDialog({ open, onOpenChange, onStorySubmit }: { open: boolean, onOpenChange: (open: boolean) => void, onStorySubmit: (image: string) => void }) {
+function CreateStoryDialog({ open, onOpenChange, onStorySubmit }: { open: boolean, onOpenChange: (open: boolean) => void, onStorySubmit: (media: { type: 'image' | 'video', url: string }) => void }) {
     const { toast } = useToast();
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
-    const imageInputRef = useRef<HTMLInputElement>(null);
+    const [mediaPreview, setMediaPreview] = useState<{ type: 'image' | 'video', url: string } | null>(null);
+    const mediaInputRef = useRef<HTMLInputElement>(null);
 
-    const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleMediaUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
+            if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                toast({ variant: "destructive", title: "File too large", description: "Please select a file smaller than 10MB." });
+                return;
+            }
             const reader = new FileReader();
             reader.onloadend = () => {
-                setImagePreview(reader.result as string);
+                const url = reader.result as string;
+                const type = file.type.startsWith('video') ? 'video' : 'image';
+                setMediaPreview({ type, url });
             };
             reader.readAsDataURL(file);
         }
     };
 
     const handleSubmit = () => {
-        if (!imagePreview) {
+        if (!mediaPreview) {
             toast({
                 variant: "destructive",
-                title: "No Image Selected",
-                description: "Please select an image for your story.",
+                title: "No Media Selected",
+                description: "Please select an image or video for your story.",
             });
             return;
         }
 
-        onStorySubmit(imagePreview);
+        onStorySubmit(mediaPreview);
 
         toast({
             title: "Story Posted!",
             description: "Your story is now visible to your network.",
         });
 
-        setImagePreview(null);
-        if(imageInputRef.current) {
-            imageInputRef.current.value = "";
+        setMediaPreview(null);
+        if(mediaInputRef.current) {
+            mediaInputRef.current.value = "";
         }
         onOpenChange(false);
     };
@@ -218,23 +224,27 @@ function CreateStoryDialog({ open, onOpenChange, onStorySubmit }: { open: boolea
                 </DialogHeader>
                 <div className="py-4">
                     <div className="flex flex-col items-center justify-center gap-4">
-                        {imagePreview ? (
-                            <div className="relative aspect-[9/16] w-64">
-                                <Image src={imagePreview} alt="Story preview" layout="fill" objectFit="cover" className="rounded-lg" />
-                                <Button variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => setImagePreview(null)}>
+                        {mediaPreview ? (
+                            <div className="relative aspect-[9/16] w-64 bg-black rounded-lg">
+                                {mediaPreview.type === 'image' ? (
+                                    <Image src={mediaPreview.url} alt="Story preview" layout="fill" objectFit="cover" className="rounded-lg" />
+                                ) : (
+                                    <video src={mediaPreview.url} controls autoPlay loop className="w-full h-full rounded-lg object-cover" />
+                                )}
+                                <Button variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => setMediaPreview(null)}>
                                     <X className="h-4 w-4" />
                                 </Button>
                             </div>
                         ) : (
                             <div className="flex flex-col items-center justify-center w-full h-80 border-2 border-dashed rounded-lg">
-                                <ImageIcon className="h-16 w-16 text-muted-foreground mb-4" />
+                                <Video className="h-16 w-16 text-muted-foreground mb-4" />
                                 <Button asChild>
-                                    <label htmlFor="story-image-upload">
-                                        Upload Image
-                                        <Input id="story-image-upload" type="file" className="sr-only" accept="image/*" onChange={handleImageUpload} ref={imageInputRef} />
+                                    <label htmlFor="story-media-upload">
+                                        Upload Media
+                                        <Input id="story-media-upload" type="file" className="sr-only" accept="image/*,video/*" onChange={handleMediaUpload} ref={mediaInputRef} />
                                     </label>
                                 </Button>
-                                <p className="text-xs text-muted-foreground mt-2">Stories are visual. Start with a photo.</p>
+                                <p className="text-xs text-muted-foreground mt-2">Upload a photo or video (max 10MB).</p>
                             </div>
                         )}
                     </div>
@@ -245,7 +255,7 @@ function CreateStoryDialog({ open, onOpenChange, onStorySubmit }: { open: boolea
                             Cancel
                         </Button>
                     </DialogClose>
-                    <Button onClick={handleSubmit} disabled={!imagePreview}>Post Story</Button>
+                    <Button onClick={handleSubmit} disabled={!mediaPreview}>Post Story</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
@@ -282,15 +292,24 @@ function StoryViewersSheet({ viewers, open, onOpenChange }: { viewers: StoryView
 
 function StoryViewerDialog({ story, open, onOpenChange }: { story: Story | null; open: boolean; onOpenChange: (open: boolean) => void; }) {
   const [isViewersSheetOpen, setIsViewersSheetOpen] = useState(false);
+  
+  if (!story || story.media.length === 0) return null;
 
-  if (!story || story.images.length === 0) return null;
+  const validMedia = story.media.filter(m => (Date.now() - m.timestamp) < 24 * 60 * 60 * 1000);
+  if (validMedia.length === 0) return null;
+
+  const currentMedia = validMedia[0]; // For now, just show the first valid one
 
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="p-0 border-0 max-w-md w-full h-[80vh] bg-black">
           <div className="relative w-full h-full rounded-lg overflow-hidden">
-            <Image src={story.images[0]} alt={`Story from ${story.name}`} layout="fill" objectFit="cover" data-ai-hint={story.aiHint} />
+             {currentMedia.type === 'image' ? (
+                <Image src={currentMedia.url} alt={`Story from ${story.name}`} layout="fill" objectFit="cover" data-ai-hint={story.aiHint} />
+             ) : (
+                <video src={currentMedia.url} controls autoPlay loop className="w-full h-full object-cover" />
+             )}
             <div className="absolute top-0 left-0 p-4 flex items-center justify-between bg-gradient-to-b from-black/50 to-transparent w-full">
               <div className="flex items-center gap-3">
                 <Avatar>
@@ -379,26 +398,19 @@ function HomePageContent() {
     });
   }
   
-  const handleStorySubmit = (image: string) => {
+  const handleStorySubmit = (media: { type: 'image' | 'video', url: string }) => {
     if (!profileData) return;
+
+    const newStoryMedia: StoryMedia = { ...media, timestamp: Date.now() };
 
     setStories(prevStories => {
         const newStories = [...prevStories];
         const myStoryIndex = newStories.findIndex(s => s.isOwn);
 
         if (myStoryIndex !== -1) {
-            const myStory = newStories[myStoryIndex];
-            if (myStory.images.length === 0) {
-                 // If it's the first image, replace the placeholder
-                 newStories[myStoryIndex] = {
-                    ...myStory,
-                    images: [image],
-                    avatar: profileData.avatar,
-                 };
-            } else {
-                // Otherwise, just add the image
-                myStory.images.push(image);
-            }
+            newStories[myStoryIndex].media.push(newStoryMedia);
+            // Ensure avatar is up to date
+            newStories[myStoryIndex].avatar = profileData.avatar;
         }
         return newStories;
     });
@@ -408,8 +420,11 @@ function HomePageContent() {
     if (story.isOwn) {
         setIsCreateStoryDialogOpen(true);
     } else {
-      setSelectedStory(story);
-      setIsStoryViewerOpen(true);
+      const validMedia = story.media.filter(m => (Date.now() - m.timestamp) < 24 * 60 * 60 * 1000);
+      if (validMedia.length > 0) {
+        setSelectedStory({...story, media: validMedia});
+        setIsStoryViewerOpen(true);
+      }
     }
   };
 
@@ -452,32 +467,41 @@ function HomePageContent() {
   };
 
   const activePostForComments = feedItems.find(item => item.id === activeCommentPostId);
+  const now = Date.now();
 
   return (
     <div className="w-full max-w-2xl mx-auto">
       {/* Stories */}
       <div className="py-4 border-b">
         <div className="px-4 flex items-center space-x-4 overflow-x-auto">
-          {stories.map((story) => (
-            <div key={story.id} className="flex-shrink-0 text-center cursor-pointer" onClick={() => handleStoryClick(story)}>
-              <div className={cn(
-                "relative rounded-full p-0.5 border-2",
-                story.isOwn && "border-dashed",
-                !story.isOwn && story.images.length > 0 && "border-primary"
-              )}>
-                <Avatar className="w-16 h-16">
-                  <AvatarImage src={story.isOwn ? profileData.avatar : story.avatar} data-ai-hint={story.aiHint} />
-                  <AvatarFallback>{story.name.substring(0,2)}</AvatarFallback>
-                  {story.isOwn && (
-                    <div className="absolute bottom-0 right-0 bg-primary rounded-full p-0.5 border-2 border-background">
-                      <Plus className="w-4 h-4 text-primary-foreground" />
-                    </div>
-                  )}
-                </Avatar>
-              </div>
-              <p className="text-xs mt-1.5">{story.isOwn ? 'Your Story' : story.name}</p>
-            </div>
-          ))}
+          {stories.map((story) => {
+            const hasValidMedia = story.media.some(m => (now - m.timestamp) < 24 * 60 * 60 * 1000);
+            
+            // Don't render other users' stories if they have no valid media
+            if (!story.isOwn && !hasValidMedia) {
+                return null;
+            }
+
+            return (
+                <div key={story.id} className="flex-shrink-0 text-center cursor-pointer" onClick={() => handleStoryClick(story)}>
+                <div className={cn(
+                    "relative rounded-full p-0.5 border-2",
+                    story.isOwn ? "border-dashed" : (hasValidMedia ? "border-primary" : "border-transparent")
+                )}>
+                    <Avatar className="w-16 h-16">
+                    <AvatarImage src={story.isOwn ? profileData.avatar : story.avatar} data-ai-hint={story.aiHint} />
+                    <AvatarFallback>{story.name.substring(0,2)}</AvatarFallback>
+                    {story.isOwn && (
+                        <div className="absolute bottom-0 right-0 bg-primary rounded-full p-0.5 border-2 border-background">
+                        <Plus className="w-4 h-4 text-primary-foreground" />
+                        </div>
+                    )}
+                    </Avatar>
+                </div>
+                <p className="text-xs mt-1.5">{story.isOwn ? 'Your Story' : story.name}</p>
+                </div>
+            )
+          })}
         </div>
       </div>
       

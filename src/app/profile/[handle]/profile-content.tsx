@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2, PlusCircle, Linkedin, Github, Mail, Link as LinkIcon, Camera } from "lucide-react";
+import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2, PlusCircle, Linkedin, Github, Mail, Link as LinkIcon, Camera, Video } from "lucide-react";
 import { ProfileData, FeedItem, communityMembers, EducationEntry, feedItems, stories, Story } from "@/lib/data.tsx";
 import { useState, useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -467,6 +467,8 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
     }
 
     const primaryEducation = profileData.education.find(e => e.graduationYear);
+    
+    const validUserStories = userStories?.media.filter(m => (Date.now() - m.timestamp) < 24 * 60 * 60 * 1000) || [];
 
   return (
     <div className="bg-secondary/40">
@@ -614,11 +616,15 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
                 )) : <p className="text-center text-muted-foreground py-8">This user hasn't posted anything yet.</p>}
               </TabsContent>
               <TabsContent value="stories" className="mt-6">
-                {userStories && userStories.images.length > 0 ? (
+                {validUserStories.length > 0 ? (
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
-                    {userStories.images.map((img, index) => (
-                        <div key={index} className="aspect-square relative rounded-md overflow-hidden">
-                        <Image src={img} alt={`Story image ${index + 1}`} layout="fill" objectFit="cover" />
+                    {validUserStories.map((media, index) => (
+                        <div key={index} className="aspect-square relative rounded-md overflow-hidden bg-black">
+                        {media.type === 'image' ? (
+                            <Image src={media.url} alt={`Story content ${index + 1}`} layout="fill" objectFit="cover" />
+                        ) : (
+                            <video src={media.url} className="w-full h-full object-cover" loop muted />
+                        )}
                         </div>
                     ))}
                     </div>

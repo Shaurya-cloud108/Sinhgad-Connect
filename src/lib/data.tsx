@@ -139,11 +139,17 @@ export type StoryViewer = {
   avatar: string;
 };
 
+export type StoryMedia = {
+  type: 'image' | 'video';
+  url: string;
+  timestamp: number;
+}
+
 export type Story = {
   id: number;
   name: string;
   avatar: string;
-  images: string[];
+  media: StoryMedia[];
   isOwn?: boolean;
   aiHint: string;
   viewers?: StoryViewer[];
@@ -563,28 +569,25 @@ export const stories: Story[] = [
       id: 1, 
       name: "Your Story", 
       avatar: "https://placehold.co/100x100.png", 
-      images: [], 
+      media: [], 
       isOwn: true, 
       aiHint: "add icon", 
-      viewers: [
-        { name: "Sunita Narayan", avatar: "https://placehold.co/100x100.png" },
-        { name: "Kavya Iyer", avatar: "https://placehold.co/100x100.png" },
-      ] 
+      viewers: []
     },
     { 
       id: 2, 
       name: "Rohan Verma", 
       avatar: "https://placehold.co/100x100.png", 
-      images: ["https://placehold.co/400x700.png"], 
+      media: [{ type: 'image', url: "https://placehold.co/400x700.png", timestamp: Date.now() - (12 * 60 * 60 * 1000) }], // 12 hours ago
       aiHint: "professional man",
       viewers: [
         { name: "Priya Sharma", avatar: "https://placehold.co/100x100.png" },
         { name: "Anjali Mehta", avatar: "https://placehold.co/100x100.png" },
       ]
     },
-    { id: 3, name: "Anjali Mehta", avatar: "https://placehold.co/100x100.png", images: ["https://placehold.co/400x700.png"], aiHint: "corporate woman", viewers: [] },
-    { id: 4, name: "Vikram Singh", avatar: "https://placehold.co/100x100.png", images: ["https://placehold.co/400x700.png"], aiHint: "corporate man", viewers: [] },
-    { id: 5, name: "Sneha Reddy", avatar: "https://placehold.co/100x100.png", images: ["https://placehold.co/400x700.png"], aiHint: "young professional", viewers: [] },
+    { id: 3, name: "Anjali Mehta", avatar: "https://placehold.co/100x100.png", media: [{ type: 'image', url: "https://placehold.co/400x700.png", timestamp: Date.now() - (2 * 60 * 60 * 1000) }], aiHint: "corporate woman", viewers: [] }, // 2 hours ago
+    { id: 4, name: "Vikram Singh", avatar: "https://placehold.co/100x100.png", media: [], aiHint: "corporate man", viewers: [] },
+    { id: 5, name: "Sneha Reddy", avatar: "https://placehold.co/100x100.png", media: [{ type: 'image', url: "https://placehold.co/400x700.png", timestamp: Date.now() - (30 * 60 * 60 * 1000) }], aiHint: "young professional", viewers: [] }, // 30 hours ago (will be expired)
 ];
 
 export const conversationsData: Conversation[] = [
