@@ -40,15 +40,17 @@ import {
 
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { stories as initialStories, feedItems as initialFeedItems, FeedItem, Story, profileData as initialProfileData, ProfileData } from "@/lib/data";
+import { stories as initialStories, feedItems as initialFeedItems, FeedItem, Story } from "@/lib/data";
 import Image from "next/image";
+import { ProfileContext } from "@/context/ProfileContext";
 
 function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean, onOpenChange: (open: boolean) => void, onPostSubmit: (post: FeedItem) => void }) {
   const { toast } = useToast();
   const [postContent, setPostContent] = useState("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const { profileData } = useContext(ProfileContext);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -74,9 +76,9 @@ function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean,
     const newPost: FeedItem = {
         id: Date.now(), // Simple unique ID
         author: {
-            name: "Priya Sharma",
-            avatar: "https://placehold.co/100x100.png",
-            handle: "priya-sharma-09",
+            name: profileData.name,
+            avatar: profileData.avatar,
+            handle: profileData.handle,
             aiHint: "professional woman"
         },
         content: postContent,
@@ -113,9 +115,9 @@ function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean,
           />
           {imagePreview && (
             <div className="mt-4 relative">
-              <img src={imagePreview} alt="Image preview" className="rounded-lg w-full" />
+              <Image src={imagePreview} alt="Image preview" className="rounded-lg w-full" width={400} height={225} />
                <Button variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => setImagePreview(null)}>
-                 <Plus className="h-4 w-4 rotate-45" />
+                 <X className="h-4 w-4" />
                </Button>
             </div>
           )}
@@ -158,9 +160,11 @@ function StoryViewerDialog({ story, open, onOpenChange }: { story: Story | null;
             </Avatar>
             <span className="font-semibold text-white">{story.name}</span>
           </div>
-          <DialogClose className="absolute right-2 top-2 text-white">
-            <X />
-            <span className="sr-only">Close</span>
+          <DialogClose asChild>
+            <Button variant="ghost" size="icon" className="absolute right-2 top-2 text-white hover:bg-black/50 hover:text-white">
+                <X />
+                <span className="sr-only">Close</span>
+            </Button>
           </DialogClose>
         </div>
       </DialogContent>
@@ -175,7 +179,7 @@ export default function Home() {
   const [stories, setStories] = useState<Story[]>(initialStories);
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
   const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
-  const [profileData, setProfileData] = useState<ProfileData>(initialProfileData);
+  const { profileData } = useContext(ProfileContext);
 
   const handlePostSubmit = (newPost: FeedItem) => {
     setFeedItems(prev => [newPost, ...prev]);
@@ -183,7 +187,6 @@ export default function Home() {
   
   const handleStoryClick = (story: Story) => {
     if (story.isOwn) {
-      // This is a placeholder for creating a story, we'll open the post dialog for now
       setIsPostDialogOpen(true);
     } else {
       setSelectedStory(story);
@@ -204,7 +207,7 @@ export default function Home() {
             <div key={story.name} className="flex-shrink-0 text-center cursor-pointer" onClick={() => handleStoryClick(story)}>
               <div className={`relative rounded-full p-0.5 border-2 ${story.isOwn ? 'border-dashed' : 'border-primary'}`}>
                 <Avatar className="w-16 h-16">
-                  <AvatarImage src={story.avatar} data-ai-hint={story.aiHint} />
+                  <AvatarImage src={story.isOwn ? profileData.avatar : story.avatar} data-ai-hint={story.aiHint} />
                   <AvatarFallback>{story.name.substring(0,2)}</AvatarFallback>
                   {story.isOwn && (
                     <div className="absolute bottom-0 right-0 bg-primary rounded-full p-0.5 border-2 border-background">
@@ -213,7 +216,7 @@ export default function Home() {
                   )}
                 </Avatar>
               </div>
-              <p className="text-xs mt-1.5">{story.name}</p>
+              <p className="text-xs mt-1.5">{story.isOwn ? 'Your Story' : story.name}</p>
             </div>
           ))}
         </div>
@@ -225,8 +228,8 @@ export default function Home() {
           <CardContent className="p-3">
              <div className="flex items-center gap-3">
               <Avatar>
-                <AvatarImage src="https://placehold.co/100x100.png" data-ai-hint="user avatar" />
-                <AvatarFallback>U</AvatarFallback>
+                <AvatarImage src={profileData.avatar} data-ai-hint="user avatar" />
+                <AvatarFallback>{profileData.name.substring(0,2)}</AvatarFallback>
               </Avatar>
               <button
                 className="w-full text-left bg-muted/50 hover:bg-muted/80 transition-colors py-2 px-4 rounded-full text-sm text-muted-foreground"
@@ -281,7 +284,7 @@ export default function Home() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                        <AlertDialogTrigger asChild>
-                          <DropdownMenuItem className="text-destructive">
+                          <DropdownMenuItem className="text-destructive cursor-pointer">
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete
                           </DropdownMenuItem>
@@ -309,7 +312,7 @@ export default function Home() {
               <p className="px-4 pb-3 text-sm">{item.content}</p>
               {item.image && (
                 <div className="w-full aspect-video bg-card">
-                   <img src={item.image} alt="Feed item" className="w-full h-full object-cover" data-ai-hint={item.aiHint} />
+                   <Image src={item.image} alt="Feed item" className="w-full h-full object-cover" data-ai-hint={item.aiHint} width={600} height={400}/>
                 </div>
               )}
             </CardContent>

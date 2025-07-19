@@ -6,8 +6,11 @@ import { usePathname } from "next/navigation";
 import { GraduationCap, Send, User, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useContext } from "react";
+import { ProfileContext } from "@/context/ProfileContext";
 
 const navLinks = [
+  { href: "/", label: "Home" },
   { href: "/search", label: "Search" },
   { href: "/jobs", label: "Jobs" },
   { href: "/events", label: "Events" },
@@ -18,6 +21,11 @@ const navLinks = [
 export function AppHeader() {
   const pathname = usePathname();
   const isRegisterPage = pathname === "/register";
+  const { profileData } = useContext(ProfileContext);
+
+  if (!profileData) {
+    return null; // Or a loading state
+  }
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background">
@@ -84,8 +92,8 @@ export function AppHeader() {
                   </Button>
                   <Link href="/profile">
                     <Avatar className="h-9 w-9 cursor-pointer">
-                      <AvatarImage src="https://placehold.co/100x100.png" data-ai-hint="professional woman" />
-                      <AvatarFallback>PS</AvatarFallback>
+                      <AvatarImage src={profileData.avatar} data-ai-hint={profileData.aiHint} />
+                      <AvatarFallback>{profileData.name.substring(0,2)}</AvatarFallback>
                     </Avatar>
                   </Link>
                 </>

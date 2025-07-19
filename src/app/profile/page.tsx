@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload } from "lucide-react";
-import { profileData as initialProfileData, feedItems as initialFeedItems, ProfileData, FeedItem } from "@/lib/data";
-import { useState } from "react";
+import { feedItems as initialFeedItems, ProfileData, FeedItem } from "@/lib/data";
+import { useState, useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Dialog,
@@ -54,6 +54,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ProfileContext } from "@/context/ProfileContext";
 
 
 const profileFormSchema = z.object({
@@ -67,7 +68,7 @@ const profileFormSchema = z.object({
 });
 
 
-function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { open: boolean, onOpenChange: (open: boolean) => void, profile: ProfileData, onProfileUpdate: (data: ProfileData) => void }) {
+function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { open: boolean, onOpenChange: (open: boolean) => void, profile: ProfileData, onProfileUpdate: (data: Partial<ProfileData>) => void }) {
   const { toast } = useToast();
   const [avatarPreview, setAvatarPreview] = useState<string | null>(profile.avatar);
   const [bannerPreview, setBannerPreview] = useState<string | null>(profile.banner);
@@ -95,8 +96,7 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
   };
 
   const onSubmit = (values: z.infer<typeof profileFormSchema>) => {
-    const updatedProfile: ProfileData = { 
-      ...profile, 
+    const updatedProfile: Partial<ProfileData> = { 
       ...values,
       avatar: avatarPreview || profile.avatar,
       banner: bannerPreview || profile.banner,
@@ -237,15 +237,20 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
 
 
 export default function ProfilePage() {
-    const [profileData, setProfileData] = useState<ProfileData>(initialProfileData);
-    const [userPosts, setUserPosts] = useState<FeedItem[]>(
-        initialFeedItems.filter(item => item.author.handle === initialProfileData.handle)
-    );
+    const { profileData, setProfileData } = useContext(ProfileContext);
+    const [userPosts, setUserPosts] = useState<FeedItem[]>([]);
+    
+    useEffect(() => {
+        if (profileData) {
+            setUserPosts(initialFeedItems.filter(item => item.author.handle === profileData.handle));
+        }
+    }, [profileData]);
+
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const router = useRouter();
     
-    const handleProfileUpdate = (updatedData: ProfileData) => {
-        setProfileData(updatedData);
+    const handleProfileUpdate = (updatedData: Partial<ProfileData>) => {
+        setProfileData(prev => ({...prev, ...updatedData}));
     };
 
     const handleLogout = () => {
@@ -256,6 +261,10 @@ export default function ProfilePage() {
     const handleDeletePost = (postId: number) => {
         setUserPosts(prev => prev.filter(item => item.id !== postId));
     };
+
+    if (!profileData) {
+        return <div>Loading...</div>;
+    }
 
   return (
     <div className="bg-secondary/40">
@@ -303,7 +312,7 @@ export default function ProfilePage() {
                 <TabsTrigger value="about">About</TabsTrigger>
               </TabsList>
               <TabsContent value="posts" className="mt-6 space-y-6">
-                 {userPosts.map((item) => (
+                 {userPosts.length > 0 ? userPosts.map((item) => (
                   <Card key={item.id}>
                     <CardHeader className="p-4 flex flex-row items-center justify-between">
                       <div className="flex items-center space-x-3">
@@ -325,7 +334,7 @@ export default function ProfilePage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                             <AlertDialogTrigger asChild>
-                                <DropdownMenuItem className="text-destructive">
+                                <DropdownMenuItem className="text-destructive cursor-pointer">
                                     <Trash2 className="mr-2 h-4 w-4" />
                                     Delete
                                 </DropdownMenuItem>
@@ -352,7 +361,7 @@ export default function ProfilePage() {
                       <p className="px-4 pb-3 text-sm">{item.content}</p>
                       {item.image && (
                         <div className="w-full aspect-video bg-card">
-                           <img src={item.image} alt="Feed item" className="w-full h-full object-cover" data-ai-hint={item.aiHint} />
+                           <Image src={item.image} alt="Feed item" className="w-full h-full object-cover" data-ai-hint={item.aiHint} width={600} height={400} />
                         </div>
                       )}
                     </CardContent>
@@ -372,7 +381,7 @@ export default function ProfilePage() {
                       </div>
                     </CardContent>
                   </Card>
-                ))}
+                )) : <p className="text-center text-muted-foreground py-8">You haven't posted anything yet.</p>}
               </TabsContent>
               <TabsContent value="about" className="mt-6">
                 <Card>
@@ -420,7 +429,7 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
       </div>
-      <EditProfileDialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} profile={profileData} onProfileUpdate={handleProfileUpdate} />
+      {profileData && <EditProfileDialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} profile={profileData} onProfileUpdate={handleProfileUpdate} />}
     </div>
   );
 }
