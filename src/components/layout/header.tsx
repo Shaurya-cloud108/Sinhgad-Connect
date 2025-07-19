@@ -31,7 +31,7 @@ export function AppHeader() {
       <div className="container flex h-16 items-center">
         
         {/* Logo */}
-        <Link href="/" className="flex items-center space-x-2 mr-6">
+        <Link href="/" className="flex items-center space-x-2 mr-auto">
           <GraduationCap className="h-6 w-6 text-primary" />
           <span className="hidden sm:inline-block font-bold font-headline">
             Sinhgad Connect
@@ -41,7 +41,7 @@ export function AppHeader() {
           </span>
         </Link>
         
-        <div className="flex flex-1 items-center justify-end">
+        <div className="flex items-center justify-end">
           {/* Desktop Navigation */}
           {!showAuthArea && (
             <nav className="hidden md:flex items-center space-x-1 text-sm font-medium">
@@ -53,7 +53,7 @@ export function AppHeader() {
             </nav>
           )}
 
-          <div className="flex flex-1 items-center justify-end space-x-2">
+          <div className="flex items-center justify-end space-x-2 pl-4">
             {showAuthArea ? (
               <>
                 <Button variant="ghost" asChild>
@@ -65,13 +65,13 @@ export function AppHeader() {
               </>
             ) : (
               <>
-                <Button variant="ghost" size="icon" asChild>
+                <Button variant="ghost" size="icon" asChild className="hidden md:inline-flex">
                   <Link href="/messages">
                     <Send />
                     <span className="sr-only">Messages</span>
                   </Link>
                 </Button>
-                <Button variant="ghost" size="icon" asChild>
+                <Button variant="ghost" size="icon" asChild className="hidden md:inline-flex">
                   <Link href="/notifications">
                     <Bell />
                      <span className="sr-only">Notifications</span>
