@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import Link from "next/link";
 import {
   Card,
@@ -109,6 +109,9 @@ export default function NetworkingPage() {
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
 
   const handleGroupClick = (group: NetworkingGroup) => {
       setSelectedConversationByName(group.title);
@@ -122,6 +125,10 @@ export default function NetworkingPage() {
         g.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
         g.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+  if (!mounted) {
+    return null; // or a loading spinner
+  }
 
   return (
     <div className="container py-8 md:py-12">

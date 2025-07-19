@@ -339,17 +339,11 @@ function JobsPageContent() {
 }
 
 export default function JobsPage() {
-  const [isClient, setIsClient] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  return (
-    <>
-      {isClient ? (
-        <JobsPageContent />
-      ) : (
+  if (!mounted) {
+    return (
         <div className="container py-8 md:py-12">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
             <div className="space-y-2">
@@ -367,7 +361,8 @@ export default function JobsPage() {
             </div>
           </div>
         </div>
-      )}
-    </>
-  );
+      );
+  }
+
+  return <JobsPageContent />;
 }

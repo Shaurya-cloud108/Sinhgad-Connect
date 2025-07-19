@@ -44,15 +44,12 @@ function RegisterPageContent() {
 }
 
 export default function RegisterPage() {
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   return (
     <div className="min-h-[calc(100vh-112px)] flex items-center justify-center p-4 bg-secondary/50">
-      {isClient ? (
+      {mounted ? (
         <RegisterPageContent />
       ) : (
         <div className="container grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
