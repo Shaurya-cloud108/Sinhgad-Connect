@@ -290,7 +290,7 @@ function StoryViewerDialog({ story, open, onOpenChange }: { story: Story | null;
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="p-0 border-0 max-w-md w-full h-[80vh] bg-black">
           <div className="relative w-full h-full rounded-lg overflow-hidden">
-            <Image src={story.images[story.images.length - 1]} alt={`Story from ${story.name}`} layout="fill" objectFit="cover" data-ai-hint={story.aiHint} />
+            <Image src={story.images[0]} alt={`Story from ${story.name}`} layout="fill" objectFit="cover" data-ai-hint={story.aiHint} />
             <div className="absolute top-0 left-0 p-4 flex items-center justify-between bg-gradient-to-b from-black/50 to-transparent w-full">
               <div className="flex items-center gap-3">
                 <Avatar>
@@ -609,6 +609,22 @@ function HomePageContent() {
 
 
 export default function Home() {
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) {
+        return (
+            <div className="w-full max-w-2xl mx-auto py-4 space-y-4">
+                <Skeleton className="h-24 w-full" />
+                <Skeleton className="h-40 w-full" />
+                <Skeleton className="h-96 w-full" />
+                <Skeleton className="h-96 w-full" />
+            </div>
+        );
+    }
+    
     return (
         <React.Suspense fallback={<div>Loading...</div>}>
             <HomePageContent />

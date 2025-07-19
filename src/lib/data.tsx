@@ -2,8 +2,7 @@
 "use client";
 
 import React from 'react';
-import { Member, NetworkingGroup, Conversation } from "@/context/AppContext";
-import Link from 'next/link';
+import { Member, NetworkingGroup, Conversation, MessagesData } from "@/context/AppContext";
 
 export type Event = {
   id: string;
@@ -85,8 +84,8 @@ export const jobListings: JobListing[] = [
     location: "Pune, India",
     type: "Full-time",
     tags: ["Python", "Machine Learning", "SQL"],
-    postedBy: "Rajesh Kumar '11",
-    postedByHandle: "rajesh-kumar", // Example handle, not in community members
+    postedBy: "Rohan Verma '12",
+    postedByHandle: "rohan-verma",
     description: "Join DataDriven Co. and help us solve complex problems with data. As a Data Scientist, you will be responsible for designing and implementing machine learning models, performing statistical analysis, and communicating insights to stakeholders."
   },
   {
@@ -96,8 +95,8 @@ export const jobListings: JobListing[] = [
     location: "Bangalore, India",
     type: "Full-time",
     tags: ["Agile", "Roadmap", "UX"],
-    postedBy: "Ananya Deshpande '14",
-    postedByHandle: "ananya-deshpande", // Example handle
+    postedBy: "Anjali Mehta '15",
+    postedByHandle: "anjali-mehta",
     description: "Connectify is looking for a user-centric Product Manager to lead our product strategy and roadmap. You will work closely with engineering, design, and marketing to deliver products that our users love."
   },
   {
@@ -118,8 +117,8 @@ export const jobListings: JobListing[] = [
     location: "Hyderabad, India",
     type: "Full-time",
     tags: ["AWS", "Kubernetes", "CI/CD"],
-    postedBy: "Amit Singh '15",
-    postedByHandle: "amit-singh", // Example handle
+    postedBy: "Vikram Singh '08",
+    postedByHandle: "vikram-singh",
     description: "CloudLeap is hiring a DevOps Engineer to manage and improve our cloud infrastructure. You will be responsible for our CI/CD pipelines, automation, and ensuring the reliability and scalability of our systems."
   },
   {
@@ -152,10 +151,18 @@ export type Story = {
 
 
 export const stories: Story[] = [
-    { id: 1, name: "Your Story", avatar: "https://placehold.co/100x100.png", images: [], isOwn: true, aiHint: "add icon", viewers: [
+    { 
+      id: 1, 
+      name: "Your Story", 
+      avatar: "https://placehold.co/100x100.png", 
+      images: [], 
+      isOwn: true, 
+      aiHint: "add icon", 
+      viewers: [
         { name: "Sunita Narayan", avatar: "https://placehold.co/100x100.png" },
         { name: "Kavya Iyer", avatar: "https://placehold.co/100x100.png" },
-    ] },
+      ] 
+    },
     { 
       id: 2, 
       name: "Rohan Verma", 
@@ -191,7 +198,7 @@ export const successStories: SuccessStory[] = [
     role: "CEO, Innovate Inc.",
     image: "https://placehold.co/400x400.png",
     aiHint: "professional woman portrait",
-    story: "Led her company through a successful IPO, becoming a leading voice in sustainable technology.",
+    story: "Sunita Narayan, a 2009 Computer Engineering graduate, is the trailblazing CEO of Innovate Inc. After starting her career at a major tech firm, she identified a gap in the market for sustainable technology solutions. She founded Innovate Inc. with a small team, focusing on creating eco-friendly consumer electronics. Under her leadership, the company developed a breakthrough biodegradable material for device casings. Her vision and relentless drive led Innovate Inc. through multiple funding rounds and ultimately to a successful IPO, establishing her as a leading voice in green technology and an inspiration for aspiring entrepreneurs.",
     tags: ["Leadership", "Technology", "Entrepreneurship"],
   },
   {
@@ -201,7 +208,7 @@ export const successStories: SuccessStory[] = [
     role: "Lead Researcher, CureAI",
     image: "https://placehold.co/400x400.png",
     aiHint: "male doctor",
-    story: "Pioneered a new AI-driven diagnostic tool that has significantly improved early cancer detection rates.",
+    story: "Dr. Rohan Gupta, a 2005 Electronics & Telecommunication alumnus, has made monumental contributions to medical science. After completing his PhD in biomedical engineering, he joined CureAI, a research lab focused on artificial intelligence in healthcare. He spearheaded a project to develop an AI-driven diagnostic tool that analyzes medical images with unprecedented accuracy. His team's algorithm can detect early-stage cancer markers far more effectively than traditional methods, significantly improving patient outcomes. His work has been published in numerous prestigious journals and is now being adopted by hospitals worldwide.",
     tags: ["Healthcare", "AI/ML", "Research"],
   },
   {
@@ -211,7 +218,7 @@ export const successStories: SuccessStory[] = [
     role: "Award-Winning Architect",
     image: "https://placehold.co/400x400.png",
     aiHint: "female architect",
-    story: "Designed the iconic 'Green Tower' in Mumbai, a landmark of eco-friendly architecture.",
+    story: "Meera Desai, a 2012 Civil Engineering graduate, is transforming urban landscapes with her focus on sustainable architecture. After working at several top firms, she started her own practice, 'Desai Designs.' Her firm won the bid to design a major high-rise in Mumbai, resulting in the iconic 'Green Tower.' The building incorporates vertical gardens, solar power, and a revolutionary rainwater harvesting system, setting a new standard for eco-friendly construction in India. Meera has received multiple international awards for her work and is a passionate advocate for sustainable urban development.",
     tags: ["Architecture", "Sustainability", "Design"],
   },
   {
@@ -221,7 +228,7 @@ export const successStories: SuccessStory[] = [
     role: "Forbes 30 Under 30, FinTech",
     image: "https://placehold.co/400x400.png",
     aiHint: "young businessman",
-    story: "Co-founded a FinTech startup that provides accessible financial services to rural communities.",
+    story: "Karan Malhotra, from the 2016 Information Technology batch, was recognized by Forbes for his work in financial inclusion. Noticing the lack of accessible financial services in rural India, Karan co-founded 'BharatFinance,' a mobile-first platform that offers micro-loans, insurance, and investment opportunities through a simple, user-friendly interface. His startup leverages technology to reach underserved communities, empowering thousands of small business owners and farmers. His innovative approach and social impact earned him a coveted spot on the Forbes 30 Under 30 list for Asia.",
     tags: ["Finance", "Startup", "Social Impact"],
   },
 ];
@@ -256,9 +263,9 @@ export const feedItems: FeedItem[] = [
   {
     id: 1,
     author: {
-      name: "Annual Alumni Meet",
+      name: "Alumni Events Committee",
       avatar: "https://placehold.co/100x100.png",
-      handle: "Official Event",
+      handle: "alumni-events",
       aiHint: "university logo"
     },
     content: "The flagship event of the year is just around the corner! Reconnect with old friends, network with peers, and relive your college days. Don't miss out on the Annual Alumni Grand Meet 2024. Register now!",
@@ -294,10 +301,10 @@ export const feedItems: FeedItem[] = [
     author: {
       name: "Alumni Network Job Board",
       avatar: "https://placehold.co/100x100.png",
-      handle: "Career Center",
+      handle: "alumni-network",
       aiHint: "briefcase icon"
     },
-    content: "New Opportunity! DataDriven Co. is hiring a Data Scientist in Pune. This role was posted by Rajesh Kumar '11. Apply now and take the next step in your career.",
+    content: "New Opportunity! DataDriven Co. is hiring a Data Scientist in Pune. This role was posted by Rohan Verma '12. Apply now and take the next step in your career.",
     image: "https://placehold.co/600x400.png",
     aiHint: "modern office",
     likes: 98,
@@ -415,7 +422,7 @@ export const communityMembers: CommunityMember[] = [
     name: "Priya Sharma",
     avatar: "https://placehold.co/100x100.png",
     fallback: "PS",
-    graduationYear: 2010,
+    graduationYear: 2009,
     graduationMonth: 6,
     field: "Computer Engineering",
     industry: "Technology",
@@ -530,17 +537,22 @@ export const communityMembers: CommunityMember[] = [
   }
 ];
 
-
-const groupMembers: { [key: string]: Member[] } = {
-  "Software & Tech Innovators": [
-    { id: 'priya-sharma-09', name: 'Priya Sharma', avatar: profileData.avatar, role: 'admin' },
+const allMembers = [
+    { id: 'priya-sharma-09', name: 'Priya Sharma', avatar: 'https://placehold.co/100x100.png', role: 'admin' },
+    { id: 'sunita-narayan', name: 'Sunita Narayan', avatar: 'https://placehold.co/100x100.png', role: 'admin' },
     { id: 'rohan-verma', name: 'Rohan Verma', avatar: 'https://placehold.co/100x100.png', role: 'member' },
     { id: 'kavya-iyer', name: 'Kavya Iyer', avatar: 'https://placehold.co/100x100.png', role: 'member' },
-  ],
-  "Entrepreneurship Hub": [
-     { id: 'priya-sharma-09', name: 'Priya Sharma', avatar: profileData.avatar, role: 'admin' },
-     { id: 'sunita-narayan', name: "Sunita Narayan", avatar: 'https://placehold.co/100x100.png', role: 'admin' },
-  ]
+    { id: 'vikram-singh', name: 'Vikram Singh', avatar: 'https://placehold.co/100x100.png', role: 'member' },
+    { id: 'amit-patel', name: 'Amit Patel', avatar: 'https://placehold.co/100x100.png', role: 'member' },
+];
+
+const groupMembers: { [key: string]: Member[] } = {
+  "Software & Tech Innovators": allMembers.filter(m => ['priya-sharma-09', 'sunita-narayan', 'rohan-verma', 'kavya-iyer'].includes(m.id)),
+  "Entrepreneurship Hub": allMembers.filter(m => ['priya-sharma-09', 'sunita-narayan'].includes(m.id)),
+  "Core Engineering Circle": allMembers.filter(m => ['rohan-verma', 'amit-patel'].includes(m.id)),
+  "Management & Consulting": allMembers.filter(m => ['vikram-singh'].includes(m.id)),
+  "Bay Area Alumni & Students": allMembers.filter(m => ['priya-sharma-09'].includes(m.id)),
+  "Higher Education & Academia": [],
 };
 
 export const networkingGroups: NetworkingGroup[] = [
@@ -560,53 +572,60 @@ export const networkingGroups: NetworkingGroup[] = [
     title: "Core Engineering Circle",
     description: "For alumni and students in Mechanical, Civil, and Electrical fields. Collaborate on projects and discuss industry trends.",
     iconName: "building",
-    members: [],
+    members: groupMembers["Core Engineering Circle"],
   },
   {
     title: "Management & Consulting",
     description: "Network with alumni and students interested in business management, finance, and consulting roles.",
     iconName: "briefcase",
-    members: [],
+    members: groupMembers["Management & Consulting"],
   },
   {
     title: "Bay Area Alumni & Students",
     description: "Connect with fellow graduates and current students in the San Francisco Bay Area for local meetups and networking.",
     iconName: "globe",
-    members: [],
+    members: groupMembers["Bay Area Alumni & Students"],
   },
    {
     title: "Higher Education & Academia",
     description: "A forum for alumni and students pursuing or working in research, teaching, and higher education.",
     iconName: "globe",
-    members: [],
+    members: groupMembers["Higher Education & Academia"],
   },
 ];
 
 
-export const conversationsData: Conversation[] = [
-  {
-    name: "Rohan Verma",
-    avatar: "https://placehold.co/100x100.png",
-    aiHint: "professional man",
-    lastMessage: "Thanks for the resume tips!",
-    time: "9:15 AM",
-    unread: 0,
+export const conversationsData: Conversation[] = communityMembers
+  .filter(m => m.handle !== profileData.handle) // Don't create a conversation with oneself
+  .map(member => ({
+    name: member.name,
+    avatar: member.avatar,
+    aiHint: member.aiHint,
+    lastMessage: `Say hi to ${member.name}!`,
+    time: "3d",
+    unread: Math.random() > 0.8 ? 1 : 0, // Randomly mark some as unread
     isGroup: false,
-  },
-  {
-    name: "Kavya Iyer",
-    avatar: "https://placehold.co/100x100.png",
-    aiHint: "female student",
-    lastMessage: "Thank you for the mentorship!",
-    time: "Yesterday",
-    unread: 1,
-    isGroup: false,
-  },
-];
+  }))
+  .concat(
+    networkingGroups
+      .filter(g => g.members.some(m => m.id === profileData.handle)) // Only show groups the user is in
+      .map(group => ({
+        name: group.title,
+        avatar: "https://placehold.co/100x100.png", // Generic group avatar
+        aiHint: "university logo",
+        lastMessage: `${group.members.length} members`,
+        time: "1w",
+        unread: Math.random() > 0.5 ? Math.floor(Math.random() * 3) + 1 : 0,
+        isGroup: true,
+      }))
+  )
+  .sort((a,b) => (a.unread > 0 ? -1 : 1) - (b.unread > 0 ? -1 : 1)); // Bring unread to top
 
-export const messagesData: { [key: string]: { senderId: string; senderName: string; text: string }[] } = {
+
+export const messagesData: MessagesData = {
   "Rohan Verma": [
     { senderId: "rohan-verma", senderName: "Rohan Verma", text: "Thanks for the resume tips!" },
+    { senderId: profileData.handle, senderName: profileData.name, text: "You're welcome! Let me know if you need more help." },
   ],
   "Kavya Iyer": [
       { senderId: 'kavya-iyer', senderName: 'Kavya Iyer', text: "Hi Priya! I had a question about my project." },
@@ -632,11 +651,11 @@ export const getContentDetails = (contentType: string, contentId: string | numbe
             const job = jobListings.find(item => item.id === contentId);
             return job ? { title: `Job: ${job.title} at ${job.company}`, url: `/jobs` } : null;
         case 'event':
-            // This is a placeholder as events don't have unique IDs yet
-            return { title: `Event: ${contentId}`, url: `/events` };
+            const event = eventsData.find(e => e.id === contentId);
+            return event ? { title: `Event: ${event.title}`, url: `/events` } : null;
         case 'story':
-             // This is a placeholder as stories don't have unique IDs yet
-            return { title: `Success Story: ${contentId}`, url: `/success-stories` };
+            const story = successStories.find(s => s.id === contentId);
+            return story ? { title: `Success Story: ${story.name}`, url: `/success-stories/${story.id}` } : null;
         default:
             return null;
     }
@@ -665,7 +684,7 @@ export const notifications: Notification[] = [
         time: "15 minutes ago",
         avatar: "https://placehold.co/100x100.png",
         aiHint: "professional man",
-        actions: [{ label: 'View Post', href: '/' }]
+        actions: [{ label: 'View Post', href: '/?postId=5' }]
     },
     {
         type: 'comment',
@@ -675,7 +694,7 @@ export const notifications: Notification[] = [
         time: "1 hour ago",
         avatar: "https://placehold.co/100x100.png",
         aiHint: "corporate woman",
-        actions: [{ label: 'Reply', href: '/' }]
+        actions: [{ label: 'Reply', href: '/?postId=4' }]
     },
     {
         type: "connection",

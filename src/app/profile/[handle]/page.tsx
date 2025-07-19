@@ -311,9 +311,10 @@ function ProfilePageContent({ handle }: { handle: string }) {
         setUserPosts(prev => prev.filter(item => item.id !== postId));
     };
 
-    const handleGroupClick = (groupName: string) => {
-        setSelectedConversationByName(groupName);
-        router.push("/messages");
+    const handleMessageClick = () => {
+      if (!profileData) return;
+      setSelectedConversationByName(profileData.name);
+      router.push("/messages");
     }
     
     if (profileData === undefined) { // Loading state
@@ -387,7 +388,7 @@ function ProfilePageContent({ handle }: { handle: string }) {
                             </>
                         ) : (
                           <>
-                            <Button onClick={() => handleGroupClick(profileData.name)} className="w-full">
+                            <Button onClick={handleMessageClick} className="w-full">
                                <MessageCircle className="mr-2 h-4 w-4" /> Message
                             </Button>
                              <ShareDialog contentType="profile" contentId={profileData.handle}>
@@ -551,7 +552,7 @@ function ProfilePageContent({ handle }: { handle: string }) {
                                 <Button 
                                     variant="outline" 
                                     size="sm"
-                                    onClick={() => handleGroupClick(group.title)}
+                                    onClick={() => handleMessageClick()}
                                 >
                                     Go to Chat
                                 </Button>
@@ -572,5 +573,6 @@ function ProfilePageContent({ handle }: { handle: string }) {
 
 export default function ProfilePage({ params }: { params: { handle: string } }) {
   const { handle } = params;
+  // Use a client component to render the main content and pass the handle
   return <ProfilePageContent handle={handle} />;
 }

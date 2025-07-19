@@ -31,6 +31,7 @@ import { ProfileContext } from "@/context/ProfileContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShareDialog } from "@/components/share-dialog";
 import { cn } from "@/lib/utils";
+import { Separator } from "@/components/ui/separator";
 
 function CreateGroupDialog({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
   const { addNetworkingGroup } = useContext(AppContext);
@@ -116,7 +117,6 @@ function NetworkingPageContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
 
-
   const handleGroupClick = (group: NetworkingGroup) => {
       setSelectedConversationByName(group.title);
       router.push("/messages");
@@ -126,15 +126,18 @@ function NetworkingPageContent() {
     toggleGroupMembership(group.title);
   }
 
-  const filteredGroups = useMemo(() => {
+  const { myGroups, exploreGroups } = useMemo(() => {
     const lowercasedQuery = searchQuery.toLowerCase();
-    return networkingGroups
-      .filter(g => 
+    const filtered = networkingGroups.filter(g => 
         g.title.toLowerCase().includes(lowercasedQuery) || 
         g.description.toLowerCase().includes(lowercasedQuery)
-      );
-  }, [networkingGroups, searchQuery]);
-
+    );
+    
+    const myGroups = filtered.filter(g => joinedGroups.has(g.title));
+    const exploreGroups = filtered.filter(g => !joinedGroups.has(g.title));
+    
+    return { myGroups, exploreGroups };
+  }, [networkingGroups, joinedGroups, searchQuery]);
 
   return (
     <div className="container py-8 md:py-12">
@@ -152,21 +155,56 @@ function NetworkingPageContent() {
 
       <CreateGroupDialog open={isCreateGroupOpen} onOpenChange={setIsCreateGroupOpen} />
 
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+        <h2 className="text-2xl font-headline font-bold mb-4 md:mb-0">Find Groups</h2>
+        <Input 
+            placeholder="Search for groups..."
+            className="w-full md:max-w-sm"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
+
+      {/* My Groups Section */}
+      {myGroups.length > 0 && (
+        <div className="mb-12">
+            <h3 className="text-xl font-headline font-bold mb-4">My Groups</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {myGroups.map(group => (
+                    <Card key={group.title} className="flex flex-col hover:shadow-lg transition-shadow duration-300">
+                      <CardHeader className="flex-row items-center gap-4">
+                        <GroupIcon iconName={group.iconName} />
+                        <div className="flex-1">
+                          <CardTitle className="font-headline text-xl">{group.title}</CardTitle>
+                          <CardDescription>{group.members.length} Members</CardDescription>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="flex-grow">
+                        <p className="text-sm text-muted-foreground line-clamp-2">{group.description}</p>
+                      </CardContent>
+                      <CardFooter className="gap-2">
+                        <Button className="w-full" variant="secondary" onClick={() => handleGroupClick(group)}>
+                            <MessageSquare className="mr-2 h-4 w-4" /> Go to Chat
+                        </Button>
+                        <ShareDialog contentType="group" contentId={group.title}>
+                            <Button variant="outline" size="icon">
+                                <Send className="h-4 w-4" />
+                            </Button>
+                        </ShareDialog>
+                      </CardFooter>
+                    </Card>
+                ))}
+            </div>
+        </div>
+      )}
+      
+      {myGroups.length > 0 && exploreGroups.length > 0 && <Separator className="my-12"/>}
+
       {/* Explore Groups Section */}
       <div>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-            <h2 className="text-2xl font-headline font-bold mb-4 md:mb-0">Explore Groups</h2>
-            <Input 
-                placeholder="Search for groups..."
-                className="w-full md:max-w-sm"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-            />
-        </div>
+        <h3 className="text-xl font-headline font-bold mb-4">Explore Groups</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredGroups.map((group) => {
-              const isMember = joinedGroups.has(group.title);
-              return (
+            {exploreGroups.map((group) => (
               <Card key={group.title} className="flex flex-col hover:shadow-lg transition-shadow duration-300">
                 <CardHeader className="flex-row items-center gap-4">
                   <GroupIcon iconName={group.iconName} />
@@ -176,18 +214,12 @@ function NetworkingPageContent() {
                   </div>
                 </CardHeader>
                 <CardContent className="flex-grow">
-                  <p className="text-sm text-muted-foreground">{group.description}</p>
+                  <p className="text-sm text-muted-foreground line-clamp-2">{group.description}</p>
                 </CardContent>
                 <CardFooter className="gap-2">
-                  {isMember ? (
-                      <Button className="w-full" variant="secondary" onClick={() => handleGroupClick(group)}>
-                        <CheckCircle className="mr-2 h-4 w-4" /> Go to Chat
-                      </Button>
-                  ) : (
-                      <Button className="w-full" onClick={() => handleJoinToggle(group)}>
-                        Join Group <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                  )}
+                  <Button className="w-full" onClick={() => handleJoinToggle(group)}>
+                    Join Group <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
                   <ShareDialog contentType="group" contentId={group.title}>
                       <Button variant="outline" size="icon">
                           <Send className="h-4 w-4" />
@@ -195,21 +227,17 @@ function NetworkingPageContent() {
                   </ShareDialog>
                 </CardFooter>
               </Card>
-            )})}
+            ))}
         </div>
-        {filteredGroups.length === 0 && searchQuery && (
+        {exploreGroups.length === 0 && myGroups.length === 0 && (
              <Card>
               <CardContent className="p-6 text-center text-muted-foreground">
-                <p>No groups found matching "{searchQuery}".</p>
+                <p>No groups found matching "{searchQuery}". Try a different search.</p>
               </CardContent>
             </Card>
         )}
-         {filteredGroups.length === 0 && !searchQuery && (
-             <Card>
-              <CardContent className="p-6 text-center text-muted-foreground">
-                <p>No groups available. Why not create one?</p>
-              </CardContent>
-            </Card>
+         {exploreGroups.length === 0 && myGroups.length > 0 && (
+             <p className="text-center text-muted-foreground pt-4">You have joined all available groups.</p>
         )}
       </div>
     </div>
