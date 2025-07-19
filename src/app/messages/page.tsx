@@ -49,6 +49,8 @@ import { SharedProfileCard } from "@/components/shared-profile-card";
 import { SharedGroupCard } from "@/components/shared-group-card";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Skeleton } from "@/components/ui/skeleton";
+
 
 function AddMemberDialog({ group, onOpenChange }: { group: NetworkingGroup, onOpenChange: (open: boolean) => void }) {
     const { addMemberToGroup } = useContext(AppContext);
@@ -239,8 +241,7 @@ function GroupInfoDialog({ group, currentUserRole, onOpenChange }: { group: Netw
     );
 }
 
-
-export default function MessagesPage() {
+function MessagesPageContent() {
   const { conversations, setConversations, messagesData, setMessagesData, selectedConversation, setSelectedConversation, networkingGroups, joinedGroups, toggleGroupMembership } = useContext(AppContext);
   const { profileData } = useContext(ProfileContext);
   const [newMessage, setNewMessage] = useState("");
@@ -462,4 +463,47 @@ export default function MessagesPage() {
       </div>
     </div>
   );
+}
+
+export default function MessagesPage() {
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => setMounted(true), []);
+
+    if (!mounted) {
+        return (
+            <div className="h-[calc(100vh-112px)] md:h-[calc(100vh-64px)] border-t md:border-t-0 flex">
+                <div className="w-full md:w-1/3 lg:w-1/4 border-r flex-col hidden md:flex">
+                    <div className="p-4 border-b space-y-4">
+                        <Skeleton className="h-8 w-32" />
+                        <Skeleton className="h-10 w-full" />
+                    </div>
+                    <div className="flex-grow p-4 space-y-4">
+                        <Skeleton className="h-16 w-full" />
+                        <Skeleton className="h-16 w-full" />
+                        <Skeleton className="h-16 w-full" />
+                    </div>
+                </div>
+                <div className="w-full md:w-2/3 lg:w-3/4 flex-col hidden md:flex">
+                    <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                        <MessageSquare className="h-20 w-20 mb-4" />
+                        <h2 className="text-xl font-semibold">Select a conversation</h2>
+                        <p>Start chatting with your connections or join a group.</p>
+                    </div>
+                </div>
+                 <div className="flex flex-col w-full md:hidden">
+                    <div className="p-4 border-b space-y-4">
+                        <Skeleton className="h-8 w-32" />
+                        <Skeleton className="h-10 w-full" />
+                    </div>
+                    <div className="flex-grow p-4 space-y-4">
+                        <Skeleton className="h-16 w-full" />
+                        <Skeleton className="h-16 w-full" />
+                        <Skeleton className="h-16 w-full" />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+    
+    return <MessagesPageContent />;
 }
