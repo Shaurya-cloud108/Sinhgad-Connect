@@ -16,7 +16,6 @@ const navLinks = [
   { href: "/jobs", label: "Jobs" },
   { href: "/events", label: "Events" },
   { href: "/success-stories", label: "Stories" },
-  { href: "/donate", label: "Donate" },
 ];
 
 export function AppHeader() {
