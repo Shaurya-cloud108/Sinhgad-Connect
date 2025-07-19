@@ -35,6 +35,12 @@ import { ProfileContext } from "@/context/ProfileContext";
 import { alumniData } from "@/lib/data";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 function AddMemberDialog({ group, onOpenChange }: { group: NetworkingGroup, onOpenChange: (open: boolean) => void }) {
     const { addMemberToGroup } = useContext(AppContext);
@@ -115,6 +121,7 @@ function GroupInfoDialog({ group, currentUserRole, onOpenChange }: { group: Netw
             </div>
 
             <ScrollArea className="h-64 pr-4 -mr-4">
+              <TooltipProvider>
                 <div className="space-y-4">
                     {group.members.map(member => (
                         <div key={member.id} className="flex items-center justify-between">
@@ -131,24 +138,38 @@ function GroupInfoDialog({ group, currentUserRole, onOpenChange }: { group: Netw
                             <div className="flex items-center gap-2">
                                 {currentUserRole === 'admin' && member.id !== profileData.handle && (
                                     <>
-                                        <Button 
-                                            size="icon" 
-                                            variant={member.role === 'admin' ? "secondary" : "ghost"}
-                                            className="h-8 w-8"
-                                            onClick={() => updateMemberRole(group.title, member.id, member.role === 'admin' ? 'member' : 'admin')}
-                                        >
-                                            <Crown className="h-4 w-4" />
-                                            <span className="sr-only">{member.role === 'admin' ? "Revoke Admin" : "Make Admin"}</span>
-                                        </Button>
-                                        <Button
-                                            size="icon"
-                                            variant="ghost"
-                                            className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                                            onClick={() => removeMemberFromGroup(group.title, member.id)}
-                                        >
-                                           <Trash2 className="h-4 w-4" />
-                                            <span className="sr-only">Remove Member</span>
-                                        </Button>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button 
+                                                    size="icon" 
+                                                    variant={member.role === 'admin' ? "secondary" : "ghost"}
+                                                    className="h-8 w-8"
+                                                    onClick={() => updateMemberRole(group.title, member.id, member.role === 'admin' ? 'member' : 'admin')}
+                                                >
+                                                    <Crown className="h-4 w-4" />
+                                                    <span className="sr-only">{member.role === 'admin' ? "Revoke Admin" : "Make Admin"}</span>
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>{member.role === 'admin' ? "Revoke Admin" : "Make Admin"}</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                                    onClick={() => removeMemberFromGroup(group.title, member.id)}
+                                                >
+                                                   <Trash2 className="h-4 w-4" />
+                                                    <span className="sr-only">Remove Member</span>
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>Remove Member</p>
+                                            </TooltipContent>
+                                        </Tooltip>
                                     </>
                                 )}
                                 {member.id === profileData.handle && <Badge variant="secondary">You</Badge>}
@@ -156,6 +177,7 @@ function GroupInfoDialog({ group, currentUserRole, onOpenChange }: { group: Netw
                         </div>
                     ))}
                 </div>
+              </TooltipProvider>
             </ScrollArea>
             <Separator />
              <DialogFooter className="!justify-center">
@@ -354,5 +376,3 @@ export default function MessagesPage() {
     </div>
   );
 }
-
-    
