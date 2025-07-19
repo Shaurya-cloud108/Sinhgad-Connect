@@ -88,17 +88,29 @@ export function ShareDialog({ contentType, contentId, children }: ShareDialogPro
   const handleShare = () => {
     if (!profileData || selectedTargets.size === 0) return;
 
-    const contentDetails = getContentDetails(contentType, contentId);
-    if (!contentDetails) return;
-    
-    const { title, url } = contentDetails;
-    const shareMessageText = `Check this out: ${title}\n${window.location.origin}${url}`;
+    let newShareMessage: Message;
+    let lastMessageText: string;
 
-    const newShareMessage: Message = {
-      senderId: profileData.handle,
-      senderName: profileData.name,
-      text: shareMessageText,
-    };
+    if (contentType === 'post') {
+      newShareMessage = {
+        senderId: profileData.handle,
+        senderName: profileData.name,
+        sharedPostId: contentId as number,
+      };
+      lastMessageText = `Shared a post.`;
+    } else {
+      const contentDetails = getContentDetails(contentType, contentId);
+      if (!contentDetails) return;
+
+      const { title, url } = contentDetails;
+      const shareMessageText = `Check this out: ${title}\n${window.location.origin}${url}`;
+      newShareMessage = {
+        senderId: profileData.handle,
+        senderName: profileData.name,
+        text: shareMessageText,
+      };
+      lastMessageText = `Shared a link.`;
+    }
     
     // Update messages for all selected targets
     setMessagesData(prev => {
@@ -121,7 +133,7 @@ export function ShareDialog({ contentType, contentId, children }: ShareDialogPro
             if (existingConversations.has(target.name)) {
                 // Update existing conversation
                 const existingConvo = existingConversations.get(target.name)!;
-                existingConvo.lastMessage = "Shared a link.";
+                existingConvo.lastMessage = lastMessageText;
                 existingConvo.time = "Now";
             } else if (!target.isGroup) {
                 // This is a new 1-on-1 conversation, create it
@@ -129,7 +141,7 @@ export function ShareDialog({ contentType, contentId, children }: ShareDialogPro
                     name: target.name,
                     avatar: target.avatar,
                     aiHint: "user avatar",
-                    lastMessage: "Shared a link.",
+                    lastMessage: lastMessageText,
                     time: "Now",
                     unread: 0,
                     isGroup: false,
@@ -205,3 +217,5 @@ export function ShareDialog({ contentType, contentId, children }: ShareDialogPro
     </Dialog>
   );
 }
+
+    

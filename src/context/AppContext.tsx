@@ -33,7 +33,8 @@ export type Conversation = {
 export type Message = { 
     senderId: string;
     senderName: string;
-    text: string 
+    text?: string;
+    sharedPostId?: number;
 };
 
 export type MessagesData = {
@@ -115,7 +116,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                         name: convoName,
                         avatar: "https://placehold.co/100x100.png",
                         aiHint: "university logo",
-                        lastMessage: lastMessage.text,
+                        lastMessage: lastMessage.text || "Shared a post.",
                         time: "Yesterday",
                         unread: 0,
                         isGroup: true,
@@ -128,7 +129,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                          name: convoName,
                          avatar: otherUser.avatar,
                          aiHint: "user avatar",
-                         lastMessage: lastMessage.text,
+                         lastMessage: lastMessage.text || "Shared a post.",
                          time: "Yesterday",
                          unread: initialConversations.find(c => c.name === convoName)?.unread || 0,
                          isGroup: false,
@@ -260,3 +261,5 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         </AppContext.Provider>
     );
 };
+
+    
