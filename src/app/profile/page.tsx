@@ -6,9 +6,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Briefcase, Calendar, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send } from "lucide-react";
+import { Briefcase, Calendar, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut } from "lucide-react";
 import { profileData as initialProfileData, feedItems as initialFeedItems, ProfileData, FeedItem } from "@/lib/data";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Dialog,
   DialogContent,
@@ -120,7 +121,7 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
               name="about"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>About</FormLabel>
+                  <FormLabel>About / Bio</FormLabel>
                   <FormControl>
                     <Textarea rows={4} {...field} />
                   </FormControl>
@@ -145,10 +146,15 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
 export default function ProfilePage() {
     const [profileData, setProfileData] = useState<ProfileData>(initialProfileData);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const router = useRouter();
     
     const handleProfileUpdate = (updatedData: ProfileData) => {
         setProfileData(updatedData);
     };
+
+    const handleLogout = () => {
+        router.push("/register");
+    }
 
   return (
     <div className="bg-secondary/40">
@@ -171,8 +177,9 @@ export default function ProfilePage() {
                         <AvatarFallback>{profileData.name.substring(0,2)}</AvatarFallback>
                     </Avatar>
                 </div>
-                 <div className="flex justify-end pt-4">
+                 <div className="flex justify-end pt-4 gap-2">
                     <Button variant="outline" onClick={() => setIsEditDialogOpen(true)}><Edit className="mr-2" /> Edit Profile</Button>
+                    <Button variant="outline" onClick={handleLogout}><LogOut className="mr-2" /> Logout</Button>
                 </div>
                 <div className="pt-10">
                     <CardTitle className="text-2xl font-bold font-headline">{profileData.name}</CardTitle>
