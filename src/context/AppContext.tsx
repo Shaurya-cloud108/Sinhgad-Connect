@@ -54,7 +54,7 @@ type AppContextType = {
     addMemberToGroup: (groupTitle: string, member: Member) => void;
     removeMemberFromGroup: (groupTitle: string, memberId: string) => void;
     joinedGroups: Set<string>;
-    toggleGroupMembership: (groupTitle: string, memberId: string) => void;
+    toggleGroupMembership: (groupTitle: string) => void;
     updateMemberRole: (groupTitle: string, memberId: string, role: 'admin' | 'member') => void;
     conversations: Conversation[];
     setConversations: React.Dispatch<React.SetStateAction<Conversation[]>>;
@@ -150,52 +150,46 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     };
     
     const removeMemberFromGroup = (groupTitle: string, memberId: string) => {
+        let wasMember = false;
         setNetworkingGroups(prevGroups => prevGroups.map(g => {
             if (g.title === groupTitle) {
+                 wasMember = g.members.some(m => m.id === memberId);
                 return { ...g, members: g.members.filter(m => m.id !== memberId) };
             }
             return g;
         }));
 
-        if (profileData && profileData.handle === memberId) {
+        if (profileData && profileData.handle === memberId && wasMember) {
             setJoinedGroups(prev => {
                 const newSet = new Set(prev);
                 newSet.delete(groupTitle);
                 return newSet;
             });
+            if (selectedConversation?.name === groupTitle) {
+                setSelectedConversation(null);
+            }
         }
     };
 
-    const toggleGroupMembership = (groupTitle: string, memberId: string) => {
+    const toggleGroupMembership = (groupTitle: string) => {
         if (!profileData) return;
         
         const group = networkingGroups.find(g => g.title === groupTitle);
         if (!group) return;
 
-        const isMember = group.members.some(m => m.id === memberId);
+        const isMember = group.members.some(m => m.id === profileData.handle);
 
-        setNetworkingGroups(prevGroups => prevGroups.map(g => {
-            if (g.title === groupTitle) {
-                if (isMember) {
-                    // Remove member
-                    return { ...g, members: g.members.filter(m => m.id !== memberId) };
-                } else {
-                    // Add member
-                    const newMember: Member = {
-                        id: profileData.handle,
-                        name: profileData.name,
-                        avatar: profileData.avatar,
-                        role: 'member'
-                    };
-                    return { ...g, members: [...g.members, newMember] };
-                }
-            }
-            return g;
-        }));
-
-        // If the user is re-joining a group, make sure a conversation exists for it.
-        if (!isMember) {
-            setSelectedConversationByName(groupTitle);
+        if (isMember) {
+             removeMemberFromGroup(groupTitle, profileData.handle);
+        } else {
+            const newMember: Member = {
+                id: profileData.handle,
+                name: profileData.name,
+                avatar: profileData.avatar,
+                role: 'member'
+            };
+            addMemberToGroup(groupTitle, newMember);
+            setJoinedGroups(prev => new Set(prev).add(groupTitle));
         }
     };
 

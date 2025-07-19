@@ -48,6 +48,7 @@ import { SharedStoryCard } from "@/components/shared-story-card";
 import { SharedProfileCard } from "@/components/shared-profile-card";
 import { SharedGroupCard } from "@/components/shared-group-card";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 function AddMemberDialog({ group, onOpenChange }: { group: NetworkingGroup, onOpenChange: (open: boolean) => void }) {
     const { addMemberToGroup } = useContext(AppContext);
@@ -122,7 +123,7 @@ function GroupInfoDialog({ group, currentUserRole, onOpenChange }: { group: Netw
 
     const handleLeaveGroup = () => {
         if (profileData) {
-            toggleGroupMembership(group.title, profileData.handle);
+            toggleGroupMembership(group.title);
         }
         onOpenChange(false);
     }
@@ -292,8 +293,8 @@ export default function MessagesPage() {
   }
 
   const handleRejoinGroup = () => {
-    if (currentGroup && profileData) {
-        toggleGroupMembership(currentGroup.title, profileData.handle);
+    if (currentGroup) {
+        toggleGroupMembership(currentGroup.title);
     }
   }
   

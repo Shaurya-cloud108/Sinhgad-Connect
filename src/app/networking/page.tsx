@@ -111,7 +111,6 @@ function GroupIcon({ iconName }: { iconName: string }) {
 
 function NetworkingPageContent() {
   const { networkingGroups, joinedGroups, toggleGroupMembership, setSelectedConversationByName } = useContext(AppContext);
-  const { profileData } = useContext(ProfileContext);
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
@@ -123,8 +122,7 @@ function NetworkingPageContent() {
   }
   
   const handleJoinGroup = (group: NetworkingGroup) => {
-    if(!profileData) return;
-    toggleGroupMembership(group.title, profileData.handle);
+    toggleGroupMembership(group.title);
     setSelectedConversationByName(group.title);
     router.push("/messages");
   }
