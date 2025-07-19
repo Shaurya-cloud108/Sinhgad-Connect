@@ -42,7 +42,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { stories as initialStories, feedItems as initialFeedItems, FeedItem, Story } from "@/lib/data";
+import { stories as initialStories, feedItems as initialFeedItems, FeedItem, Story, profileData as initialProfileData, ProfileData } from "@/lib/data";
 import Image from "next/image";
 
 function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean, onOpenChange: (open: boolean) => void, onPostSubmit: (post: FeedItem) => void }) {
@@ -175,6 +175,7 @@ export default function Home() {
   const [stories, setStories] = useState<Story[]>(initialStories);
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
   const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
+  const [profileData, setProfileData] = useState<ProfileData>(initialProfileData);
 
   const handlePostSubmit = (newPost: FeedItem) => {
     setFeedItems(prev => [newPost, ...prev]);
@@ -193,8 +194,6 @@ export default function Home() {
   const handleDeletePost = (postId: number) => {
     setFeedItems(prev => prev.filter(item => item.id !== postId));
   };
-
-  const currentUserHandle = "priya-sharma-09";
 
   return (
     <div className="w-full max-w-2xl mx-auto">
@@ -272,7 +271,7 @@ export default function Home() {
                   <p className="text-xs text-muted-foreground">@{item.author.handle}</p>
                 </div>
               </div>
-              {item.author.handle === currentUserHandle && (
+              {item.author.handle === profileData.handle && (
                 <AlertDialog>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>

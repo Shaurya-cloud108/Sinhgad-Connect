@@ -41,6 +41,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription as FormDescriptionComponent,
   FormField,
   FormItem,
   FormLabel,
@@ -57,6 +58,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 const profileFormSchema = z.object({
   name: z.string().min(2, "Name is too short"),
+  handle: z.string()
+    .min(3, "Handle must be at least 3 characters")
+    .regex(/^[a-z0-9-._]+$/, "Handle can only contain lowercase letters, numbers, hyphens, dots and underscores."),
   headline: z.string().min(5, "Headline is too short"),
   location: z.string().min(2, "Location is too short"),
   about: z.string().min(10, "About section is too short"),
@@ -72,6 +76,7 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       name: profile.name,
+      handle: profile.handle,
       headline: profile.headline,
       location: profile.location,
       about: profile.about,
@@ -157,6 +162,22 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="handle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>User Handle</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g. priya-sharma" {...field} />
+                    </FormControl>
+                     <FormDescriptionComponent>
+                      This is your unique username on the platform.
+                    </FormDescriptionComponent>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -403,5 +424,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-    
