@@ -51,7 +51,7 @@ import { useState, useContext, useRef, useEffect } from "react";
 import { useSearchParams } from 'next/navigation'
 import React from 'react';
 import { useToast } from "@/hooks/use-toast";
-import { stories as initialStories, feedItems as initialFeedItems, FeedItem, Story, Comment, StoryViewer } from "@/lib/data.tsx";
+import { stories as initialStories, feedItems as initialFeedItems, FeedItem, Story, Comment, StoryViewer, JobListing } from "@/lib/data.tsx";
 import Image from "next/image";
 import { ProfileContext } from "@/context/ProfileContext";
 import { ShareDialog } from "@/components/share-dialog";
@@ -59,7 +59,8 @@ import { cn } from "@/lib/utils";
 import { CommentSheet } from "@/components/comment-sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useRouter } from "next/navigation";
+import { PostJobDialog } from "@/components/post-job-dialog";
+import { AppContext } from "@/context/AppContext";
 
 function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean, onOpenChange: (open: boolean) => void, onPostSubmit: (post: FeedItem) => void }) {
   const { toast } = useToast();
@@ -75,7 +76,7 @@ function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean,
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
       };
-      reader.readAsDataURL(file);
+      reader.readDataURL(file);
     }
   };
   
@@ -322,14 +323,15 @@ function StoryViewerDialog({ story, open, onOpenChange }: { story: Story | null;
 
 function HomePageContent() {
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
+  const [isPostJobDialogOpen, setIsPostJobDialogOpen] = useState(false);
   const [isCreateStoryDialogOpen, setIsCreateStoryDialogOpen] = useState(false);
   const [feedItems, setFeedItems] = useState<FeedItem[]>(initialFeedItems);
   const [stories, setStories] = useState<Story[]>(initialStories);
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
   const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
   const { profileData } = useContext(ProfileContext);
+  const { addJobListing } = useContext(AppContext);
   const [activeCommentPostId, setActiveCommentPostId] = useState<number | null>(null);
-  const router = useRouter();
   
   const searchParams = useSearchParams();
 
@@ -363,12 +365,24 @@ function HomePageContent() {
   const handlePostSubmit = (newPost: FeedItem) => {
     setFeedItems(prev => [newPost, ...prev]);
   };
+
+  const handleJobSubmit = (newJob: Omit<JobListing, 'id' | 'postedBy'>) => {
+    if(!profileData) return;
+    addJobListing({
+      ...newJob,
+      id: Date.now(),
+      postedBy: `${profileData.name} '${profileData.education.graduationYear.toString().slice(-2)}`,
+      tags: [],
+    });
+  }
   
   const handleStorySubmit = (image: string) => {
     setStories(prevStories => {
         const newStories = [...prevStories];
         const myStoryIndex = newStories.findIndex(s => s.isOwn);
         if (myStoryIndex !== -1) {
+            // This is a simplified way to handle it. In a real app, you might create a new story object
+            // if the user posts multiple times. For this prototype, we'll add to the existing story object.
             newStories[myStoryIndex].images.push(image);
         }
         return newStories;
@@ -483,7 +497,7 @@ function HomePageContent() {
                 <Award className="text-yellow-500" />
                 Achievement
               </Button>
-               <Button variant="ghost" className="w-full" onClick={() => router.push('/jobs')}>
+               <Button variant="ghost" className="w-full" onClick={() => setIsPostJobDialogOpen(true)}>
                 <Briefcase className="text-blue-500" />
                 Job
               </Button>
@@ -493,6 +507,7 @@ function HomePageContent() {
       </div>
 
       <CreatePostDialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen} onPostSubmit={handlePostSubmit} />
+      <PostJobDialog open={isPostJobDialogOpen} onOpenChange={setIsPostJobDialogOpen} onJobSubmit={handleJobSubmit}/>
       <CreateStoryDialog open={isCreateStoryDialogOpen} onOpenChange={setIsCreateStoryDialogOpen} onStorySubmit={handleStorySubmit} />
       <StoryViewerDialog story={selectedStory} open={isStoryViewerOpen} onOpenChange={setIsStoryViewerOpen} />
       <CommentSheet

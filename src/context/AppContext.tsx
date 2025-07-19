@@ -2,7 +2,7 @@
 "use client";
 
 import React, { createContext, useState, ReactNode, useContext, useEffect, useCallback } from 'react';
-import { networkingGroups as initialNetworkingGroups, conversationsData as initialConversations, messagesData as initialMessagesData, communityMembers } from '@/lib/data.tsx';
+import { networkingGroups as initialNetworkingGroups, conversationsData as initialConversations, messagesData as initialMessagesData, communityMembers, jobListings as initialJobListings, JobListing } from '@/lib/data.tsx';
 import { ProfileContext } from './ProfileContext';
 
 // Types
@@ -61,6 +61,8 @@ type AppContextType = {
     selectedConversation: Conversation | null;
     setSelectedConversation: React.Dispatch<React.SetStateAction<Conversation | null>>;
     setSelectedConversationByName: (name: string) => void;
+    jobListings: JobListing[];
+    addJobListing: (job: JobListing) => void;
 };
 
 // Context
@@ -79,6 +81,8 @@ export const AppContext = createContext<AppContextType>({
     selectedConversation: null,
     setSelectedConversation: () => {},
     setSelectedConversationByName: () => {},
+    jobListings: [],
+    addJobListing: () => {},
 });
 
 // Provider
@@ -89,6 +93,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
     const [messagesData, setMessagesData] = useState<MessagesData>(initialMessagesData);
     const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+    const [jobListings, setJobListings] = useState<JobListing[]>(initialJobListings);
 
     const regenerateConversations = useCallback(() => {
         if (!profileData) {
@@ -119,7 +124,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                         name: convoName,
                         avatar: "https://placehold.co/100x100.png",
                         aiHint: "university logo",
-                        lastMessage: lastMessage.text || "Shared a post.",
+                        lastMessage: lastMessage.text || "Shared content.",
                         time: "Yesterday",
                         unread: 0,
                         isGroup: true,
@@ -132,7 +137,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                          name: convoName,
                          avatar: otherUser.avatar,
                          aiHint: "user avatar",
-                         lastMessage: lastMessage.text || "Shared a post.",
+                         lastMessage: lastMessage.text || "Shared content.",
                          time: "Yesterday",
                          unread: initialConversations.find(c => c.name === convoName)?.unread || 0,
                          isGroup: false,
@@ -140,8 +145,17 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                  }
             }
         });
+        
+        const sortedConversations = Array.from(conversationMap.values()).sort((a, b) => {
+            // A simple sort, in a real app this would be based on message timestamps
+            if (a.time === "Now") return -1;
+            if (b.time === "Now") return 1;
+            if (a.time.includes("AM") || a.time.includes("PM")) return -1;
+            if (b.time.includes("AM") || b.time.includes("PM")) return 1;
+            return 0;
+        });
 
-        setConversations(Array.from(conversationMap.values()));
+        setConversations(sortedConversations);
         setJoinedGroups(userGroupTitles);
     }, [profileData]);
 
@@ -153,6 +167,19 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const addNetworkingGroup = (group: NetworkingGroup) => {
         if (!profileData) return;
         setNetworkingGroups(prev => [group, ...prev]);
+        setJoinedGroups(prev => new Set(prev).add(group.title));
+        
+        const newConversation = {
+            name: group.title,
+            avatar: "https://placehold.co/100x100.png",
+            aiHint: "university logo",
+            lastMessage: "You created the group.",
+            time: "Now",
+            unread: 0,
+            isGroup: true,
+        };
+        setConversations(prev => [newConversation, ...prev]);
+        setSelectedConversation(newConversation);
     };
     
     const addMemberToGroup = (groupTitle: string, member: Member) => {
@@ -235,10 +262,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                     unread: 0,
                     isGroup: true,
                 };
-                setConversations(prev => [...prev, newConversation]);
+                setConversations(prev => [newConversation, ...prev]);
                 setSelectedConversation(newConversation);
             }
         }
+    };
+
+    const addJobListing = (job: JobListing) => {
+        setJobListings(prev => [job, ...prev]);
     };
 
     const value = {
@@ -256,6 +287,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         selectedConversation,
         setSelectedConversation,
         setSelectedConversationByName,
+        jobListings,
+        addJobListing,
     };
 
     return (
