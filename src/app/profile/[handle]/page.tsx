@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2, PlusCircle, Linkedin, Github, Mail, Link as LinkIcon } from "lucide-react";
-import { ProfileData, FeedItem, communityMembers, EducationEntry } from "@/lib/data.tsx";
+import { ProfileData, FeedItem, communityMembers, EducationEntry, initialFeedItems } from "@/lib/data.tsx";
 import { useState, useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -152,13 +152,18 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
     const updatedEducation: EducationEntry[] = values.education.map((edu, index) => {
       // Find the corresponding original education entry, if it exists
       const originalEdu = profile.education[index];
-      if (originalEdu) {
+      if (originalEdu && originalEdu.graduationYear) { // Check if it's the primary one with metadata
         return {
           ...originalEdu,
           ...edu,
         };
       }
-      return edu;
+      return {
+        ...edu,
+        // Ensure new entries have undefined for the optional fields if not set
+        graduationYear: undefined,
+        graduationMonth: undefined,
+      };
     });
 
     const updatedProfile: Partial<ProfileData> = { 
@@ -280,8 +285,8 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
                 <Separator />
                 
                 <div>
-                    <FormLabel className="text-lg font-semibold">Contact & Socials</FormLabel>
-                    <div className="space-y-4 mt-2 p-4 border rounded-md">
+                    <h3 className="text-lg font-semibold mb-2">Contact & Socials</h3>
+                    <div className="space-y-4 p-4 border rounded-md">
                         <FormField control={form.control} name="contact.email" render={({ field }) => (<FormItem><FormLabel>Contact Email</FormLabel><FormControl><Input type="email" placeholder="your.email@example.com" {...field} /></FormControl><FormMessage /></FormItem>)} />
                         <FormField control={form.control} name="contact.website" render={({ field }) => (<FormItem><FormLabel>Portfolio/Website URL</FormLabel><FormControl><Input placeholder="https://your-portfolio.com" {...field} /></FormControl><FormMessage /></FormItem>)} />
                         <FormField control={form.control} name="socials.linkedin" render={({ field }) => (<FormItem><FormLabel>LinkedIn URL</FormLabel><FormControl><Input placeholder="https://linkedin.com/in/your-profile" {...field} /></FormControl><FormMessage /></FormItem>)} />
@@ -292,8 +297,8 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
                 <Separator />
                 
                 <div>
-                    <FormLabel className="text-lg font-semibold">Experience</FormLabel>
-                    <div className="space-y-4 mt-2">
+                    <h3 className="text-lg font-semibold mb-2">Experience</h3>
+                    <div className="space-y-4">
                         {expFields.map((field, index) => (
                           <div key={field.id} className="p-4 border rounded-md relative space-y-2">
                               <FormField control={form.control} name={`experience.${index}.role`} render={({ field }) => (<FormItem><FormLabel>Role</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
@@ -311,8 +316,8 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
                 <Separator />
 
                  <div>
-                    <FormLabel className="text-lg font-semibold">Education</FormLabel>
-                     <div className="space-y-4 mt-2">
+                    <h3 className="text-lg font-semibold mb-2">Education</h3>
+                     <div className="space-y-4">
                         {eduFields.map((field, index) => (
                           <div key={field.id} className="p-4 border rounded-md relative space-y-2">
                               <FormField control={form.control} name={`education.${index}.college`} render={({ field }) => (<FormItem><FormLabel>School / College</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
@@ -429,7 +434,7 @@ function ProfilePageContent({ handle }: { handle: string }) {
                             <Skeleton className="h-40 md:h-48 w-full" />
                         </CardHeader>
                         <CardContent className="p-6">
-                            <Skeleton className="h-24 w-24 rounded-full" />
+                            <Skeleton className="h-24 w-24 rounded-full -mt-16" />
                             <Skeleton className="h-8 w-1/2 mt-4 mb-2" />
                             <Skeleton className="h-4 w-1/4 mb-4" />
                             <Skeleton className="h-4 w-3/4 mb-2" />
@@ -457,7 +462,7 @@ function ProfilePageContent({ handle }: { handle: string }) {
         );
     }
 
-    const primaryEducation = profileData.education[0];
+    const primaryEducation = profileData.education.find(e => e.graduationYear);
 
   return (
     <div className="bg-secondary/40">
@@ -481,7 +486,7 @@ function ProfilePageContent({ handle }: { handle: string }) {
                             <AvatarFallback>{profileData.name.substring(0,2)}</AvatarFallback>
                         </Avatar>
                         <div className="pt-2">
-                           <CardTitle className="text-2xl font-bold font-headline">{profileData.name} {primaryEducation.graduationYear && primaryEducation.graduationMonth ? getStatusEmoji(primaryEducation.graduationYear, primaryEducation.graduationMonth) : ''}</CardTitle>
+                           <CardTitle className="text-2xl font-bold font-headline flex items-center gap-2">{profileData.name} {primaryEducation?.graduationYear && primaryEducation?.graduationMonth ? getStatusEmoji(primaryEducation.graduationYear, primaryEducation.graduationMonth) : ''}</CardTitle>
                            <p className="text-sm text-muted-foreground">@{profileData.handle}</p>
                         </div>
                     </div>
@@ -693,9 +698,7 @@ function ProfilePageContent({ handle }: { handle: string }) {
   );
 }
 
-export default function ProfilePage({ params }: { params: { handle: string } }) {
+export default function ProfilePage({ params: { handle } }: { params: { handle: string } }) {
   // Use a client component to render the main content and pass the handle
-  return <ProfilePageContent handle={params.handle} />;
+  return <ProfilePageContent handle={handle} />;
 }
-
-    
