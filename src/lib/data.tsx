@@ -255,6 +255,14 @@ export type ProfileData = {
     duration: string;
   }[];
   education: EducationEntry[];
+  socials: {
+    linkedin: string;
+    github: string;
+  };
+  contact: {
+    email: string;
+    website?: string;
+  };
 };
 
 
@@ -290,7 +298,20 @@ export const profileData: ProfileData = {
       graduationYear: 2009,
       graduationMonth: 6,
     },
+     {
+      degree: "M.S. Computer Science",
+      college: "Stanford University",
+      yearRange: "2010 - 2012",
+    },
   ],
+  socials: {
+    linkedin: "https://www.linkedin.com/in/priya-sharma-example/",
+    github: "https://github.com/priyasharma-example",
+  },
+  contact: {
+    email: "priya.sharma@example.com",
+    website: "https://priya-sharma.dev"
+  },
 };
 
 export type CommunityMember = {
@@ -655,3 +676,5 @@ export const notifications: Notification[] = [
         aiHint: "briefcase icon"
     },
 ];
+
+    

@@ -6,8 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2, PlusCircle } from "lucide-react";
-import { feedItems as initialFeedItems, ProfileData, FeedItem, communityMembers, EducationEntry } from "@/lib/data.tsx";
+import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2, PlusCircle, Linkedin, Github, Mail, Link as LinkIcon } from "lucide-react";
+import { ProfileData, FeedItem, communityMembers, EducationEntry } from "@/lib/data.tsx";
 import { useState, useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -71,6 +71,14 @@ const profileFormSchema = z.object({
   headline: z.string().min(5, "Headline is too short"),
   location: z.string().min(2, "Location is too short"),
   about: z.string().min(10, "About section is too short"),
+  contact: z.object({
+    email: z.string().email("Please enter a valid email."),
+    website: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
+  }),
+  socials: z.object({
+    linkedin: z.string().url("Please enter a valid LinkedIn URL.").optional().or(z.literal('')),
+    github: z.string().url("Please enter a valid GitHub URL.").optional().or(z.literal('')),
+  }),
   experience: z.array(
     z.object({
       role: z.string().min(1, "Role is required"),
@@ -101,6 +109,14 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
       headline: profile.headline,
       location: profile.location,
       about: profile.about,
+      contact: {
+        email: profile.contact.email,
+        website: profile.contact.website,
+      },
+      socials: {
+        linkedin: profile.socials.linkedin,
+        github: profile.socials.github,
+      },
       experience: profile.experience,
       education: profile.education.map(edu => ({
         degree: edu.degree,
@@ -134,11 +150,13 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
   const onSubmit = (values: z.infer<typeof profileFormSchema>) => {
     // We need to merge back the non-editable fields like graduation year/month for the primary education
     const updatedEducation: EducationEntry[] = values.education.map((edu, index) => {
-      if (index === 0) {
+      // Find the corresponding original education entry, if it exists
+      const originalEdu = profile.education[index];
+      if (originalEdu) {
         return {
-          ...profile.education[0], // Keep original grad year/month
-          ...edu
-        }
+          ...originalEdu,
+          ...edu,
+        };
       }
       return edu;
     });
@@ -262,6 +280,18 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
                 <Separator />
                 
                 <div>
+                    <FormLabel className="text-lg font-semibold">Contact & Socials</FormLabel>
+                    <div className="space-y-4 mt-2 p-4 border rounded-md">
+                        <FormField control={form.control} name="contact.email" render={({ field }) => (<FormItem><FormLabel>Contact Email</FormLabel><FormControl><Input type="email" placeholder="your.email@example.com" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={form.control} name="contact.website" render={({ field }) => (<FormItem><FormLabel>Portfolio/Website URL</FormLabel><FormControl><Input placeholder="https://your-portfolio.com" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={form.control} name="socials.linkedin" render={({ field }) => (<FormItem><FormLabel>LinkedIn URL</FormLabel><FormControl><Input placeholder="https://linkedin.com/in/your-profile" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={form.control} name="socials.github" render={({ field }) => (<FormItem><FormLabel>GitHub URL</FormLabel><FormControl><Input placeholder="https://github.com/your-username" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    </div>
+                </div>
+
+                <Separator />
+                
+                <div>
                     <FormLabel className="text-lg font-semibold">Experience</FormLabel>
                     <div className="space-y-4 mt-2">
                         {expFields.map((field, index) => (
@@ -348,6 +378,14 @@ function ProfilePageContent({ handle }: { handle: string }) {
                         graduationYear: member.graduationYear,
                         graduationMonth: member.graduationMonth,
                     }],
+                    socials: { // Placeholder socials
+                        linkedin: "https://www.linkedin.com/",
+                        github: "https://github.com/",
+                      },
+                      contact: { // Placeholder contact
+                        email: `${member.handle}@example.com`,
+                        website: "https://example.com"
+                      },
                 };
             }
         }
@@ -364,7 +402,7 @@ function ProfilePageContent({ handle }: { handle: string }) {
 
     const handleProfileUpdate = (updatedData: Partial<ProfileData>) => {
         if (isOwnProfile) {
-            setProfileData(prev => prev ? {...prev, ...updatedData} : null);
+            setProfileData(prev => prev ? {...prev, ...updatedData} as ProfileData : null);
         }
     };
 
@@ -574,6 +612,43 @@ function ProfilePageContent({ handle }: { handle: string }) {
                     <p className="text-sm text-muted-foreground">{profileData.about}</p>
                   </CardContent>
                 </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="font-headline text-xl">Contact & Socials</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center gap-4">
+                        <Mail className="h-5 w-5 text-muted-foreground"/>
+                        <a href={`mailto:${profileData.contact.email}`} className="text-sm text-primary hover:underline">
+                            {profileData.contact.email}
+                        </a>
+                    </div>
+                    {profileData.contact.website && (
+                         <div className="flex items-center gap-4">
+                            <LinkIcon className="h-5 w-5 text-muted-foreground"/>
+                            <a href={profileData.contact.website} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">
+                                Personal Website
+                            </a>
+                        </div>
+                    )}
+                    {profileData.socials.linkedin && (
+                         <div className="flex items-center gap-4">
+                            <Linkedin className="h-5 w-5 text-muted-foreground"/>
+                            <a href={profileData.socials.linkedin} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">
+                                LinkedIn
+                            </a>
+                        </div>
+                    )}
+                    {profileData.socials.github && (
+                         <div className="flex items-center gap-4">
+                            <Github className="h-5 w-5 text-muted-foreground"/>
+                            <a href={profileData.socials.github} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">
+                                GitHub
+                            </a>
+                        </div>
+                    )}
+                  </CardContent>
+                </Card>
                  <Card>
                   <CardHeader>
                     <CardTitle className="font-headline text-xl">Experience</CardTitle>
@@ -622,3 +697,5 @@ export default function ProfilePage({ params }: { params: { handle: string } }) 
   // Use a client component to render the main content and pass the handle
   return <ProfilePageContent handle={params.handle} />;
 }
+
+    
