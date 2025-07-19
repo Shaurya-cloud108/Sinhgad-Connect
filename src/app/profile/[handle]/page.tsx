@@ -700,7 +700,7 @@ function ProfilePageContent({ handle }: { handle: string }) {
   );
 }
 
-export default function ProfilePage({ params: { handle } }: { params: { handle: string } }) {
+export default async function ProfilePage({ params: { handle } }: { params: { handle: string } }) {
   // Use a client component to render the main content and pass the handle
   return <ProfilePageContent handle={handle} />;
 }
