@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2, PlusCircle, Linkedin, Github, Mail, Link as LinkIcon } from "lucide-react";
-import { ProfileData, FeedItem, communityMembers, EducationEntry, initialFeedItems } from "@/lib/data.tsx";
+import { ProfileData, FeedItem, communityMembers, EducationEntry, feedItems } from "@/lib/data.tsx";
 import { useState, useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -373,7 +373,7 @@ function ProfilePageContent({ handle }: { handle: string }) {
                     headline: `${member.field} at ${member.company}`,
                     location: member.location,
                     connections: Math.floor(Math.random() * 500) + 1, // Placeholder
-                    posts: initialFeedItems.filter(item => item.author.handle === member.handle).length,
+                    posts: feedItems.filter(item => item.author.handle === member.handle).length,
                     about: `A passionate ${member.field} professional working in the ${member.industry} industry. Graduate of the class of ${member.graduationYear}.`,
                     experience: [{ role: member.field, company: member.company, duration: "2020 - Present" }], // Placeholder
                     education: [{
@@ -397,7 +397,7 @@ function ProfilePageContent({ handle }: { handle: string }) {
         setProfileDataState(targetProfile);
         
         if (targetProfile) {
-            setUserPosts(initialFeedItems.filter(item => item.author.handle === targetProfile!.handle));
+            setUserPosts(feedItems.filter(item => item.author.handle === targetProfile!.handle));
         } else {
              setUserPosts([]);
         }
