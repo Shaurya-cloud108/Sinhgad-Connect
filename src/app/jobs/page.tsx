@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const jobListings = [
   {
@@ -111,7 +112,7 @@ const postJobSchema = z.object({
   description: z.string().min(20, "Description must be at least 20 characters."),
 });
 
-export default function JobsPage() {
+function JobsPageContent() {
   const [isPostJobOpen, setIsPostJobOpen] = useState(false);
   const [isViewDetailsOpen, setIsViewDetailsOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<JobListing | null>(null);
@@ -350,7 +351,40 @@ export default function JobsPage() {
             )}
         </DialogContent>
       </Dialog>
-
     </div>
+  );
+}
+
+export default function JobsPage() {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  return (
+    <>
+      {isClient ? (
+        <JobsPageContent />
+      ) : (
+        <div className="container py-8 md:py-12">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
+            <div className="space-y-2">
+              <Skeleton className="h-10 w-64" />
+              <Skeleton className="h-6 w-96" />
+            </div>
+            <Skeleton className="h-10 w-32 mt-4 md:mt-0" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <Skeleton className="col-span-1 h-64" />
+            <div className="md:col-span-3 space-y-6">
+              <Skeleton className="h-40 w-full" />
+              <Skeleton className="h-40 w-full" />
+              <Skeleton className="h-40 w-full" />
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
