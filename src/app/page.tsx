@@ -40,7 +40,7 @@ import {
 
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { useState, useContext } from "react";
+import { useState, useContext, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { stories as initialStories, feedItems as initialFeedItems, FeedItem, Story } from "@/lib/data";
 import Image from "next/image";
@@ -51,6 +51,7 @@ function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean,
   const [postContent, setPostContent] = useState("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const { profileData } = useContext(ProfileContext);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -97,6 +98,9 @@ function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean,
 
     setPostContent("");
     setImagePreview(null);
+    if(imageInputRef.current) {
+        imageInputRef.current.value = "";
+    }
     onOpenChange(false);
   }
 
@@ -127,7 +131,7 @@ function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean,
             <Button asChild variant="ghost" size="icon">
               <label htmlFor="image-upload">
                 <ImageIcon className="h-6 w-6 text-muted-foreground" />
-                <Input id="image-upload" type="file" className="sr-only" accept="image/*" onChange={handleImageUpload} />
+                <Input id="image-upload" type="file" className="sr-only" accept="image/*" onChange={handleImageUpload} ref={imageInputRef} />
               </label>
             </Button>
            </div>
@@ -143,6 +147,96 @@ function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean,
       </DialogContent>
     </Dialog>
   );
+}
+
+function CreateStoryDialog({ open, onOpenChange, onStorySubmit }: { open: boolean, onOpenChange: (open: boolean) => void, onStorySubmit: (story: Story) => void }) {
+    const { toast } = useToast();
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const { profileData } = useContext(ProfileContext);
+    const imageInputRef = useRef<HTMLInputElement>(null);
+
+    const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleSubmit = () => {
+        if (!imagePreview) {
+            toast({
+                variant: "destructive",
+                title: "No Image Selected",
+                description: "Please select an image for your story.",
+            });
+            return;
+        }
+
+        const newStory: Story = {
+            name: profileData.name,
+            avatar: profileData.avatar,
+            image: imagePreview,
+            aiHint: "user uploaded story",
+        };
+
+        onStorySubmit(newStory);
+
+        toast({
+            title: "Story Posted!",
+            description: "Your story is now visible to your network.",
+        });
+
+        setImagePreview(null);
+        if(imageInputRef.current) {
+            imageInputRef.current.value = "";
+        }
+        onOpenChange(false);
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Create a Story</DialogTitle>
+                </DialogHeader>
+                <div className="py-4">
+                    <div className="flex flex-col items-center justify-center gap-4">
+                        {imagePreview ? (
+                            <div className="relative aspect-[9/16] w-64">
+                                <Image src={imagePreview} alt="Story preview" layout="fill" objectFit="cover" className="rounded-lg" />
+                                <Button variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => setImagePreview(null)}>
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center w-full h-80 border-2 border-dashed rounded-lg">
+                                <ImageIcon className="h-16 w-16 text-muted-foreground mb-4" />
+                                <Button asChild>
+                                    <label htmlFor="story-image-upload">
+                                        Upload Image
+                                        <Input id="story-image-upload" type="file" className="sr-only" accept="image/*" onChange={handleImageUpload} ref={imageInputRef} />
+                                    </label>
+                                </Button>
+                                <p className="text-xs text-muted-foreground mt-2">Stories are visual. Start with a photo.</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+                <DialogFooter>
+                    <DialogClose asChild>
+                        <Button type="button" variant="secondary">
+                            Cancel
+                        </Button>
+                    </DialogClose>
+                    <Button onClick={handleSubmit} disabled={!imagePreview}>Post Story</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
 }
 
 function StoryViewerDialog({ story, open, onOpenChange }: { story: Story | null; open: boolean; onOpenChange: (open: boolean) => void; }) {
@@ -175,6 +269,7 @@ function StoryViewerDialog({ story, open, onOpenChange }: { story: Story | null;
 
 export default function Home() {
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
+  const [isCreateStoryDialogOpen, setIsCreateStoryDialogOpen] = useState(false);
   const [feedItems, setFeedItems] = useState<FeedItem[]>(initialFeedItems);
   const [stories, setStories] = useState<Story[]>(initialStories);
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
@@ -185,9 +280,14 @@ export default function Home() {
     setFeedItems(prev => [newPost, ...prev]);
   };
   
+  const handleStorySubmit = (newStory: Story) => {
+    // Adds the new story right after "Your Story"
+    setStories(prev => [prev[0], newStory, ...prev.slice(1)]);
+  }
+
   const handleStoryClick = (story: Story) => {
     if (story.isOwn) {
-      setIsPostDialogOpen(true);
+      setIsCreateStoryDialogOpen(true);
     } else {
       setSelectedStory(story);
       setIsStoryViewerOpen(true);
@@ -203,8 +303,8 @@ export default function Home() {
       {/* Stories */}
       <div className="py-4 border-b">
         <div className="px-4 flex items-center space-x-4 overflow-x-auto">
-          {stories.map((story) => (
-            <div key={story.name} className="flex-shrink-0 text-center cursor-pointer" onClick={() => handleStoryClick(story)}>
+          {stories.map((story, index) => (
+            <div key={story.name + index} className="flex-shrink-0 text-center cursor-pointer" onClick={() => handleStoryClick(story)}>
               <div className={`relative rounded-full p-0.5 border-2 ${story.isOwn ? 'border-dashed' : 'border-primary'}`}>
                 <Avatar className="w-16 h-16">
                   <AvatarImage src={story.isOwn ? profileData.avatar : story.avatar} data-ai-hint={story.aiHint} />
@@ -257,6 +357,7 @@ export default function Home() {
       </div>
 
       <CreatePostDialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen} onPostSubmit={handlePostSubmit} />
+      <CreateStoryDialog open={isCreateStoryDialogOpen} onOpenChange={setIsCreateStoryDialogOpen} onStorySubmit={handleStorySubmit} />
       <StoryViewerDialog story={selectedStory} open={isStoryViewerOpen} onOpenChange={setIsStoryViewerOpen} />
 
       {/* Feed */}
