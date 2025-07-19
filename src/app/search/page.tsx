@@ -14,7 +14,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Linkedin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { alumniData } from "@/lib/data";
 
@@ -22,8 +21,9 @@ export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredAlumni, setFilteredAlumni] = useState(alumniData);
 
-  const handleSearch = () => {
-    const lowercasedQuery = searchQuery.toLowerCase();
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    const lowercasedQuery = query.toLowerCase();
     if (!lowercasedQuery) {
       setFilteredAlumni(alumniData);
       return;
@@ -39,7 +39,7 @@ export default function SearchPage() {
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      handleSearch();
+      handleSearch(searchQuery);
     }
   }
 
@@ -59,10 +59,10 @@ export default function SearchPage() {
               placeholder="Search by name, company, industry..."
               className="flex-grow"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => handleSearch(e.target.value)}
               onKeyDown={handleKeyDown}
             />
-            <Button onClick={handleSearch} className="w-full md:w-auto">Search</Button>
+            <Button onClick={() => handleSearch(searchQuery)} className="w-full md:w-auto">Search</Button>
           </div>
         </CardContent>
       </Card>

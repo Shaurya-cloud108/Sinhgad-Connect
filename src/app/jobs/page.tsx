@@ -64,8 +64,8 @@ function JobsPageContent() {
   const [filteredJobListings, setFilteredJobListings] = useState<JobListing[]>(initialJoblistings);
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [jobType, setJobType] = useState<string>('');
-  const [location, setLocation] = useState<string>('');
+  const [jobType, setJobType] = useState<string>('all');
+  const [location, setLocation] = useState<string>('all');
 
 
   const form = useForm<z.infer<typeof postJobSchema>>({
@@ -236,7 +236,7 @@ function JobsPageContent() {
             </CardHeader>
             <CardContent className="space-y-4">
               <Input placeholder="Search jobs or companies..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
-               <Select onValueChange={(value) => setJobType(value === 'all' ? '' : value)} defaultValue="all">
+               <Select onValueChange={setJobType} defaultValue={jobType}>
                 <SelectTrigger>
                   <SelectValue placeholder="Job Type" />
                 </SelectTrigger>
@@ -247,7 +247,7 @@ function JobsPageContent() {
                   <SelectItem value="Internship">Internship</SelectItem>
                 </SelectContent>
               </Select>
-               <Select onValueChange={(value) => setLocation(value === 'all' ? '' : value)} defaultValue="all">
+               <Select onValueChange={setLocation} defaultValue={location}>
                 <SelectTrigger>
                   <SelectValue placeholder="Location" />
                 </SelectTrigger>
