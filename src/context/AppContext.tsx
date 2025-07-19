@@ -150,24 +150,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     };
     
     const removeMemberFromGroup = (groupTitle: string, memberId: string) => {
-        let wasMember = false;
         setNetworkingGroups(prevGroups => prevGroups.map(g => {
             if (g.title === groupTitle) {
-                 wasMember = g.members.some(m => m.id === memberId);
                 return { ...g, members: g.members.filter(m => m.id !== memberId) };
             }
             return g;
         }));
 
-        if (profileData && profileData.handle === memberId && wasMember) {
-            setJoinedGroups(prev => {
-                const newSet = new Set(prev);
-                newSet.delete(groupTitle);
-                return newSet;
-            });
-            if (selectedConversation?.name === groupTitle) {
-                setSelectedConversation(null);
-            }
+        if (selectedConversation?.name === groupTitle && profileData?.handle === memberId) {
+            setSelectedConversation(null);
         }
     };
 
@@ -189,7 +180,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 role: 'member'
             };
             addMemberToGroup(groupTitle, newMember);
-            setJoinedGroups(prev => new Set(prev).add(groupTitle));
         }
     };
 
