@@ -5,7 +5,7 @@ import { GraduationCap, Send, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const navLinks = [
-  { href: "/directory", label: "Directory" },
+  { href: "/search", label: "Search" },
   { href: "/jobs", label: "Jobs" },
   { href: "/events", label: "Events" },
   { href: "/success-stories", label: "Stories" },
