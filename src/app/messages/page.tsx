@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useContext, useMemo } from "react";
+import { useState, useContext, useMemo, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,11 +49,16 @@ import { SharedStoryCard } from "@/components/shared-story-card";
 function AddMemberDialog({ group, onOpenChange }: { group: NetworkingGroup, onOpenChange: (open: boolean) => void }) {
     const { addMemberToGroup } = useContext(AppContext);
     const [searchQuery, setSearchQuery] = useState("");
-    
-    const memberIds = new Set(group.members.map(m => m.id));
-    const potentialMembers = communityMembers
-        .filter(alumnus => !memberIds.has(alumnus.handle))
-        .filter(alumnus => alumnus.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    const [potentialMembers, setPotentialMembers] = useState<CommunityMember[]>([]);
+
+    useEffect(() => {
+        const memberIds = new Set(group.members.map(m => m.id));
+        const filtered = communityMembers
+            .filter(alumnus => !memberIds.has(alumnus.handle))
+            .filter(alumnus => alumnus.name.toLowerCase().includes(searchQuery.toLowerCase()));
+        setPotentialMembers(filtered);
+    }, [searchQuery, group.members]);
+
 
     const handleAddMember = (alumnus: CommunityMember) => {
         const newMember: Member = {
@@ -440,5 +445,3 @@ export default function MessagesPage() {
     </div>
   );
 }
-
-    

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
   Card,
@@ -117,14 +117,20 @@ function NetworkingPageContent() {
       router.push("/messages");
   }
 
-  const myGroups = networkingGroups.filter(g => joinedGroups.has(g.title));
-  const otherGroups = networkingGroups
-    .filter(g => !joinedGroups.has(g.title))
-    .filter(g => {
-        const lowercasedQuery = searchQuery.toLowerCase();
-        return g.title.toLowerCase().includes(lowercasedQuery) || 
-               g.description.toLowerCase().includes(lowercasedQuery);
-    });
+  const myGroups = useMemo(() => {
+    return networkingGroups.filter(g => joinedGroups.has(g.title));
+  }, [networkingGroups, joinedGroups]);
+
+  const otherGroups = useMemo(() => {
+    const lowercasedQuery = searchQuery.toLowerCase();
+    return networkingGroups
+      .filter(g => !joinedGroups.has(g.title))
+      .filter(g => 
+        g.title.toLowerCase().includes(lowercasedQuery) || 
+        g.description.toLowerCase().includes(lowercasedQuery)
+      );
+  }, [networkingGroups, joinedGroups, searchQuery]);
+
 
   return (
     <div className="container py-8 md:py-12">
