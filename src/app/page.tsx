@@ -329,6 +329,7 @@ export default function Home() {
   const handleAddComment = (postId: number, commentText: string) => {
     if (!profileData) return;
     const newComment: Comment = {
+      id: Date.now(),
       author: {
         name: profileData.name,
         avatar: profileData.avatar,
@@ -339,6 +340,14 @@ export default function Home() {
     setFeedItems(prev => prev.map(item =>
       item.id === postId
         ? { ...item, comments: [...item.comments, newComment] }
+        : item
+    ));
+  };
+
+  const handleDeleteComment = (postId: number, commentId: number) => {
+    setFeedItems(prev => prev.map(item =>
+      item.id === postId
+        ? { ...item, comments: item.comments.filter(c => c.id !== commentId) }
         : item
     ));
   };
@@ -413,7 +422,8 @@ export default function Home() {
         }}
         post={activePostForComments}
         onCommentSubmit={handleAddComment}
-        currentUserAvatar={profileData.avatar}
+        onCommentDelete={handleDeleteComment}
+        currentProfile={profileData}
       />
 
       {/* Feed */}

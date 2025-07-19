@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { Member, NetworkingGroup } from "@/context/AppContext";
+import { profileData as currentUserProfileData } from './data'; // Renamed to avoid conflict
 
 export type JobListing = {
   id: number;
@@ -96,6 +97,7 @@ export const stories: Story[] = [
 
 
 export type Comment = {
+  id: number;
   author: {
     name: string;
     avatar: string;
@@ -150,6 +152,7 @@ export const feedItems: FeedItem[] = [
     likes: 189,
     comments: [
         {
+            id: 101,
             author: { name: "Rohan Verma", avatar: "https://placehold.co/100x100.png", handle: "rohan-verma" },
             text: "Congratulations, Sunita! This is huge."
         }
@@ -475,9 +478,16 @@ export const messagesData: { [key: string]: { senderId: string; senderName: stri
   ],
   "Kavya Iyer": [
       { senderId: 'kavya-iyer', senderName: 'Kavya Iyer', text: "Hi Priya! I had a question about my project." },
-      { senderId: profileData.handle, senderName: profileData.name, text: "Of course, ask away!" },
+      { senderId: currentUserProfileData.handle, senderName: currentUserProfileData.name, text: "Of course, ask away!" },
       { senderId: 'kavya-iyer', senderName: 'Kavya Iyer', text: "Thank you for the mentorship!" },
   ],
+  "Software & Tech Innovators": [
+      { senderId: 'rohan-verma', senderName: 'Rohan Verma', text: 'Has anyone worked with the new Bun APIs?' },
+      { senderId: currentUserProfileData.handle, senderName: currentUserProfileData.name, text: 'I have! It’s incredibly fast. What are you building?' },
+  ],
+  "Entrepreneurship Hub": [
+      { senderId: 'sunita-narayan', senderName: 'Sunita Narayan', text: 'Seed funding secured! Big things coming soon.' },
+  ]
 };
 
 // Helper function to get content details for sharing
