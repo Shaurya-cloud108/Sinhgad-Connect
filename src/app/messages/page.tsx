@@ -45,6 +45,7 @@ import { SharedPostCard } from "@/components/shared-post-card";
 import { SharedJobCard } from "@/components/shared-job-card";
 import { SharedEventCard } from "@/components/shared-event-card";
 import { SharedStoryCard } from "@/components/shared-story-card";
+import Link from "next/link";
 
 function AddMemberDialog({ group, onOpenChange }: { group: NetworkingGroup, onOpenChange: (open: boolean) => void }) {
     const { addMemberToGroup } = useContext(AppContext);
@@ -151,16 +152,16 @@ function GroupInfoDialog({ group, currentUserRole, onOpenChange }: { group: Netw
                         const gradMonth = memberDetails?.graduationMonth || 0;
                         return (
                         <div key={member.id} className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
+                            <Link href={`/profile/${member.id}`} className="flex items-center gap-3 group">
                                 <Avatar className="h-9 w-9">
                                     <AvatarImage src={member.avatar} />
                                     <AvatarFallback>{member.name.substring(0,2)}</AvatarFallback>
                                 </Avatar>
                                 <div>
-                                    <p className="font-semibold text-sm">{member.name} {getStatusEmoji(gradYear, gradMonth)}</p>
+                                    <p className="font-semibold text-sm group-hover:underline">{member.name} {getStatusEmoji(gradYear, gradMonth)}</p>
                                     <p className="text-xs text-muted-foreground">{member.role}</p>
                                 </div>
-                            </div>
+                            </Link>
                             <div className="flex items-center gap-2">
                                 {currentUserRole === 'admin' && member.id !== profileData.handle && (
                                     <>
@@ -399,7 +400,9 @@ export default function MessagesPage() {
                           msg.senderId === profileData.handle ? "bg-primary text-primary-foreground" : "bg-muted"
                         )}>
                           {msg.senderId !== profileData.handle && (
-                            <p className="text-xs font-semibold mb-1">{msg.senderName}</p>
+                            <Link href={`/profile/${msg.senderId}`} className="hover:underline">
+                              <p className="text-xs font-semibold mb-1">{msg.senderName}</p>
+                            </Link>
                           )}
                           {msg.text && <p>{msg.text}</p>}
                           {msg.sharedPostId && <SharedPostCard postId={msg.sharedPostId} />}

@@ -33,6 +33,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import Link from "next/link";
 
 type CommentSheetProps = {
   open: boolean;
@@ -73,8 +74,11 @@ export function CommentSheet({
       <SheetContent className="flex flex-col">
         <SheetHeader>
           <SheetTitle>Comments ({post.comments.length})</SheetTitle>
-          <SheetDescription>
-            Replying to a post by @{post.author.handle}
+           <SheetDescription>
+            Replying to a post by{' '}
+            <Link href={`/profile/${post.author.handle}`} className="hover:underline text-primary">
+              @{post.author.handle}
+            </Link>
           </SheetDescription>
         </SheetHeader>
         <ScrollArea className="flex-grow my-4 pr-6 -mr-6">
@@ -83,16 +87,18 @@ export function CommentSheet({
               const canDelete = currentProfile.handle === comment.author.handle || currentProfile.handle === post.author.handle;
               return (
               <div key={comment.id} className="flex items-start gap-3 group">
-                <Avatar className="w-9 h-9">
-                  <AvatarImage src={comment.author.avatar} />
-                  <AvatarFallback>{comment.author.name.substring(0, 2)}</AvatarFallback>
-                </Avatar>
+                <Link href={`/profile/${comment.author.handle}`}>
+                  <Avatar className="w-9 h-9">
+                    <AvatarImage src={comment.author.avatar} />
+                    <AvatarFallback>{comment.author.name.substring(0, 2)}</AvatarFallback>
+                  </Avatar>
+                </Link>
                 <div className="flex-grow bg-muted/50 rounded-lg p-3">
                   <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-semibold text-sm">{comment.author.name}</p>
+                    <Link href={`/profile/${comment.author.handle}`} className="group/user">
+                      <p className="font-semibold text-sm group-hover/user:underline">{comment.author.name}</p>
                       <p className="text-xs text-muted-foreground">@{comment.author.handle}</p>
-                    </div>
+                    </Link>
                     {canDelete && (
                        <AlertDialog>
                           <DropdownMenu>

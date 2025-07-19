@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserPlus, MessageSquare, CalendarCheck, Briefcase, Heart, MessageCircle } from "lucide-react";
-import { notifications as initialNotifications, Notification } from "@/lib/data.tsx";
+import { notifications as initialNotifications, Notification, communityMembers } from "@/lib/data.tsx";
 import Link from "next/link";
 
 const NotificationIcon = ({ type }: { type: Notification['type'] }) => {
@@ -25,6 +25,32 @@ const NotificationIcon = ({ type }: { type: Notification['type'] }) => {
     }
 }
 
+const renderNotificationText = (notification: Notification) => {
+    const member = communityMembers.find(m => m.name === notification.userName);
+    const userLink = member ? (
+        <Link href={`/profile/${member.handle}`} className="font-bold hover:underline">{notification.userName}</Link>
+    ) : (
+        <b className="font-bold">{notification.userName}</b>
+    );
+
+    switch (notification.type) {
+        case 'like':
+            return <p>{userLink} liked your post.</p>;
+        case 'comment':
+            return <p>{userLink} commented: "{notification.commentText}"</p>;
+        case 'connection':
+            return <p>{userLink} sent you a connection request.</p>;
+        case 'message':
+            return <p>{userLink} sent you a new message.</p>;
+        case 'event':
+            return <p>Reminder: <b>{notification.eventTitle}</b> is tomorrow.</p>;
+        case 'job':
+            return <p>A new job matching your profile was posted: <b>{notification.jobTitle}</b> at {notification.companyName}.</p>;
+        default:
+            return <p>{notification.rawText}</p>;
+    }
+}
+
 export default function NotificationsPage() {
   return (
     <div className="container max-w-2xl mx-auto py-8 md:py-12">
@@ -41,7 +67,7 @@ export default function NotificationsPage() {
                 </Avatar>
                 <div className="flex-grow">
                   <div className="text-sm">
-                    {notification.text}
+                    {renderNotificationText(notification)}
                     {notification.contentPreview && (
                         <p className="pl-3 mt-1 text-xs border-l-2 text-muted-foreground italic">
                             "{notification.contentPreview}"

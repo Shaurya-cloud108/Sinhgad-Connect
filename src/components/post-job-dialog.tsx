@@ -32,6 +32,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { JobListing } from "@/lib/data.tsx";
 
 const postJobSchema = z.object({
   title: z.string().min(3, "Job title must be at least 3 characters."),
@@ -39,12 +40,13 @@ const postJobSchema = z.object({
   location: z.string().min(2, "Location must be at least 2 characters."),
   type: z.enum(["Full-time", "Contract", "Internship"]),
   description: z.string().min(20, "Description must be at least 20 characters."),
+  tags: z.array(z.string()).optional(),
 });
 
 type PostJobDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onJobSubmit: (job: Omit<z.infer<typeof postJobSchema>, 'tags'>) => void;
+  onJobSubmit: (job: Omit<JobListing, 'id' | 'postedBy' | 'postedByHandle'>) => void;
 };
 
 export function PostJobDialog({ open, onOpenChange, onJobSubmit }: PostJobDialogProps) {
@@ -57,6 +59,7 @@ export function PostJobDialog({ open, onOpenChange, onJobSubmit }: PostJobDialog
       location: "",
       type: "Full-time",
       description: "",
+      tags: [],
     },
   });
 

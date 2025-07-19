@@ -370,12 +370,13 @@ function HomePageContent() {
     setFeedItems(prev => [newPost, ...prev]);
   };
 
-  const handleJobSubmit = (newJob: Omit<JobListing, 'id' | 'postedBy' | 'tags'>) => {
+  const handleJobSubmit = (newJob: Omit<JobListing, 'id' | 'postedBy' | 'postedByHandle'>) => {
     if(!profileData) return;
     addJobListing({
       ...newJob,
       id: Date.now(),
       postedBy: `${profileData.name} '${profileData.education.graduationYear.toString().slice(-2)}`,
+      postedByHandle: profileData.handle,
     });
   }
   
@@ -529,14 +530,16 @@ function HomePageContent() {
           <Card key={item.id} id={`post-${item.id}`} className="rounded-none md:rounded-lg shadow-none md:shadow-sm border-l-0 border-r-0 md:border">
             <CardHeader className="p-4 flex flex-row items-center justify-between">
               <div className="flex items-center space-x-3">
-                <Avatar className="w-10 h-10">
-                  <AvatarImage src={item.author.avatar} data-ai-hint={item.author.aiHint} />
-                  <AvatarFallback>{item.author.name.substring(0,2)}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="font-semibold text-sm">{item.author.name}</p>
-                  <p className="text-xs text-muted-foreground">@{item.author.handle}</p>
-                </div>
+                <Link href={`/profile/${item.author.handle}`} className="flex items-center space-x-3 group">
+                  <Avatar className="w-10 h-10">
+                    <AvatarImage src={item.author.avatar} data-ai-hint={item.author.aiHint} />
+                    <AvatarFallback>{item.author.name.substring(0,2)}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-semibold text-sm group-hover:underline">{item.author.name}</p>
+                    <p className="text-xs text-muted-foreground">@{item.author.handle}</p>
+                  </div>
+                </Link>
               </div>
               {item.author.handle === profileData.handle && (
                 <AlertDialog>

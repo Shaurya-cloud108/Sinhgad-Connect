@@ -35,6 +35,8 @@ import { ShareDialog } from "@/components/share-dialog";
 import { PostJobDialog } from "@/components/post-job-dialog";
 import { AppContext } from "@/context/AppContext";
 import { ProfileContext } from "@/context/ProfileContext";
+import Link from "next/link";
+import { communityMembers } from "@/lib/data.tsx";
 
 function JobsPageContent() {
   const [isPostJobOpen, setIsPostJobOpen] = useState(false);
@@ -69,12 +71,13 @@ function JobsPageContent() {
   }, [searchQuery, jobType, location, jobListings]);
 
 
-  function handleJobSubmit(values: Omit<JobListing, 'id' | 'postedBy'>) {
+  function handleJobSubmit(values: Omit<JobListing, 'id' | 'postedBy' | 'postedByHandle'>) {
     if (!profileData) return;
     const newJob: JobListing = {
         id: Date.now(),
         ...values,
-        postedBy: `${profileData.name} '${profileData.education.graduationYear.toString().slice(-2)}`
+        postedBy: `${profileData.name} '${profileData.education.graduationYear.toString().slice(-2)}`,
+        postedByHandle: profileData.handle
     };
     addJobListing(newJob);
   }
@@ -137,40 +140,48 @@ function JobsPageContent() {
 
         <div className="md:col-span-3 space-y-6">
           {filteredJobListings.length > 0 ? (
-            filteredJobListings.map((job, index) => (
-            <Card key={`${job.id}-${index}`} className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="font-headline text-xl">{job.title}</CardTitle>
-                    <CardDescription className="flex items-center gap-4 mt-1">
-                      <span className="flex items-center gap-1"><Briefcase className="h-4 w-4" /> {job.company}</span>
-                      <span className="flex items-center gap-1"><MapPin className="h-4 w-4" /> {job.location}</span>
-                    </CardDescription>
-                  </div>
-                  <Badge variant={job.type === 'Full-time' ? 'default' : 'secondary'}>{job.type}</Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {job.tags && job.tags.map((tag) => (
-                    <Badge key={tag} variant="outline">{tag}</Badge>
-                  ))}
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between items-center text-sm text-muted-foreground">
-                <p>Posted by: <span className="text-primary font-medium">{job.postedBy}</span></p>
-                <div className="flex items-center gap-2">
-                    <ShareDialog contentType="job" contentId={job.id}>
-                        <Button variant="ghost" size="icon">
-                            <Send className="h-4 w-4" />
-                        </Button>
-                    </ShareDialog>
-                    <Button onClick={() => handleViewDetails(job)}>View Details</Button>
-                </div>
-              </CardFooter>
-            </Card>
-          ))
+            filteredJobListings.map((job, index) => {
+              const poster = communityMembers.find(m => m.handle === job.postedByHandle);
+              return (
+                <Card key={`${job.id}-${index}`} className="hover:shadow-md transition-shadow">
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle className="font-headline text-xl">{job.title}</CardTitle>
+                        <CardDescription className="flex items-center gap-4 mt-1">
+                          <span className="flex items-center gap-1"><Briefcase className="h-4 w-4" /> {job.company}</span>
+                          <span className="flex items-center gap-1"><MapPin className="h-4 w-4" /> {job.location}</span>
+                        </CardDescription>
+                      </div>
+                      <Badge variant={job.type === 'Full-time' ? 'default' : 'secondary'}>{job.type}</Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-2">
+                      {job.tags && job.tags.map((tag) => (
+                        <Badge key={tag} variant="outline">{tag}</Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                  <CardFooter className="flex justify-between items-center text-sm text-muted-foreground">
+                    <p>Posted by: 
+                      {poster ? (
+                        <Link href={`/profile/${poster.handle}`} className="text-primary font-medium hover:underline ml-1">{job.postedBy}</Link>
+                      ) : (
+                        <span className="text-primary font-medium ml-1">{job.postedBy}</span>
+                      )}
+                    </p>
+                    <div className="flex items-center gap-2">
+                        <ShareDialog contentType="job" contentId={job.id}>
+                            <Button variant="ghost" size="icon">
+                                <Send className="h-4 w-4" />
+                            </Button>
+                        </ShareDialog>
+                        <Button onClick={() => handleViewDetails(job)}>View Details</Button>
+                    </div>
+                  </CardFooter>
+                </Card>
+            )})
           ) : (
             <Card>
               <CardContent className="p-6">
@@ -200,7 +211,9 @@ function JobsPageContent() {
                           ))}
                         </div>
                         <p>{selectedJob.description}</p>
-                        <p className="text-xs">Posted by: <span className="text-primary font-medium">{selectedJob.postedBy}</span></p>
+                        <p className="text-xs">Posted by: 
+                          <Link href={`/profile/${selectedJob.postedByHandle}`} className="text-primary font-medium hover:underline ml-1">{selectedJob.postedBy}</Link>
+                        </p>
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsViewDetailsOpen(false)}>Close</Button>

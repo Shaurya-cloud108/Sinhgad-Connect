@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { Member, NetworkingGroup, Conversation } from "@/context/AppContext";
+import Link from 'next/link';
 
 export type Event = {
   id: string;
@@ -61,6 +62,7 @@ export type JobListing = {
   type: "Full-time" | "Contract" | "Internship";
   tags: string[];
   postedBy: string;
+  postedByHandle: string;
   description: string;
 };
 
@@ -73,6 +75,7 @@ export const jobListings: JobListing[] = [
     type: "Full-time",
     tags: ["React", "TypeScript", "Next.js"],
     postedBy: "Sunita Narayan '09",
+    postedByHandle: "sunita-narayan",
     description: "Innovate Inc. is seeking a passionate Senior Frontend Engineer to build and scale our next-generation sustainable tech products. You will work with a modern tech stack and a talented team to create beautiful, responsive, and high-performance web applications."
   },
   {
@@ -83,6 +86,7 @@ export const jobListings: JobListing[] = [
     type: "Full-time",
     tags: ["Python", "Machine Learning", "SQL"],
     postedBy: "Rajesh Kumar '11",
+    postedByHandle: "rajesh-kumar", // Example handle, not in community members
     description: "Join DataDriven Co. and help us solve complex problems with data. As a Data Scientist, you will be responsible for designing and implementing machine learning models, performing statistical analysis, and communicating insights to stakeholders."
   },
   {
@@ -93,6 +97,7 @@ export const jobListings: JobListing[] = [
     type: "Full-time",
     tags: ["Agile", "Roadmap", "UX"],
     postedBy: "Ananya Deshpande '14",
+    postedByHandle: "ananya-deshpande", // Example handle
     description: "Connectify is looking for a user-centric Product Manager to lead our product strategy and roadmap. You will work closely with engineering, design, and marketing to deliver products that our users love."
   },
   {
@@ -103,6 +108,7 @@ export const jobListings: JobListing[] = [
     type: "Contract",
     tags: ["Figma", "User Research", "Prototyping"],
     postedBy: "Alumni Network",
+    postedByHandle: "alumni-network",
     description: "We are looking for a talented UX/UI Designer to create amazing user experiences. The ideal candidate will have a strong portfolio of design projects and be proficient in Figma, user research, and prototyping."
   },
   {
@@ -113,6 +119,7 @@ export const jobListings: JobListing[] = [
     type: "Full-time",
     tags: ["AWS", "Kubernetes", "CI/CD"],
     postedBy: "Amit Singh '15",
+    postedByHandle: "amit-singh", // Example handle
     description: "CloudLeap is hiring a DevOps Engineer to manage and improve our cloud infrastructure. You will be responsible for our CI/CD pipelines, automation, and ensuring the reliability and scalability of our systems."
   },
   {
@@ -123,6 +130,7 @@ export const jobListings: JobListing[] = [
     type: "Internship",
     tags: ["Social Media", "SEO"],
     postedBy: "Alumni Network",
+    postedByHandle: "alumni-network",
     description: "Gain hands-on experience in digital marketing with GrowthX! This internship will give you exposure to social media marketing, SEO, content creation, and campaign analysis. A great opportunity for aspiring marketers."
   },
 ];
@@ -150,7 +158,7 @@ export const stories: Story[] = [
     ] },
     { 
       id: 2, 
-      name: "Rohan V.", 
+      name: "Rohan Verma", 
       avatar: "https://placehold.co/100x100.png", 
       images: ["https://placehold.co/400x700.png"], 
       aiHint: "professional man",
@@ -159,9 +167,9 @@ export const stories: Story[] = [
         { name: "Anjali Mehta", avatar: "https://placehold.co/100x100.png" },
       ]
     },
-    { id: 3, name: "Anjali M.", avatar: "https://placehold.co/100x100.png", images: ["https://placehold.co/400x700.png"], aiHint: "corporate woman", viewers: [] },
-    { id: 4, name: "Vikram S.", avatar: "https://placehold.co/100x100.png", images: ["https://placehold.co/400x700.png"], aiHint: "corporate man", viewers: [] },
-    { id: 5, name: "Sneha R.", avatar: "https://placehold.co/100x100.png", images: ["https://placehold.co/400x700.png"], aiHint: "young professional", viewers: [] },
+    { id: 3, name: "Anjali Mehta", avatar: "https://placehold.co/100x100.png", images: ["https://placehold.co/400x700.png"], aiHint: "corporate woman", viewers: [] },
+    { id: 4, name: "Vikram Singh", avatar: "https://placehold.co/100x100.png", images: ["https://placehold.co/400x700.png"], aiHint: "corporate man", viewers: [] },
+    { id: 5, name: "Sneha Reddy", avatar: "https://placehold.co/100x100.png", images: ["https://placehold.co/400x700.png"], aiHint: "young professional", viewers: [] },
 ];
 
 export type SuccessStory = {
@@ -263,9 +271,9 @@ export const feedItems: FeedItem[] = [
   {
     id: 2,
     author: {
-      name: "Sunita Narayan '09",
+      name: "Sunita Narayan",
       avatar: "https://placehold.co/100x100.png",
-      handle: "CEO at Innovate Inc.",
+      handle: "sunita-narayan",
       aiHint: "professional woman portrait"
     },
     content: "Thrilled to share that Innovate Inc. just launched a new line of sustainable tech products! A huge thanks to the team and the foundation I got from Sinhgad. Looking to hire fellow alumni for a Senior Frontend role - check the jobs board!",
@@ -636,7 +644,12 @@ export const getContentDetails = (contentType: string, contentId: string | numbe
 
 export type Notification = {
     type: 'connection' | 'message' | 'event' | 'job' | 'like' | 'comment';
-    text: React.ReactNode;
+    userName?: string; // e.g., "Rohan Verma"
+    commentText?: string;
+    eventTitle?: string;
+    jobTitle?: string;
+    companyName?: string;
+    rawText?: string; // For notifications that don't fit other patterns
     time: string;
     actions?: { label: string; href: string }[];
     avatar: string;
@@ -647,7 +660,7 @@ export type Notification = {
 export const notifications: Notification[] = [
     {
         type: 'like',
-        text: <p><b>Rohan Verma</b> liked your post.</p>,
+        userName: 'Rohan Verma',
         contentPreview: "Mentoring a final year student on their capstone project...",
         time: "15 minutes ago",
         avatar: "https://placehold.co/100x100.png",
@@ -656,7 +669,8 @@ export const notifications: Notification[] = [
     },
     {
         type: 'comment',
-        text: <p><b>Anjali Mehta</b> commented: "This is so inspiring! Congratulations!"</p>,
+        userName: 'Anjali Mehta',
+        commentText: "This is so inspiring! Congratulations!",
         contentPreview: "Just hit my 5-year anniversary at Google! So grateful...",
         time: "1 hour ago",
         avatar: "https://placehold.co/100x100.png",
@@ -665,7 +679,7 @@ export const notifications: Notification[] = [
     },
     {
         type: "connection",
-        text: <p><b>Vikram Singh</b> sent you a connection request.</p>,
+        userName: 'Vikram Singh',
         time: "2 hours ago",
         actions: [
             { label: 'Accept', href: '/profile' },
@@ -676,7 +690,7 @@ export const notifications: Notification[] = [
     },
     {
         type: "message",
-        text: <p><b>Kavya Iyer</b> sent you a new message.</p>,
+        userName: 'Kavya Iyer',
         time: "5 hours ago",
         actions: [{ label: 'Reply', href: '/messages' }],
         avatar: "https://placehold.co/100x100.png",
@@ -684,7 +698,7 @@ export const notifications: Notification[] = [
     },
     {
         type: "event",
-        text: <p>Reminder: <b>Annual Alumni Grand Meet 2024</b> is tomorrow.</p>,
+        eventTitle: 'Annual Alumni Grand Meet 2024',
         time: "1 day ago",
         actions: [{ label: 'View Event', href: '/events' }],
         avatar: "https://placehold.co/100x100.png",
@@ -692,7 +706,8 @@ export const notifications: Notification[] = [
     },
     {
         type: "job",
-        text: <p>A new job matching your profile was posted: <b>Senior Frontend Engineer</b> at Innovate Inc.</p>,
+        jobTitle: "Senior Frontend Engineer",
+        companyName: "Innovate Inc.",
         time: "2 days ago",
         actions: [{ label: 'View Job', href: '/jobs' }],
         avatar: "https://placehold.co/100x100.png",
