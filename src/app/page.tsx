@@ -1,3 +1,6 @@
+
+"use client";
+
 import Link from "next/link";
 import {
   Card,
@@ -7,7 +10,20 @@ import {
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, Send, Plus } from "lucide-react";
+import { Heart, MessageCircle, Send, Plus, Image as ImageIcon, Video, Briefcase, Award } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const stories = [
   { name: "Your Story", avatar: "https://placehold.co/100x100.png", isOwn: true, aiHint: "plus icon" },
@@ -60,7 +76,90 @@ const feedItems = [
   }
 ];
 
+function CreatePostDialog({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
+  const { toast } = useToast();
+  const [postContent, setPostContent] = useState("");
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  
+  const handleSubmit = () => {
+     if (!postContent.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Empty Post",
+        description: "Please write something before posting.",
+      });
+      return;
+    }
+    console.log("Posting content:", postContent);
+    toast({
+      title: "Post Successful!",
+      description: "Your update has been shared with the network.",
+    });
+    setPostContent("");
+    setImagePreview(null);
+    onOpenChange(false);
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Create a Post</DialogTitle>
+        </DialogHeader>
+        <div className="py-4">
+          <Textarea
+            placeholder="Share an achievement or ask a question..."
+            value={postContent}
+            onChange={(e) => setPostContent(e.target.value)}
+            rows={5}
+          />
+          {imagePreview && (
+            <div className="mt-4 relative">
+              <img src={imagePreview} alt="Image preview" className="rounded-lg w-full" />
+               <Button variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => setImagePreview(null)}>
+                 <Plus className="h-4 w-4 rotate-45" />
+               </Button>
+            </div>
+          )}
+        </div>
+        <DialogFooter className="justify-between sm:justify-between">
+           <div className="flex items-center gap-2">
+            <Button asChild variant="ghost" size="icon">
+              <label htmlFor="image-upload">
+                <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                <Input id="image-upload" type="file" className="sr-only" accept="image/*" onChange={handleImageUpload} />
+              </label>
+            </Button>
+           </div>
+           <div className="flex items-center gap-2">
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button onClick={handleSubmit}>Post</Button>
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+
 export default function Home() {
+  const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
+
   return (
     <div className="w-full max-w-2xl mx-auto">
       {/* Stories */}
@@ -84,6 +183,42 @@ export default function Home() {
           ))}
         </div>
       </div>
+      
+      {/* Create Post */}
+      <div className="p-4">
+        <Card>
+          <CardContent className="p-3">
+             <div className="flex items-center gap-3">
+              <Avatar>
+                <AvatarImage src="https://placehold.co/100x100.png" data-ai-hint="user avatar" />
+                <AvatarFallback>U</AvatarFallback>
+              </Avatar>
+              <button
+                className="w-full text-left bg-muted/50 hover:bg-muted/80 transition-colors py-2 px-4 rounded-full text-sm text-muted-foreground"
+                onClick={() => setIsPostDialogOpen(true)}
+              >
+                Share an update, achievement, or question...
+              </button>
+            </div>
+            <div className="flex justify-around mt-3 pt-3 border-t">
+              <Button variant="ghost" className="w-full" onClick={() => setIsPostDialogOpen(true)}>
+                <ImageIcon className="text-green-500" />
+                Photo
+              </Button>
+              <Button variant="ghost" className="w-full" onClick={() => setIsPostDialogOpen(true)}>
+                <Award className="text-yellow-500" />
+                Achievement
+              </Button>
+               <Button variant="ghost" className="w-full" onClick={() => setIsPostDialogOpen(true)}>
+                <Briefcase className="text-blue-500" />
+                Job
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <CreatePostDialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen} />
 
       {/* Feed */}
       <div className="space-y-4 py-4">
@@ -130,3 +265,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
