@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -28,7 +29,10 @@ export default function SearchPage() {
       return;
     }
     const results = alumniData.filter((alumni) =>
-      alumni.name.toLowerCase().includes(lowercasedQuery)
+      alumni.name.toLowerCase().includes(lowercasedQuery) ||
+      alumni.field.toLowerCase().includes(lowercasedQuery) ||
+      alumni.industry.toLowerCase().includes(lowercasedQuery) ||
+      alumni.company.toLowerCase().includes(lowercasedQuery)
     );
     setFilteredAlumni(results);
   };
@@ -52,7 +56,7 @@ export default function SearchPage() {
         <CardContent className="p-4">
           <div className="flex flex-col md:flex-row gap-4 items-center">
             <Input
-              placeholder="Search by name..."
+              placeholder="Search by name, company, industry..."
               className="flex-grow"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -65,30 +69,32 @@ export default function SearchPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredAlumni.map((alumni) => (
-          <Card key={alumni.name} className="flex flex-col">
-            <CardHeader className="items-center text-center">
-              <Avatar className="w-24 h-24 mb-4">
-                <AvatarImage src={alumni.avatar} data-ai-hint={alumni.aiHint} />
-                <AvatarFallback>{alumni.fallback}</AvatarFallback>
-              </Avatar>
-              <CardTitle className="font-headline">{alumni.name}</CardTitle>
-              <CardDescription>
-                {alumni.field}, Class of {alumni.graduationYear}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-grow text-center">
-              <p className="font-semibold">{alumni.company}</p>
-              <p className="text-sm text-muted-foreground">{alumni.location}</p>
-              <div className="mt-4">
-                <Badge>{alumni.industry}</Badge>
-              </div>
-            </CardContent>
-            <CardFooter className="justify-center">
-              <Button variant="outline">
-                <Linkedin className="mr-2 h-4 w-4" /> Connect
-              </Button>
-            </CardFooter>
-          </Card>
+          <Link href="/profile" key={alumni.name} className="block hover:shadow-xl transition-shadow duration-300 rounded-lg">
+            <Card className="flex flex-col h-full">
+              <CardHeader className="items-center text-center">
+                <Avatar className="w-24 h-24 mb-4">
+                  <AvatarImage src={alumni.avatar} data-ai-hint={alumni.aiHint} />
+                  <AvatarFallback>{alumni.fallback}</AvatarFallback>
+                </Avatar>
+                <CardTitle className="font-headline">{alumni.name}</CardTitle>
+                <CardDescription>
+                  {alumni.field}, Class of {alumni.graduationYear}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex-grow text-center">
+                <p className="font-semibold">{alumni.company}</p>
+                <p className="text-sm text-muted-foreground">{alumni.location}</p>
+                <div className="mt-4">
+                  <Badge>{alumni.industry}</Badge>
+                </div>
+              </CardContent>
+              <CardFooter className="justify-center">
+                <Button variant="outline" onClick={(e) => { e.preventDefault(); /* Handle connect logic */ }}>
+                  <Linkedin className="mr-2 h-4 w-4" /> Connect
+                </Button>
+              </CardFooter>
+            </Card>
+          </Link>
         ))}
       </div>
     </div>
