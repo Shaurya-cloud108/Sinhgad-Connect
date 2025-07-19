@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -44,65 +45,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-
-const jobListings = [
-  {
-    title: "Senior Frontend Engineer",
-    company: "Innovate Inc.",
-    location: "Remote",
-    type: "Full-time",
-    tags: ["React", "TypeScript", "Next.js"],
-    postedBy: "Sunita Narayan '09",
-    description: "Innovate Inc. is seeking a passionate Senior Frontend Engineer to build and scale our next-generation sustainable tech products. You will work with a modern tech stack and a talented team to create beautiful, responsive, and high-performance web applications."
-  },
-  {
-    title: "Data Scientist",
-    company: "DataDriven Co.",
-    location: "Pune, India",
-    type: "Full-time",
-    tags: ["Python", "Machine Learning", "SQL"],
-    postedBy: "Rajesh Kumar '11",
-    description: "Join DataDriven Co. and help us solve complex problems with data. As a Data Scientist, you will be responsible for designing and implementing machine learning models, performing statistical analysis, and communicating insights to stakeholders."
-  },
-  {
-    title: "Product Manager",
-    company: "Connectify",
-    location: "Bangalore, India",
-    type: "Full-time",
-    tags: ["Agile", "Roadmap", "UX"],
-    postedBy: "Ananya Deshpande '14",
-    description: "Connectify is looking for a user-centric Product Manager to lead our product strategy and roadmap. You will work closely with engineering, design, and marketing to deliver products that our users love."
-  },
-  {
-    title: "UX/UI Designer",
-    company: "Creative Solutions",
-    location: "Remote",
-    type: "Contract",
-    tags: ["Figma", "User Research", "Prototyping"],
-    postedBy: "Alumni Network",
-    description: "We are looking for a talented UX/UI Designer to create amazing user experiences. The ideal candidate will have a strong portfolio of design projects and be proficient in Figma, user research, and prototyping."
-  },
-  {
-    title: "DevOps Engineer",
-    company: "CloudLeap",
-    location: "Hyderabad, India",
-    type: "Full-time",
-    tags: ["AWS", "Kubernetes", "CI/CD"],
-    postedBy: "Amit Singh '15",
-    description: "CloudLeap is hiring a DevOps Engineer to manage and improve our cloud infrastructure. You will be responsible for our CI/CD pipelines, automation, and ensuring the reliability and scalability of our systems."
-  },
-  {
-    title: "Marketing Intern",
-    company: "GrowthX",
-    location: "Mumbai, India",
-    type: "Internship",
-    tags: ["Social Media", "SEO"],
-    postedBy: "Alumni Network",
-    description: "Gain hands-on experience in digital marketing with GrowthX! This internship will give you exposure to social media marketing, SEO, content creation, and campaign analysis. A great opportunity for aspiring marketers."
-  },
-];
-
-type JobListing = typeof jobListings[0];
+import { jobListings as initialJoblistings, JobListing } from "@/lib/data";
 
 const postJobSchema = z.object({
   title: z.string().min(3, "Job title must be at least 3 characters."),
@@ -117,6 +60,8 @@ function JobsPageContent() {
   const [isViewDetailsOpen, setIsViewDetailsOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<JobListing | null>(null);
   const { toast } = useToast();
+  const [jobListings, setJobListings] = useState<JobListing[]>(initialJoblistings);
+
 
   const form = useForm<z.infer<typeof postJobSchema>>({
     resolver: zodResolver(postJobSchema),
@@ -130,7 +75,12 @@ function JobsPageContent() {
   });
 
   function onSubmit(values: z.infer<typeof postJobSchema>) {
-    console.log(values);
+    const newJob: JobListing = {
+        ...values,
+        tags: [], // Tags can be derived or added via another field
+        postedBy: "Current User" // Placeholder for logged-in user
+    };
+    setJobListings(prev => [newJob, ...prev]);
     toast({
       title: "Job Posted!",
       description: "Your job listing has been submitted successfully.",
@@ -290,8 +240,8 @@ function JobsPageContent() {
         </div>
 
         <div className="md:col-span-3 space-y-6">
-          {jobListings.map((job) => (
-            <Card key={job.title} className="hover:shadow-md transition-shadow">
+          {jobListings.map((job, index) => (
+            <Card key={`${job.title}-${index}`} className="hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>

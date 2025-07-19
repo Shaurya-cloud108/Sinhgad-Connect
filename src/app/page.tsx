@@ -24,59 +24,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { stories as initialStories, feedItems as initialFeedItems, FeedItem } from "@/lib/data";
 
-const stories = [
-  { name: "Your Story", avatar: "https://placehold.co/100x100.png", isOwn: true, aiHint: "plus icon" },
-  { name: "Priya S.", avatar: "https://placehold.co/100x100.png", aiHint: "professional woman" },
-  { name: "Rohan V.", avatar: "https://placehold.co/100x100.png", aiHint: "professional man" },
-  { name: "Anjali M.", avatar: "https://placehold.co/100x100.png", aiHint: "corporate woman" },
-  { name: "Vikram S.", avatar: "https://placehold.co/100x100.png", aiHint: "corporate man" },
-  { name: "Sneha R.", avatar: "https://placehold.co/100x100.png", aiHint: "young professional" },
-];
-
-const feedItems = [
-  {
-    author: {
-      name: "Annual Alumni Meet",
-      avatar: "https://placehold.co/100x100.png",
-      handle: "Official Event",
-      aiHint: "university logo"
-    },
-    content: "The flagship event of the year is just around the corner! Reconnect with old friends, network with peers, and relive your college days. Don't miss out on the Annual Alumni Grand Meet 2024. Register now!",
-    image: "https://placehold.co/600x400.png",
-    aiHint: "people networking",
-    likes: 256,
-    comments: 32,
-  },
-  {
-    author: {
-      name: "Sunita Narayan '09",
-      avatar: "https://placehold.co/100x100.png",
-      handle: "CEO at Innovate Inc.",
-      aiHint: "professional woman portrait"
-    },
-    content: "Thrilled to share that Innovate Inc. just launched a new line of sustainable tech products! A huge thanks to the team and the foundation I got from Sinhgad. Looking to hire fellow alumni for a Senior Frontend role - check the jobs board!",
-    image: null,
-    aiHint: "",
-    likes: 189,
-    comments: 15,
-  },
-  {
-    author: {
-      name: "Alumni Network Job Board",
-      avatar: "https://placehold.co/100x100.png",
-      handle: "Career Center",
-      aiHint: "briefcase icon"
-    },
-    content: "New Opportunity! DataDriven Co. is hiring a Data Scientist in Pune. This role was posted by Rajesh Kumar '11. Apply now and take the next step in your career.",
-    image: "https://placehold.co/600x400.png",
-    aiHint: "modern office",
-    likes: 98,
-    comments: 7,
-  }
-];
-
-function CreatePostDialog({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
+function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean, onOpenChange: (open: boolean) => void, onPostSubmit: (post: FeedItem) => void }) {
   const { toast } = useToast();
   const [postContent, setPostContent] = useState("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -101,11 +51,28 @@ function CreatePostDialog({ open, onOpenChange }: { open: boolean, onOpenChange:
       });
       return;
     }
-    console.log("Posting content:", postContent);
+    
+    const newPost: FeedItem = {
+        author: {
+            name: "Priya Sharma",
+            avatar: "https://placehold.co/100x100.png",
+            handle: "priya-sharma-09",
+            aiHint: "professional woman"
+        },
+        content: postContent,
+        image: imagePreview,
+        aiHint: "user uploaded",
+        likes: 0,
+        comments: 0
+    };
+
+    onPostSubmit(newPost);
+    
     toast({
       title: "Post Successful!",
       description: "Your update has been shared with the network.",
     });
+
     setPostContent("");
     setImagePreview(null);
     onOpenChange(false);
@@ -159,13 +126,18 @@ function CreatePostDialog({ open, onOpenChange }: { open: boolean, onOpenChange:
 
 export default function Home() {
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
+  const [feedItems, setFeedItems] = useState<FeedItem[]>(initialFeedItems);
+
+  const handlePostSubmit = (newPost: FeedItem) => {
+    setFeedItems(prev => [newPost, ...prev]);
+  };
 
   return (
     <div className="w-full max-w-2xl mx-auto">
       {/* Stories */}
       <div className="py-4 border-b">
         <div className="px-4 flex items-center space-x-4 overflow-x-auto">
-          {stories.map((story) => (
+          {initialStories.map((story) => (
             <div key={story.name} className="flex-shrink-0 text-center">
               <div className={`relative rounded-full p-0.5 border-2 ${story.isOwn ? 'border-dashed' : 'border-primary'}`}>
                 <Avatar className="w-16 h-16">
@@ -218,7 +190,7 @@ export default function Home() {
         </Card>
       </div>
 
-      <CreatePostDialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen} />
+      <CreatePostDialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen} onPostSubmit={handlePostSubmit} />
 
       {/* Feed */}
       <div className="space-y-4 py-4">
@@ -265,5 +237,3 @@ export default function Home() {
     </div>
   );
 }
-
-    

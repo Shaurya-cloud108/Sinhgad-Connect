@@ -1,5 +1,4 @@
 
-
 import {
   Card,
   CardContent,
@@ -13,75 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Linkedin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-
-const alumniData = [
-  {
-    name: "Priya Sharma",
-    avatar: "https://placehold.co/100x100.png",
-    fallback: "PS",
-    graduationYear: 2010,
-    field: "Computer Engineering",
-    industry: "Technology",
-    company: "Google",
-    location: "San Francisco, CA",
-    aiHint: "professional woman"
-  },
-  {
-    name: "Rohan Verma",
-    avatar: "https://placehold.co/100x100.png",
-    fallback: "RV",
-    graduationYear: 2012,
-    field: "Mechanical Engineering",
-    industry: "Automotive",
-    company: "Tesla",
-    location: "Austin, TX",
-    aiHint: "professional man"
-  },
-  {
-    name: "Anjali Mehta",
-    avatar: "https://placehold.co/100x100.png",
-    fallback: "AM",
-    graduationYear: 2015,
-    field: "Electronics & Telecommunication",
-    industry: "Telecommunications",
-    company: "Verizon",
-    location: "New York, NY",
-    aiHint: "corporate woman"
-  },
-  {
-    name: "Vikram Singh",
-    avatar: "https://placehold.co/100x100.png",
-    fallback: "VS",
-    graduationYear: 2008,
-    field: "Information Technology",
-    industry: "Finance",
-    company: "Goldman Sachs",
-    location: "London, UK",
-    aiHint: "corporate man"
-  },
-  {
-    name: "Sneha Reddy",
-    avatar: "https://placehold.co/100x100.png",
-    fallback: "SR",
-    graduationYear: 2018,
-    field: "Computer Engineering",
-    industry: "E-commerce",
-    company: "Amazon",
-    location: "Seattle, WA",
-    aiHint: "young professional"
-  },
-  {
-    name: "Amit Patel",
-    avatar: "https://placehold.co/100x100.png",
-    fallback: "AP",
-    graduationYear: 2013,
-    field: "Civil Engineering",
-    industry: "Construction",
-    company: "L&T Construction",
-    location: "Mumbai, India",
-    aiHint: "engineer man"
-  },
-];
+import { alumniData } from "@/lib/data";
 
 export default function SearchPage() {
   return (

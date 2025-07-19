@@ -1,72 +1,155 @@
 
+"use client";
+
 import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Briefcase, Calendar, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send } from "lucide-react";
+import { profileData as initialProfileData, feedItems as initialFeedItems, ProfileData, FeedItem } from "@/lib/data";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useToast } from "@/hooks/use-toast";
 
-const profileData = {
-  name: "Priya Sharma",
-  avatar: "https://placehold.co/150x150.png",
-  aiHint: "professional woman",
-  banner: "https://placehold.co/1000x300.png",
-  bannerAiHint: "university campus",
-  handle: "priya-sharma-09",
-  headline: "Senior Software Engineer at Google | Mentor",
-  location: "San Francisco Bay Area",
-  connections: 500,
-  posts: 42,
-  about: "Passionate about building scalable systems and helping the next generation of engineers. Graduated in 2009 with a degree in Computer Engineering. Feel free to reach out for advice on careers in tech, interview prep, or anything else!",
-  experience: [
-    {
-      role: "Senior Software Engineer",
-      company: "Google",
-      duration: "2015 - Present",
-    },
-    {
-      role: "Software Engineer",
-      company: "Innovate Inc.",
-      duration: "2012 - 2015",
-    },
-  ],
-  education: {
-    degree: "B.E. Computer Engineering",
-    college: "Sinhgad College of Engineering",
-    duration: "2005 - 2009",
-  },
-};
 
-const feedItems = [
-    {
-    author: {
-      name: "Priya Sharma",
-      avatar: "https://placehold.co/100x100.png",
-      handle: "priya-sharma-09",
-      aiHint: "professional woman"
+const profileFormSchema = z.object({
+  name: z.string().min(2, "Name is too short"),
+  headline: z.string().min(5, "Headline is too short"),
+  location: z.string().min(2, "Location is too short"),
+  about: z.string().min(10, "About section is too short"),
+});
+
+
+function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { open: boolean, onOpenChange: (open: boolean) => void, profile: ProfileData, onProfileUpdate: (data: ProfileData) => void }) {
+  const { toast } = useToast();
+  const form = useForm<z.infer<typeof profileFormSchema>>({
+    resolver: zodResolver(profileFormSchema),
+    defaultValues: {
+      name: profile.name,
+      headline: profile.headline,
+      location: profile.location,
+      about: profile.about,
     },
-    content: "Just hit my 5-year anniversary at Google! So grateful for the journey and the amazing people I've worked with. The lessons I learned at Sinhgad continue to be my foundation.",
-    image: null,
-    aiHint: "",
-    likes: 152,
-    comments: 18,
-  },
-  {
-    author: {
-      name: "Priya Sharma",
-      avatar: "https://placehold.co/100x100.png",
-      handle: "priya-sharma-09",
-      aiHint: "professional woman"
-    },
-    content: "Mentoring a final year student on their capstone project has been such a rewarding experience. It's amazing to see the talent coming out of our college!",
-    image: "https://placehold.co/600x400.png",
-    aiHint: "mentoring session",
-    likes: 98,
-    comments: 7,
-  }
-];
+  });
+
+  const onSubmit = (values: z.infer<typeof profileFormSchema>) => {
+    const updatedProfile = { ...profile, ...values };
+    onProfileUpdate(updatedProfile);
+    toast({
+      title: "Profile Updated",
+      description: "Your information has been saved successfully.",
+    });
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit Profile</DialogTitle>
+          <DialogDescription>
+            Make changes to your profile here. Click save when you're done.
+          </DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="headline"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Headline</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="location"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Location</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="about"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>About</FormLabel>
+                  <FormControl>
+                    <Textarea rows={4} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="secondary">Cancel</Button>
+              </DialogClose>
+              <Button type="submit">Save Changes</Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 
 export default function ProfilePage() {
+    const [profileData, setProfileData] = useState<ProfileData>(initialProfileData);
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    
+    const handleProfileUpdate = (updatedData: ProfileData) => {
+        setProfileData(updatedData);
+    };
+
   return (
     <div className="bg-secondary/40">
       <div className="max-w-4xl mx-auto">
@@ -89,7 +172,7 @@ export default function ProfilePage() {
                     </Avatar>
                 </div>
                  <div className="flex justify-end pt-4">
-                    <Button variant="outline"><Edit className="mr-2" /> Edit Profile</Button>
+                    <Button variant="outline" onClick={() => setIsEditDialogOpen(true)}><Edit className="mr-2" /> Edit Profile</Button>
                 </div>
                 <div className="pt-10">
                     <CardTitle className="text-2xl font-bold font-headline">{profileData.name}</CardTitle>
@@ -112,7 +195,7 @@ export default function ProfilePage() {
                 <TabsTrigger value="about">About</TabsTrigger>
               </TabsList>
               <TabsContent value="posts" className="mt-6 space-y-6">
-                 {feedItems.map((item, index) => (
+                 {initialFeedItems.filter(item => item.author.handle === profileData.handle).map((item, index) => (
                   <Card key={index}>
                     <CardHeader className="p-4">
                       <div className="flex items-center space-x-3">
@@ -198,6 +281,7 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
       </div>
+      <EditProfileDialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} profile={profileData} onProfileUpdate={handleProfileUpdate} />
     </div>
   );
 }
