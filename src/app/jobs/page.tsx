@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Briefcase, MapPin, PlusCircle } from "lucide-react";
+import { Briefcase, MapPin, PlusCircle, ExternalLink } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -52,6 +52,7 @@ const jobListings = [
     type: "Full-time",
     tags: ["React", "TypeScript", "Next.js"],
     postedBy: "Sunita Narayan '09",
+    description: "Innovate Inc. is seeking a passionate Senior Frontend Engineer to build and scale our next-generation sustainable tech products. You will work with a modern tech stack and a talented team to create beautiful, responsive, and high-performance web applications."
   },
   {
     title: "Data Scientist",
@@ -60,6 +61,7 @@ const jobListings = [
     type: "Full-time",
     tags: ["Python", "Machine Learning", "SQL"],
     postedBy: "Rajesh Kumar '11",
+    description: "Join DataDriven Co. and help us solve complex problems with data. As a Data Scientist, you will be responsible for designing and implementing machine learning models, performing statistical analysis, and communicating insights to stakeholders."
   },
   {
     title: "Product Manager",
@@ -68,6 +70,7 @@ const jobListings = [
     type: "Full-time",
     tags: ["Agile", "Roadmap", "UX"],
     postedBy: "Ananya Deshpande '14",
+    description: "Connectify is looking for a user-centric Product Manager to lead our product strategy and roadmap. You will work closely with engineering, design, and marketing to deliver products that our users love."
   },
   {
     title: "UX/UI Designer",
@@ -76,6 +79,7 @@ const jobListings = [
     type: "Contract",
     tags: ["Figma", "User Research", "Prototyping"],
     postedBy: "Alumni Network",
+    description: "We are looking for a talented UX/UI Designer to create amazing user experiences. The ideal candidate will have a strong portfolio of design projects and be proficient in Figma, user research, and prototyping."
   },
   {
     title: "DevOps Engineer",
@@ -84,6 +88,7 @@ const jobListings = [
     type: "Full-time",
     tags: ["AWS", "Kubernetes", "CI/CD"],
     postedBy: "Amit Singh '15",
+    description: "CloudLeap is hiring a DevOps Engineer to manage and improve our cloud infrastructure. You will be responsible for our CI/CD pipelines, automation, and ensuring the reliability and scalability of our systems."
   },
   {
     title: "Marketing Intern",
@@ -92,8 +97,11 @@ const jobListings = [
     type: "Internship",
     tags: ["Social Media", "SEO"],
     postedBy: "Alumni Network",
+    description: "Gain hands-on experience in digital marketing with GrowthX! This internship will give you exposure to social media marketing, SEO, content creation, and campaign analysis. A great opportunity for aspiring marketers."
   },
 ];
+
+type JobListing = typeof jobListings[0];
 
 const postJobSchema = z.object({
   title: z.string().min(3, "Job title must be at least 3 characters."),
@@ -104,7 +112,9 @@ const postJobSchema = z.object({
 });
 
 export default function JobsPage() {
-  const [open, setOpen] = useState(false);
+  const [isPostJobOpen, setIsPostJobOpen] = useState(false);
+  const [isViewDetailsOpen, setIsViewDetailsOpen] = useState(false);
+  const [selectedJob, setSelectedJob] = useState<JobListing | null>(null);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof postJobSchema>>({
@@ -125,9 +135,13 @@ export default function JobsPage() {
       description: "Your job listing has been submitted successfully.",
     });
     form.reset();
-    setOpen(false);
+    setIsPostJobOpen(false);
   }
 
+  function handleViewDetails(job: JobListing) {
+    setSelectedJob(job);
+    setIsViewDetailsOpen(true);
+  }
 
   return (
     <div className="container py-8 md:py-12">
@@ -138,7 +152,7 @@ export default function JobsPage() {
             Exclusive career opportunities from the Sinhgad alumni community.
           </p>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={isPostJobOpen} onOpenChange={setIsPostJobOpen}>
           <DialogTrigger asChild>
             <Button className="mt-4 md:mt-0">
               <PlusCircle className="mr-2 h-4 w-4" /> Post a Job
@@ -298,12 +312,45 @@ export default function JobsPage() {
               </CardContent>
               <CardFooter className="flex justify-between items-center text-sm text-muted-foreground">
                 <p>Posted by: <span className="text-primary font-medium">{job.postedBy}</span></p>
-                <Button>View Details</Button>
+                <Button onClick={() => handleViewDetails(job)}>View Details</Button>
               </CardFooter>
             </Card>
           ))}
         </div>
       </div>
+      
+      {/* View Job Details Dialog */}
+      <Dialog open={isViewDetailsOpen} onOpenChange={setIsViewDetailsOpen}>
+        <DialogContent className="sm:max-w-lg">
+            {selectedJob && (
+                <>
+                    <DialogHeader>
+                        <DialogTitle className="font-headline text-2xl">{selectedJob.title}</DialogTitle>
+                        <DialogDescription className="flex items-center gap-4 pt-2">
+                            <span className="flex items-center gap-1.5"><Briefcase className="h-4 w-4" /> {selectedJob.company}</span>
+                            <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {selectedJob.location}</span>
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="py-4 space-y-4 text-sm text-muted-foreground">
+                       <div className="flex flex-wrap gap-2">
+                          {selectedJob.tags.map((tag) => (
+                            <Badge key={tag} variant="secondary">{tag}</Badge>
+                          ))}
+                        </div>
+                        <p>{selectedJob.description}</p>
+                        <p className="text-xs">Posted by: <span className="text-primary font-medium">{selectedJob.postedBy}</span></p>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsViewDetailsOpen(false)}>Close</Button>
+                         <Button>
+                            Apply Now <ExternalLink className="ml-2 h-4 w-4" />
+                        </Button>
+                    </DialogFooter>
+                </>
+            )}
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
