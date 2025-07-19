@@ -282,7 +282,11 @@ export default function Home() {
   
   const handleStorySubmit = (newStory: Story) => {
     // Adds the new story right after "Your Story"
-    setStories(prev => [prev[0], newStory, ...prev.slice(1)]);
+    setStories(prev => {
+        const yourStory = prev.find(s => s.isOwn);
+        const otherStories = prev.filter(s => !s.isOwn);
+        return [yourStory!, newStory, ...otherStories];
+    });
   }
 
   const handleStoryClick = (story: Story) => {

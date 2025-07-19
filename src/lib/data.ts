@@ -76,8 +76,7 @@ export type Story = {
 }
 
 export const stories: Story[] = [
-  { name: "Your Story", avatar: "https://placehold.co/100x100.png", image: "", isOwn: true, aiHint: "plus icon" },
-  { name: "Priya S.", avatar: "https://placehold.co/100x100.png", image: "https://placehold.co/400x700.png", aiHint: "professional woman" },
+  { name: "Your Story", avatar: "https://placehold.co/100x100.png", image: "", isOwn: true, aiHint: "add icon" },
   { name: "Rohan V.", avatar: "https://placehold.co/100x100.png", image: "https://placehold.co/400x700.png", aiHint: "professional man" },
   { name: "Anjali M.", avatar: "https://placehold.co/100x100.png", image: "https://placehold.co/400x700.png", aiHint: "corporate woman" },
   { name: "Vikram S.", avatar: "https://placehold.co/100x100.png", image: "https://placehold.co/400x700.png", aiHint: "corporate man" },
