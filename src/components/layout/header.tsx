@@ -2,6 +2,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { GraduationCap, Send, User, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -15,6 +16,9 @@ const navLinks = [
 ];
 
 export function AppHeader() {
+  const pathname = usePathname();
+  const isRegisterPage = pathname === "/register";
+
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background">
       <div className="container flex h-16 items-center">
@@ -43,34 +47,49 @@ export function AppHeader() {
                 Sinhgad Alumni Connect
                 </span>
             </Link>
-            <nav className="flex items-center space-x-4 text-sm font-medium">
-            {navLinks.map((link) => (
-                <Link
-                key={link.href}
-                href={link.href}
-                className="transition-colors hover:text-primary text-muted-foreground px-2 py-1"
-                >
-                {link.label}
-                </Link>
-            ))}
-            </nav>
+            {!isRegisterPage && (
+              <nav className="flex items-center space-x-4 text-sm font-medium">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="transition-colors hover:text-primary text-muted-foreground px-2 py-1"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </nav>
+            )}
             <div className="flex flex-1 items-center justify-end space-x-4">
-                <Button variant="ghost" size="icon" asChild>
-                  <Link href="/messages">
-                    <Send />
+              {isRegisterPage ? (
+                <>
+                  <Button variant="ghost" asChild>
+                    <Link href="/register">Login</Link>
+                  </Button>
+                  <Button asChild>
+                    <Link href="/register">Join Now</Link>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="ghost" size="icon" asChild>
+                    <Link href="/messages">
+                      <Send />
+                    </Link>
+                  </Button>
+                  <Button variant="ghost" size="icon" asChild>
+                    <Link href="/notifications">
+                      <Bell />
+                    </Link>
+                  </Button>
+                  <Link href="/profile">
+                    <Avatar className="h-9 w-9 cursor-pointer">
+                      <AvatarImage src="https://placehold.co/100x100.png" data-ai-hint="professional woman" />
+                      <AvatarFallback>PS</AvatarFallback>
+                    </Avatar>
                   </Link>
-                </Button>
-                <Button variant="ghost" size="icon" asChild>
-                  <Link href="/notifications">
-                    <Bell />
-                  </Link>
-                </Button>
-                <Link href="/profile">
-                  <Avatar className="h-9 w-9 cursor-pointer">
-                    <AvatarImage src="https://placehold.co/100x100.png" data-ai-hint="professional woman" />
-                    <AvatarFallback>PS</AvatarFallback>
-                  </Avatar>
-                </Link>
+                </>
+              )}
             </div>
         </div>
 
