@@ -327,9 +327,9 @@ function StoryViewerDialog({ story, open, onOpenChange, onDeleteStoryItem, curre
     if (!currentItem) return;
 
     if (currentItem.type === 'image') {
-        const timer = setTimeout(handleNext, 7000); // 7-second timer for images
+        const timer = setTimeout(handleNext, 15000); // 15-second timer for images
         const interval = setInterval(() => {
-            setProgress(p => p + 100 / (7000 / 50));
+            setProgress(p => p + 100 / (15000 / 50));
         }, 50);
 
         return () => {
@@ -809,5 +809,7 @@ export default function Home() {
         </React.Suspense>
     )
 }
+
+    
 
     
