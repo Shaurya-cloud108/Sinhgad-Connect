@@ -99,20 +99,20 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [jobListings, setJobListings] = useState<JobListing[]>(initialJobListings);
 
     const { myGroups, exploreGroups } = useMemo(() => {
-        const myGroups: NetworkingGroup[] = [];
-        const exploreGroups: NetworkingGroup[] = [];
+        const myGroupsList: NetworkingGroup[] = [];
+        const exploreGroupsList: NetworkingGroup[] = [];
         if (profileData?.handle) {
             networkingGroups.forEach(group => {
                 if (group.members.some(member => member.id === profileData.handle)) {
-                    myGroups.push(group);
+                    myGroupsList.push(group);
                 } else {
-                    exploreGroups.push(group);
+                    exploreGroupsList.push(group);
                 }
             });
         } else {
-             exploreGroups.push(...networkingGroups);
+             exploreGroupsList.push(...networkingGroups);
         }
-        return { myGroups, exploreGroups };
+        return { myGroups: myGroupsList, exploreGroups: exploreGroupsList };
     }, [profileData, networkingGroups]);
 
 
@@ -156,13 +156,16 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const toggleGroupMembership = useCallback((groupTitle: string) => {
         if (!profileData) return;
 
-        setNetworkingGroups(prevGroups => {
-            return prevGroups.map(group => {
+        setNetworkingGroups(prevGroups => 
+            prevGroups.map(group => {
                 if (group.title === groupTitle) {
                     const isMember = group.members.some(member => member.id === profileData.handle);
                     if (isMember) {
                         // Leave group
-                        return { ...group, members: group.members.filter(m => m.id !== profileData.handle) };
+                        return { 
+                            ...group, 
+                            members: group.members.filter(m => m.id !== profileData.handle) 
+                        };
                     } else {
                         // Join group
                         const newMember: Member = {
@@ -175,8 +178,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                     }
                 }
                 return group;
-            });
-        });
+            })
+        );
     }, [profileData]);
 
     const updateMemberRole = (groupTitle: string, memberId: string, role: 'admin' | 'member') => {
