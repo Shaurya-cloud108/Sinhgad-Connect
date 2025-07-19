@@ -69,8 +69,7 @@ export default function SearchPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredAlumni.map((alumni) => (
-          <Link href="/profile" key={alumni.name} className="block hover:shadow-xl transition-shadow duration-300 rounded-lg">
-            <Card className="flex flex-col h-full">
+          <Card key={alumni.name} className="flex flex-col h-full hover:shadow-xl transition-shadow duration-300">
               <CardHeader className="items-center text-center">
                 <Avatar className="w-24 h-24 mb-4">
                   <AvatarImage src={alumni.avatar} data-ai-hint={alumni.aiHint} />
@@ -89,12 +88,11 @@ export default function SearchPage() {
                 </div>
               </CardContent>
               <CardFooter className="justify-center">
-                <Button variant="outline" onClick={(e) => { e.preventDefault(); /* Handle connect logic */ }}>
+                <Button variant="outline" onClick={(e) => { e.preventDefault(); /* Logic to connect or view profile */ }}>
                   <Linkedin className="mr-2 h-4 w-4" /> Connect
                 </Button>
               </CardFooter>
             </Card>
-          </Link>
         ))}
       </div>
     </div>
