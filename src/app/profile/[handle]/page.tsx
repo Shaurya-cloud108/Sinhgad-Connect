@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2, PlusCircle } from "lucide-react";
-import { feedItems as initialFeedItems, ProfileData, FeedItem, communityMembers } from "@/lib/data.tsx";
+import { feedItems as initialFeedItems, ProfileData, FeedItem, communityMembers, EducationEntry } from "@/lib/data.tsx";
 import { useState, useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -78,11 +78,13 @@ const profileFormSchema = z.object({
       duration: z.string().min(1, "Duration is required"),
     })
   ),
-  education: z.object({
+  education: z.array(
+    z.object({
       degree: z.string().min(1, "Degree is required"),
       college: z.string().min(1, "College is required"),
       yearRange: z.string().min(1, "Year range is required"),
-  }),
+    })
+  ),
 });
 
 
@@ -100,17 +102,22 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
       location: profile.location,
       about: profile.about,
       experience: profile.experience,
-      education: {
-        degree: profile.education.degree,
-        college: profile.education.college,
-        yearRange: profile.education.yearRange,
-      }
+      education: profile.education.map(edu => ({
+        degree: edu.degree,
+        college: edu.college,
+        yearRange: edu.yearRange
+      })),
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields: expFields, append: appendExp, remove: removeExp } = useFieldArray({
     control: form.control,
     name: "experience",
+  });
+
+  const { fields: eduFields, append: appendEdu, remove: removeEdu } = useFieldArray({
+    control: form.control,
+    name: "education",
   });
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>, setImagePreview: (url: string) => void) => {
@@ -120,21 +127,25 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
       };
-      reader.readAsDataURL(file);
+      reader.readDataURL(file);
     }
   };
 
   const onSubmit = (values: z.infer<typeof profileFormSchema>) => {
-    const updatedProfileData = {
-      ...values,
-      education: {
-        ...profile.education, // retain non-editable fields like grad year/month
-        ...values.education
+    // We need to merge back the non-editable fields like graduation year/month for the primary education
+    const updatedEducation: EducationEntry[] = values.education.map((edu, index) => {
+      if (index === 0) {
+        return {
+          ...profile.education[0], // Keep original grad year/month
+          ...edu
+        }
       }
-    }
+      return edu;
+    });
 
     const updatedProfile: Partial<ProfileData> = { 
-      ...updatedProfileData,
+      ...values,
+      education: updatedEducation,
       avatar: avatarPreview || profile.avatar,
       banner: bannerPreview || profile.banner,
     };
@@ -253,15 +264,15 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
                 <div>
                     <FormLabel className="text-lg font-semibold">Experience</FormLabel>
                     <div className="space-y-4 mt-2">
-                        {fields.map((field, index) => (
+                        {expFields.map((field, index) => (
                           <div key={field.id} className="p-4 border rounded-md relative space-y-2">
                               <FormField control={form.control} name={`experience.${index}.role`} render={({ field }) => (<FormItem><FormLabel>Role</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
                               <FormField control={form.control} name={`experience.${index}.company`} render={({ field }) => (<FormItem><FormLabel>Company</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
                               <FormField control={form.control} name={`experience.${index}.duration`} render={({ field }) => (<FormItem><FormLabel>Duration</FormLabel><FormControl><Input placeholder="e.g. 2020 - Present" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                              <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => remove(index)}><Trash2 className="h-4 w-4" /></Button>
+                              <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => removeExp(index)}><Trash2 className="h-4 w-4" /></Button>
                           </div>
                         ))}
-                         <Button type="button" variant="outline" size="sm" onClick={() => append({ role: '', company: '', duration: '' })}>
+                         <Button type="button" variant="outline" size="sm" onClick={() => appendExp({ role: '', company: '', duration: '' })}>
                             <PlusCircle className="mr-2 h-4 w-4" /> Add Experience
                         </Button>
                     </div>
@@ -271,10 +282,18 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
 
                  <div>
                     <FormLabel className="text-lg font-semibold">Education</FormLabel>
-                    <div className="p-4 border rounded-md mt-2 space-y-2">
-                        <FormField control={form.control} name="education.college" render={({ field }) => (<FormItem><FormLabel>College</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
-                        <FormField control={form.control} name="education.degree" render={({ field }) => (<FormItem><FormLabel>Degree</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
-                        <FormField control={form.control} name="education.yearRange" render={({ field }) => (<FormItem><FormLabel>Years Attended</FormLabel><FormControl><Input placeholder="e.g. 2005 - 2009" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                     <div className="space-y-4 mt-2">
+                        {eduFields.map((field, index) => (
+                          <div key={field.id} className="p-4 border rounded-md relative space-y-2">
+                              <FormField control={form.control} name={`education.${index}.college`} render={({ field }) => (<FormItem><FormLabel>School / College</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                              <FormField control={form.control} name={`education.${index}.degree`} render={({ field }) => (<FormItem><FormLabel>Degree / Certificate</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                              <FormField control={form.control} name={`education.${index}.yearRange`} render={({ field }) => (<FormItem><FormLabel>Years Attended</FormLabel><FormControl><Input placeholder="e.g. 2005 - 2009" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                              {eduFields.length > 1 && <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => removeEdu(index)}><Trash2 className="h-4 w-4" /></Button>}
+                          </div>
+                        ))}
+                         <Button type="button" variant="outline" size="sm" onClick={() => appendEdu({ college: '', degree: '', yearRange: '' })}>
+                            <PlusCircle className="mr-2 h-4 w-4" /> Add Education
+                        </Button>
                     </div>
                 </div>
               </div>
@@ -322,13 +341,13 @@ function ProfilePageContent({ handle }: { handle: string }) {
                     posts: initialFeedItems.filter(item => item.author.handle === member.handle).length,
                     about: `A passionate ${member.field} professional working in the ${member.industry} industry. Graduate of the class of ${member.graduationYear}.`,
                     experience: [{ role: member.field, company: member.company, duration: "2020 - Present" }], // Placeholder
-                    education: {
+                    education: [{
                         degree: member.field,
                         college: "Sinhgad College of Engineering",
                         yearRange: `${member.graduationYear - 4} - ${member.graduationYear}`,
                         graduationYear: member.graduationYear,
                         graduationMonth: member.graduationMonth,
-                    },
+                    }],
                 };
             }
         }
@@ -400,6 +419,8 @@ function ProfilePageContent({ handle }: { handle: string }) {
         );
     }
 
+    const primaryEducation = profileData.education[0];
+
   return (
     <div className="bg-secondary/40">
       <div className="max-w-4xl mx-auto">
@@ -422,7 +443,7 @@ function ProfilePageContent({ handle }: { handle: string }) {
                             <AvatarFallback>{profileData.name.substring(0,2)}</AvatarFallback>
                         </Avatar>
                         <div className="pt-2">
-                           <CardTitle className="text-2xl font-bold font-headline">{profileData.name} {getStatusEmoji(profileData.education.graduationYear, profileData.education.graduationMonth)}</CardTitle>
+                           <CardTitle className="text-2xl font-bold font-headline">{profileData.name} {primaryEducation.graduationYear && primaryEducation.graduationMonth ? getStatusEmoji(primaryEducation.graduationYear, primaryEducation.graduationMonth) : ''}</CardTitle>
                            <p className="text-sm text-muted-foreground">@{profileData.handle}</p>
                         </div>
                     </div>
@@ -575,14 +596,16 @@ function ProfilePageContent({ handle }: { handle: string }) {
                     <CardTitle className="font-headline text-xl">Education</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                     <div className="flex gap-4">
-                        <GraduationCap className="h-8 w-8 text-muted-foreground mt-1"/>
-                        <div>
-                            <p className="font-semibold">{profileData.education.college}</p>
-                            <p className="text-sm text-muted-foreground">{profileData.education.degree}</p>
-                            <p className="text-xs text-muted-foreground">{profileData.education.yearRange}</p>
-                        </div>
-                    </div>
+                     {profileData.education.map((edu, index) => (
+                       <div key={index} className="flex gap-4">
+                          <GraduationCap className="h-8 w-8 text-muted-foreground mt-1"/>
+                          <div>
+                              <p className="font-semibold">{edu.college}</p>
+                              <p className="text-sm text-muted-foreground">{edu.degree}</p>
+                              <p className="text-xs text-muted-foreground">{edu.yearRange}</p>
+                          </div>
+                      </div>
+                    ))}
                   </CardContent>
                 </Card>
               </TabsContent>

@@ -229,6 +229,14 @@ export type FeedItem = {
     comments: Comment[];
 }
 
+export type EducationEntry = {
+  degree: string;
+  college: string;
+  yearRange: string;
+  graduationYear?: number;
+  graduationMonth?: number;
+};
+
 export type ProfileData = {
   name: string;
   avatar: string;
@@ -246,13 +254,7 @@ export type ProfileData = {
     company: string;
     duration: string;
   }[];
-  education: {
-    degree: string;
-    college: string;
-    yearRange: string;
-    graduationYear: number;
-    graduationMonth: number;
-  };
+  education: EducationEntry[];
 };
 
 
@@ -280,13 +282,15 @@ export const profileData: ProfileData = {
       duration: "2012 - 2015",
     },
   ],
-  education: {
-    degree: "B.E. Computer Engineering",
-    college: "Sinhgad College of Engineering",
-    yearRange: "2005 - 2009",
-    graduationYear: 2009,
-    graduationMonth: 6,
-  },
+  education: [
+    {
+      degree: "B.E. Computer Engineering",
+      college: "Sinhgad College of Engineering",
+      yearRange: "2005 - 2009",
+      graduationYear: 2009,
+      graduationMonth: 6,
+    },
+  ],
 };
 
 export type CommunityMember = {
