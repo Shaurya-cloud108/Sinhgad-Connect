@@ -61,6 +61,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PostJobDialog } from "@/components/post-job-dialog";
 import { AppContext } from "@/context/AppContext";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useRouter } from "next/navigation";
+
 
 function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean, onOpenChange: (open: boolean) => void, onPostSubmit: (post: FeedItem) => void }) {
   const { toast } = useToast();
@@ -332,6 +335,7 @@ function HomePageContent() {
   const { profileData } = useContext(ProfileContext);
   const { addJobListing } = useContext(AppContext);
   const [activeCommentPostId, setActiveCommentPostId] = useState<number | null>(null);
+  const router = useRouter();
   
   const searchParams = useSearchParams();
 
@@ -366,13 +370,12 @@ function HomePageContent() {
     setFeedItems(prev => [newPost, ...prev]);
   };
 
-  const handleJobSubmit = (newJob: Omit<JobListing, 'id' | 'postedBy'>) => {
+  const handleJobSubmit = (newJob: Omit<JobListing, 'id' | 'postedBy' | 'tags'>) => {
     if(!profileData) return;
     addJobListing({
       ...newJob,
       id: Date.now(),
       postedBy: `${profileData.name} '${profileData.education.graduationYear.toString().slice(-2)}`,
-      tags: [],
     });
   }
   
@@ -381,8 +384,6 @@ function HomePageContent() {
         const newStories = [...prevStories];
         const myStoryIndex = newStories.findIndex(s => s.isOwn);
         if (myStoryIndex !== -1) {
-            // This is a simplified way to handle it. In a real app, you might create a new story object
-            // if the user posts multiple times. For this prototype, we'll add to the existing story object.
             newStories[myStoryIndex].images.push(image);
         }
         return newStories;
@@ -444,6 +445,7 @@ function HomePageContent() {
   const activePostForComments = feedItems.find(item => item.id === activeCommentPostId);
 
   return (
+    <TooltipProvider>
     <div className="w-full max-w-2xl mx-auto">
       {/* Stories */}
       <div className="py-4 border-b">
@@ -482,7 +484,7 @@ function HomePageContent() {
                 <AvatarFallback>{profileData.name.substring(0,2)}</AvatarFallback>
               </Avatar>
               <button
-                className="w-full text-left bg-muted/50 hover:bg-muted/80 transition-colors py-2 px-4 rounded-full text-sm text-muted-foreground"
+                className="w-full text-left bg-secondary/50 hover:bg-muted/80 transition-colors py-2 px-4 rounded-full text-sm text-muted-foreground"
                 onClick={() => setIsPostDialogOpen(true)}
               >
                 Share an update, achievement, or question...
@@ -578,27 +580,37 @@ function HomePageContent() {
                 </div>
               )}
             </CardContent>
-            <CardFooter className="p-4 flex flex-col items-start space-y-3">
-               <div className="flex items-center space-x-4 text-muted-foreground">
-                  <Button variant="ghost" size="sm" className={cn("flex items-center gap-2", item.liked && "text-red-500")} onClick={() => handleLike(item.id)}>
+            <CardFooter className="p-2 flex justify-between items-center">
+               <div className="flex items-center text-sm text-muted-foreground">
+                  <Button variant="ghost" size="sm" className={cn("flex items-center gap-2", item.liked && "text-destructive")} onClick={() => handleLike(item.id)}>
                     <Heart className={cn("w-5 h-5", item.liked && "fill-current")} />
-                    <span className="text-sm font-medium">{item.likes}</span>
+                    <span>{item.likes}</span>
                   </Button>
                   <Button variant="ghost" size="sm" className="flex items-center gap-2" onClick={() => setActiveCommentPostId(item.id)}>
                     <MessageCircle className="w-5 h-5" />
-                     <span className="text-sm font-medium">{item.comments.length}</span>
+                     <span>{item.comments.length}</span>
                   </Button>
-                  <ShareDialog contentType="post" contentId={item.id}>
-                    <Button variant="ghost" size="sm">
-                      <Send className="w-5 h-5" />
-                    </Button>
-                  </ShareDialog>
-              </div>
+                </div>
+                <div>
+                    <ShareDialog contentType="post" contentId={item.id}>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                    <Send className="w-5 h-5" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Share</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </ShareDialog>
+                </div>
             </CardFooter>
           </Card>
         ))}
       </div>
     </div>
+    </TooltipProvider>
   );
 }
 

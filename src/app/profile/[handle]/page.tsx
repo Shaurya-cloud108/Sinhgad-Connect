@@ -263,7 +263,7 @@ export default function ProfilePage({ params }: { params: { handle: string } }) 
                     name: member.name,
                     avatar: member.avatar,
                     aiHint: member.aiHint,
-                    banner: "https://placehold.co/1000x300.png",
+                    banner: "https://placehold.co/1200x400.png",
                     bannerAiHint: "university campus",
                     handle: member.handle,
                     headline: `${member.field} at ${member.company}`,
@@ -324,8 +324,9 @@ export default function ProfilePage({ params }: { params: { handle: string } }) 
                         <CardHeader className="p-0">
                             <Skeleton className="h-40 md:h-48 w-full" />
                         </CardHeader>
-                        <CardContent className="p-6 pt-20">
-                            <Skeleton className="h-8 w-1/2 mb-2" />
+                        <CardContent className="p-6">
+                            <Skeleton className="h-24 w-24 rounded-full" />
+                            <Skeleton className="h-8 w-1/2 mt-4 mb-2" />
                             <Skeleton className="h-4 w-1/4 mb-4" />
                             <Skeleton className="h-4 w-3/4 mb-2" />
                             <Skeleton className="h-4 w-1/3 mb-4" />
@@ -355,7 +356,7 @@ export default function ProfilePage({ params }: { params: { handle: string } }) 
   return (
     <div className="bg-secondary/40">
       <div className="max-w-4xl mx-auto">
-        <Card className="rounded-none md:rounded-lg overflow-hidden">
+        <Card className="rounded-none md:rounded-b-lg overflow-hidden">
           <CardHeader className="p-0">
             <div className="relative h-40 md:h-48 w-full">
               <Image
@@ -366,28 +367,32 @@ export default function ProfilePage({ params }: { params: { handle: string } }) 
                 data-ai-hint={profileData.bannerAiHint}
               />
             </div>
-            <div className="relative p-6 pt-0">
-                <div className="absolute -top-12 left-6">
-                    <Avatar className="w-24 h-24 border-4 border-background">
-                        <AvatarImage src={profileData.avatar} data-ai-hint={profileData.aiHint} />
-                        <AvatarFallback>{profileData.name.substring(0,2)}</AvatarFallback>
-                    </Avatar>
+            <div className="p-6 space-y-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-end sm:justify-between">
+                    <div className="flex items-start gap-4">
+                        <Avatar className="w-24 h-24 border-4 border-background -mt-16">
+                            <AvatarImage src={profileData.avatar} data-ai-hint={profileData.aiHint} />
+                            <AvatarFallback>{profileData.name.substring(0,2)}</AvatarFallback>
+                        </Avatar>
+                        <div className="pt-2">
+                           <CardTitle className="text-2xl font-bold font-headline">{profileData.name} {getStatusEmoji(profileData.education.graduationYear, profileData.education.graduationMonth)}</CardTitle>
+                           <p className="text-sm text-muted-foreground">@{profileData.handle}</p>
+                        </div>
+                    </div>
+                     <div className="flex gap-2 mt-4 sm:mt-0 w-full sm:w-auto">
+                        {isOwnProfile ? (
+                            <>
+                                <Button variant="outline" onClick={() => setIsEditDialogOpen(true)} className="flex-1 sm:flex-none"><Edit className="mr-2 h-4 w-4" /> Edit</Button>
+                                <Button variant="outline" onClick={handleLogout} className="flex-1 sm:flex-none"><LogOut className="mr-2 h-4 w-4" /> Logout</Button>
+                            </>
+                        ) : (
+                            <Button onClick={() => handleGroupClick(profileData.name)} className="w-full">
+                               <MessageCircle className="mr-2 h-4 w-4" /> Message
+                            </Button>
+                        )}
+                    </div>
                 </div>
-                 <div className="flex justify-end pt-4 gap-2">
-                    {isOwnProfile ? (
-                        <>
-                            <Button variant="outline" onClick={() => setIsEditDialogOpen(true)}><Edit className="mr-2 h-4 w-4" /> Edit Profile</Button>
-                            <Button variant="outline" onClick={handleLogout}><LogOut className="mr-2 h-4 w-4" /> Logout</Button>
-                        </>
-                    ) : (
-                        <Button onClick={() => handleGroupClick(profileData.name)}>
-                           <MessageCircle className="mr-2 h-4 w-4" /> Message
-                        </Button>
-                    )}
-                </div>
-                <div className="pt-10">
-                    <CardTitle className="text-2xl font-bold font-headline">{profileData.name} {getStatusEmoji(profileData.education.graduationYear, profileData.education.graduationMonth)}</CardTitle>
-                    <p className="text-sm text-muted-foreground">@{profileData.handle}</p>
+                 <div>
                     <p className="mt-1 text-md">{profileData.headline}</p>
                     <p className="mt-1 text-sm text-muted-foreground flex items-center gap-2">
                         <MapPin className="h-4 w-4" /> {profileData.location}

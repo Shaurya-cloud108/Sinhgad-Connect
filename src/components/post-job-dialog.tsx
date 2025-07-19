@@ -32,7 +32,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { JobListing } from "@/lib/data.tsx";
 
 const postJobSchema = z.object({
   title: z.string().min(3, "Job title must be at least 3 characters."),
@@ -45,7 +44,7 @@ const postJobSchema = z.object({
 type PostJobDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onJobSubmit: (job: Omit<JobListing, 'id' | 'postedBy' | 'tags'>) => void;
+  onJobSubmit: (job: Omit<z.infer<typeof postJobSchema>, 'tags'>) => void;
 };
 
 export function PostJobDialog({ open, onOpenChange, onJobSubmit }: PostJobDialogProps) {

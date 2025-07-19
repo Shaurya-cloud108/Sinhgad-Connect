@@ -69,12 +69,11 @@ function JobsPageContent() {
   }, [searchQuery, jobType, location, jobListings]);
 
 
-  function handleJobSubmit(values: Omit<JobListing, 'id' | 'postedBy' | 'tags'>) {
+  function handleJobSubmit(values: Omit<JobListing, 'id' | 'postedBy'>) {
     if (!profileData) return;
     const newJob: JobListing = {
         id: Date.now(),
         ...values,
-        tags: [], // Tags can be derived or added via another field
         postedBy: `${profileData.name} '${profileData.education.graduationYear.toString().slice(-2)}`
     };
     addJobListing(newJob);
@@ -154,7 +153,7 @@ function JobsPageContent() {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {job.tags.map((tag) => (
+                  {job.tags && job.tags.map((tag) => (
                     <Badge key={tag} variant="outline">{tag}</Badge>
                   ))}
                 </div>
@@ -196,7 +195,7 @@ function JobsPageContent() {
                     </DialogHeader>
                     <div className="py-4 space-y-4 text-sm text-muted-foreground">
                        <div className="flex flex-wrap gap-2">
-                          {selectedJob.tags.map((tag) => (
+                          {selectedJob.tags && selectedJob.tags.map((tag) => (
                             <Badge key={tag} variant="secondary">{tag}</Badge>
                           ))}
                         </div>

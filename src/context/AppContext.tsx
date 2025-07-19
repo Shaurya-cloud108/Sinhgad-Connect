@@ -103,7 +103,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         }
 
         const userGroupTitles = new Set<string>();
-        initialNetworkingGroups.forEach(group => {
+        networkingGroups.forEach(group => {
             if (group.members.some(member => member.id === profileData.handle)) {
                 userGroupTitles.add(group.title);
             }
@@ -112,11 +112,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         const conversationMap = new Map<string, Conversation>();
 
         // Process all conversations from messages data
-        Object.keys(initialMessagesData).forEach(convoName => {
-            const lastMessage = initialMessagesData[convoName]?.[initialMessagesData[convoName].length - 1];
+        Object.keys(messagesData).forEach(convoName => {
+            const lastMessage = messagesData[convoName]?.[messagesData[convoName].length - 1];
             if (!lastMessage) return;
 
-            const isGroup = initialNetworkingGroups.some(g => g.title === convoName);
+            const isGroup = networkingGroups.some(g => g.title === convoName);
 
             if (isGroup) {
                 if (userGroupTitles.has(convoName)) {
@@ -157,7 +157,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
         setConversations(sortedConversations);
         setJoinedGroups(userGroupTitles);
-    }, [profileData]);
+    }, [profileData, networkingGroups, messagesData]);
 
     useEffect(() => {
         regenerateConversations();
@@ -261,6 +261,22 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                     time: "Now",
                     unread: 0,
                     isGroup: true,
+                };
+                setConversations(prev => [newConversation, ...prev]);
+                setSelectedConversation(newConversation);
+                return;
+            }
+
+            const person = communityMembers.find(m => m.name === name || m.handle === name);
+            if (person) {
+                const newConversation: Conversation = {
+                     name: person.name,
+                     avatar: person.avatar,
+                     aiHint: person.aiHint,
+                     lastMessage: "Conversation started.",
+                     time: "Now",
+                     unread: 0,
+                     isGroup: false,
                 };
                 setConversations(prev => [newConversation, ...prev]);
                 setSelectedConversation(newConversation);
