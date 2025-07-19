@@ -195,6 +195,7 @@ export type ProfileData = {
     college: string;
     yearRange: string;
     graduationYear: number;
+    graduationMonth: number;
   };
 };
 
@@ -228,15 +229,31 @@ export const profileData: ProfileData = {
     college: "Sinhgad College of Engineering",
     yearRange: "2005 - 2009",
     graduationYear: 2009,
+    graduationMonth: 6,
   },
 };
 
-export const communityMembers = [
+export type CommunityMember = {
+    name: string;
+    avatar: string;
+    fallback: string;
+    graduationYear: number;
+    graduationMonth: number;
+    field: string;
+    industry: string;
+    company: string;
+    location: string;
+    aiHint: string;
+    handle: string;
+};
+
+export const communityMembers: CommunityMember[] = [
   {
     name: "Priya Sharma",
     avatar: "https://placehold.co/100x100.png",
     fallback: "PS",
     graduationYear: 2010,
+    graduationMonth: 6,
     field: "Computer Engineering",
     industry: "Technology",
     company: "Google",
@@ -249,6 +266,7 @@ export const communityMembers = [
     avatar: "https://placehold.co/100x100.png",
     fallback: "RV",
     graduationYear: 2012,
+    graduationMonth: 6,
     field: "Mechanical Engineering",
     industry: "Automotive",
     company: "Tesla",
@@ -261,6 +279,7 @@ export const communityMembers = [
     avatar: "https://placehold.co/100x100.png",
     fallback: "AM",
     graduationYear: 2015,
+    graduationMonth: 6,
     field: "Electronics & Telecommunication",
     industry: "Telecommunications",
     company: "Verizon",
@@ -273,6 +292,7 @@ export const communityMembers = [
     avatar: "https://placehold.co/100x100.png",
     fallback: "KI",
     graduationYear: 2025,
+    graduationMonth: 6,
     field: "Information Technology",
     industry: "Student",
     company: "Sinhgad College of Engineering",
@@ -285,6 +305,7 @@ export const communityMembers = [
     avatar: "https://placehold.co/100x100.png",
     fallback: "VS",
     graduationYear: 2008,
+    graduationMonth: 6,
     field: "Information Technology",
     industry: "Finance",
     company: "Goldman Sachs",
@@ -297,6 +318,7 @@ export const communityMembers = [
     avatar: "https://placehold.co/100x100.png",
     fallback: "SR",
     graduationYear: 2018,
+    graduationMonth: 6,
     field: "Computer Engineering",
     industry: "E-commerce",
     company: "Amazon",
@@ -309,6 +331,7 @@ export const communityMembers = [
     avatar: "https://placehold.co/100x100.png",
     fallback: "AD",
     graduationYear: 2026,
+    graduationMonth: 6,
     field: "Computer Engineering",
     industry: "Student",
     company: "Sinhgad College of Engineering",
@@ -321,6 +344,7 @@ export const communityMembers = [
     avatar: "https://placehold.co/100x100.png",
     fallback: "AP",
     graduationYear: 2013,
+    graduationMonth: 6,
     field: "Civil Engineering",
     industry: "Construction",
     company: "L&T Construction",
@@ -333,6 +357,7 @@ export const communityMembers = [
     avatar: "https://placehold.co/100x100.png",
     fallback: "SN",
     graduationYear: 2009,
+    graduationMonth: 6,
     field: "Computer Engineering",
     industry: "Technology",
     company: "Innovate Inc.",
@@ -426,16 +451,8 @@ export const messagesData = {
   "Rohan Verma": [
     { senderId: "rohan-verma", senderName: "Rohan Verma", text: "Thanks for the resume tips!" },
   ],
-  "Software & Tech Innovators": [
-    { senderId: 'priya-sharma-09', senderName: 'Priya Sharma', text: "Welcome to the group everyone! Let's talk about the latest in AI." },
-    { senderId: 'rohan-verma', senderName: 'Rohan Verma', text: "Great idea! I've been experimenting with some new frameworks." },
-    { senderId: 'kavya-iyer', senderName: 'Kavya Iyer', text: "Hi everyone! As a student, I'm really excited to learn from you all." },
-  ],
   "Vikram Singh": [
      { senderId: "vikram-singh", senderName: "Vikram Singh", text: "It was great meeting you at the reunion." }
-  ],
-  "Entrepreneurship Hub": [
-    { senderId: 'sunita-narayan', senderName: 'Sunita Narayan', text: "Welcome! Let's build the future together." },
   ],
   "Kavya Iyer": [
       { senderId: 'kavya-iyer', senderName: 'Kavya Iyer', text: "Hi Priya! I had a question about my project." },

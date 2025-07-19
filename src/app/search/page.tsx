@@ -76,7 +76,7 @@ export default function SearchPage() {
                   <AvatarImage src={member.avatar} data-ai-hint={member.aiHint} />
                   <AvatarFallback>{member.fallback}</AvatarFallback>
                 </Avatar>
-                <CardTitle className="font-headline">{member.name} {getStatusEmoji(member.graduationYear)}</CardTitle>
+                <CardTitle className="font-headline">{member.name} {getStatusEmoji(member.graduationYear, member.graduationMonth)}</CardTitle>
                 <CardDescription>
                   {member.field}, Class of {member.graduationYear}
                 </CardDescription>

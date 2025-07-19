@@ -303,7 +303,7 @@ export default function ProfilePage() {
                     <Button variant="outline" onClick={handleLogout}><LogOut className="mr-2 h-4 w-4" /> Logout</Button>
                 </div>
                 <div className="pt-10">
-                    <CardTitle className="text-2xl font-bold font-headline">{profileData.name} {getStatusEmoji(profileData.education.graduationYear)}</CardTitle>
+                    <CardTitle className="text-2xl font-bold font-headline">{profileData.name} {getStatusEmoji(profileData.education.graduationYear, profileData.education.graduationMonth)}</CardTitle>
                     <p className="text-sm text-muted-foreground">@{profileData.handle}</p>
                     <p className="mt-1 text-md">{profileData.headline}</p>
                     <p className="mt-1 text-sm text-muted-foreground flex items-center gap-2">

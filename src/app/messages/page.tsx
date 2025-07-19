@@ -32,7 +32,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { ProfileContext } from "@/context/ProfileContext";
-import { communityMembers } from "@/lib/data";
+import { communityMembers, CommunityMember } from "@/lib/data";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -51,7 +51,7 @@ function AddMemberDialog({ group, onOpenChange }: { group: NetworkingGroup, onOp
         .filter(alumnus => !memberIds.has(alumnus.handle))
         .filter(alumnus => alumnus.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    const handleAddMember = (alumnus: typeof communityMembers[0]) => {
+    const handleAddMember = (alumnus: CommunityMember) => {
         const newMember: Member = {
             id: alumnus.handle,
             name: alumnus.name,
@@ -86,7 +86,7 @@ function AddMemberDialog({ group, onOpenChange }: { group: NetworkingGroup, onOp
                                     <AvatarFallback>{alumnus.name.substring(0, 2)}</AvatarFallback>
                                 </Avatar>
                                 <div>
-                                    <p className="font-semibold text-sm">{alumnus.name} {getStatusEmoji(alumnus.graduationYear)}</p>
+                                    <p className="font-semibold text-sm">{alumnus.name} {getStatusEmoji(alumnus.graduationYear, alumnus.graduationMonth)}</p>
                                     <p className="text-xs text-muted-foreground">@{alumnus.handle}</p>
                                 </div>
                             </div>
@@ -137,6 +137,7 @@ function GroupInfoDialog({ group, currentUserRole, onOpenChange }: { group: Netw
                     {group.members.map(member => {
                         const memberDetails = communityMembers.find(m => m.handle === member.id);
                         const gradYear = memberDetails?.graduationYear || 0;
+                        const gradMonth = memberDetails?.graduationMonth || 0;
                         return (
                         <div key={member.id} className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
@@ -145,7 +146,7 @@ function GroupInfoDialog({ group, currentUserRole, onOpenChange }: { group: Netw
                                     <AvatarFallback>{member.name.substring(0,2)}</AvatarFallback>
                                 </Avatar>
                                 <div>
-                                    <p className="font-semibold text-sm">{member.name} {getStatusEmoji(gradYear)}</p>
+                                    <p className="font-semibold text-sm">{member.name} {getStatusEmoji(gradYear, gradMonth)}</p>
                                     <p className="text-xs text-muted-foreground">{member.role}</p>
                                 </div>
                             </div>
@@ -349,7 +350,7 @@ export default function MessagesPage() {
                         <Info />
                       </Button>
                     </DialogTrigger>
-                    <GroupInfoDialog group={currentGroup} currentUserRole={currentUserRole} onOpenChange={setIsGroupInfoOpen} />
+                    {currentGroup && <GroupInfoDialog group={currentGroup} currentUserRole={currentUserRole} onOpenChange={setIsGroupInfoOpen} />}
                  </Dialog>
               )}
             </div>

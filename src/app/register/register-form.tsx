@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,10 +31,16 @@ const formSchema = z.object({
   role: z.enum(["student", "alumni"], { required_error: "Please select your role." }),
   fullName: z.string().min(2, "Full name must be at least 2 characters."),
   email: z.string().email("Please enter a valid email address."),
+  graduationMonth: z.string().min(1, "Please select a month."),
   graduationYear: z.string().min(4, "Please select a year."),
   degree: z.string().min(1, "Please select your degree/branch."),
   password: z.string().min(8, "Password must be at least 8 characters."),
 });
+
+const months = [
+    "January", "February", "March", "April", "May", "June", 
+    "July", "August", "September", "October", "November", "December"
+];
 
 export function RegisterForm() {
   const { toast } = useToast();
@@ -46,6 +53,7 @@ export function RegisterForm() {
       role: "student",
       fullName: "",
       email: "",
+      graduationMonth: "",
       graduationYear: "",
       degree: "",
       password: "",
@@ -127,34 +135,59 @@ export function RegisterForm() {
           )}
         />
         <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="graduationYear"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{role === 'student' ? 'Expected Grad Year' : 'Graduation Year'}</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Year" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {Array.from({ length: 40 }, (_, i) => new Date().getFullYear() + 5 - i).map((year) => (
-                        <SelectItem key={year} value={String(year)}>
-                          {year}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
+            <FormField
+                control={form.control}
+                name="graduationMonth"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>{role === 'student' ? 'Grad Month' : 'Grad Month'}</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                        <SelectTrigger>
+                        <SelectValue placeholder="Month" />
+                        </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                        {months.map((month, index) => (
+                            <SelectItem key={month} value={String(index + 1)}>
+                                {month}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                    </Select>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="graduationYear"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>{role === 'student' ? 'Grad Year' : 'Grad Year'}</FormLabel>
+                    <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    >
+                    <FormControl>
+                        <SelectTrigger>
+                        <SelectValue placeholder="Year" />
+                        </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                        {Array.from({ length: 40 }, (_, i) => new Date().getFullYear() + 5 - i).map((year) => (
+                            <SelectItem key={year} value={String(year)}>
+                            {year}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                    </Select>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+        </div>
+        <FormField
             control={form.control}
             name="degree"
             render={({ field }) => (
@@ -181,7 +214,6 @@ export function RegisterForm() {
               </FormItem>
             )}
           />
-        </div>
         <FormField
           control={form.control}
           name="password"
