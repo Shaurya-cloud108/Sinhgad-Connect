@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { AppContext, Message } from "@/context/AppContext";
+import { AppContext, Message, Conversation } from "@/context/AppContext";
 import { ProfileContext } from "@/context/ProfileContext";
 import { Check, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -100,19 +100,12 @@ export function ShareDialog({ contentType, contentId, children }: ShareDialogPro
       text: shareMessageText,
     };
     
-    const newConversationsToCreate: ShareTarget[] = [];
-
     // Update messages for all selected targets
     setMessagesData(prev => {
       const newMessagesData = { ...prev };
       selectedTargets.forEach(targetName => {
-        const target = allShareTargets.find(t => t.name === targetName);
-        if (target) {
-            // For individuals, the conversation key might be their name.
-            // For groups, it's the group name. This assumes DM convo name = person's name
-            const conversationKey = target.name;
-            newMessagesData[conversationKey] = [...(newMessagesData[conversationKey] || []), newShareMessage];
-        }
+        const conversationKey = targetName;
+        newMessagesData[conversationKey] = [...(newMessagesData[conversationKey] || []), newShareMessage];
       });
       return newMessagesData;
     });
@@ -132,7 +125,7 @@ export function ShareDialog({ contentType, contentId, children }: ShareDialogPro
                 existingConvo.time = "Now";
             } else if (!target.isGroup) {
                 // This is a new 1-on-1 conversation, create it
-                const newConvo = {
+                const newConvo: Conversation = {
                     name: target.name,
                     avatar: target.avatar,
                     aiHint: "user avatar",
@@ -145,6 +138,7 @@ export function ShareDialog({ contentType, contentId, children }: ShareDialogPro
             }
         });
         
+        // Return a new array to trigger re-render
         return Array.from(existingConversations.values());
     });
     
@@ -181,7 +175,7 @@ export function ShareDialog({ contentType, contentId, children }: ShareDialogPro
           <div className="py-2 space-y-1 pr-4">
             {filteredTargets.map(target => (
               <div 
-                key={target.name}
+                key={target.id}
                 className="flex items-center justify-between p-2 rounded-md hover:bg-muted cursor-pointer"
                 onClick={() => handleSelectTarget(target.name)}
               >
@@ -204,7 +198,7 @@ export function ShareDialog({ contentType, contentId, children }: ShareDialogPro
             <Button variant="secondary">Cancel</Button>
           </DialogClose>
           <Button onClick={handleShare} disabled={selectedTargets.size === 0}>
-            <Send className="mr-2 h-4 w-4" /> Share
+            <Send className="mr-2 h-4 w-4" /> Share ({selectedTargets.size})
           </Button>
         </DialogFooter>
       </DialogContent>

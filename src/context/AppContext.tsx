@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { createContext, useState, ReactNode, useContext, useEffect } from 'react';
+import React, { createContext, useState, ReactNode, useContext, useEffect, useCallback } from 'react';
 import { networkingGroups as initialNetworkingGroups, conversationsData as initialConversations, messagesData as initialMessagesData, communityMembers } from '@/lib/data.tsx';
 import { ProfileContext } from './ProfileContext';
 
@@ -86,63 +86,64 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [messagesData, setMessagesData] = useState<MessagesData>(initialMessagesData);
     const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
 
-    useEffect(() => {
+    const regenerateConversations = useCallback(() => {
         if (!profileData) {
             setConversations([]);
             setJoinedGroups(new Set());
             return;
-        };
+        }
 
         const userGroupTitles = new Set<string>();
-        networkingGroups.forEach(group => {
+        initialNetworkingGroups.forEach(group => {
             if (group.members.some(member => member.id === profileData.handle)) {
                 userGroupTitles.add(group.title);
             }
         });
 
-        // Regenerate conversations from messages data and groups
         const conversationMap = new Map<string, Conversation>();
 
-        // Add 1-on-1 conversations from messages
-        Object.keys(messagesData).forEach(convoName => {
-            const isGroup = networkingGroups.some(g => g.title === convoName);
-            if (!isGroup) {
-                const otherUser = communityMembers.find(m => m.name === convoName);
-                if (otherUser) {
+        // Process all conversations from messages data
+        Object.keys(initialMessagesData).forEach(convoName => {
+            const lastMessage = initialMessagesData[convoName]?.[initialMessagesData[convoName].length - 1];
+            if (!lastMessage) return;
+
+            const isGroup = initialNetworkingGroups.some(g => g.title === convoName);
+
+            if (isGroup) {
+                if (userGroupTitles.has(convoName)) {
                     conversationMap.set(convoName, {
                         name: convoName,
-                        avatar: otherUser.avatar,
-                        aiHint: "user avatar",
-                        lastMessage: messagesData[convoName]?.[messagesData[convoName].length - 1]?.text || "No messages yet.",
+                        avatar: "https://placehold.co/100x100.png",
+                        aiHint: "university logo",
+                        lastMessage: lastMessage.text,
                         time: "Yesterday",
-                        unread: initialConversations.find(c=> c.name === convoName)?.unread || 0,
-                        isGroup: false,
+                        unread: 0,
+                        isGroup: true,
                     });
                 }
+            } else {
+                 const otherUser = communityMembers.find(m => m.name === convoName);
+                 if (otherUser) {
+                     conversationMap.set(convoName, {
+                         name: convoName,
+                         avatar: otherUser.avatar,
+                         aiHint: "user avatar",
+                         lastMessage: lastMessage.text,
+                         time: "Yesterday",
+                         unread: initialConversations.find(c => c.name === convoName)?.unread || 0,
+                         isGroup: false,
+                     });
+                 }
             }
         });
-        
-        // Add group conversations for joined groups
-        networkingGroups
-            .filter(group => userGroupTitles.has(group.title))
-            .forEach(group => {
-                conversationMap.set(group.title, {
-                    name: group.title,
-                    avatar: "https://placehold.co/100x100.png",
-                    aiHint: "university logo",
-                    lastMessage: messagesData[group.title]?.[messagesData[group.title].length - 1]?.text || "No messages yet.",
-                    time: "Yesterday",
-                    unread: 0,
-                    isGroup: true,
-                });
-            });
 
-        const allConversations = Array.from(conversationMap.values());
-        
-        setConversations(allConversations);
+        setConversations(Array.from(conversationMap.values()));
         setJoinedGroups(userGroupTitles);
+    }, [profileData]);
 
-    }, [profileData, networkingGroups, messagesData]);
+    useEffect(() => {
+        regenerateConversations();
+    }, [regenerateConversations]);
 
 
     const addNetworkingGroup = (group: NetworkingGroup) => {
@@ -190,6 +191,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             }
             return g;
         }));
+         setJoinedGroups(prev => {
+            const newSet = new Set(prev);
+            if (alreadyMember) {
+                newSet.delete(group.title);
+            } else {
+                newSet.add(group.title);
+            }
+            return newSet;
+        });
     };
 
     const updateMemberRole = (groupTitle: string, memberId: string, role: 'admin' | 'member') => {
