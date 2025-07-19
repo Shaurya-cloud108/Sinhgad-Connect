@@ -94,7 +94,7 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
       };
-      reader.readAsDataURL(file);
+      reader.readDataURL(file);
     }
   };
 
@@ -240,6 +240,7 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
 
 
 export default function ProfilePage({ params }: { params: { handle: string } }) {
+    const { handle } = params;
     const { profileData: ownProfileData, setProfileData } = useContext(ProfileContext);
     const { networkingGroups, setSelectedConversationByName } = useContext(AppContext);
     
@@ -248,7 +249,7 @@ export default function ProfilePage({ params }: { params: { handle: string } }) 
     const [userPosts, setUserPosts] = useState<FeedItem[]>([]);
     
     // Determine which profile to show
-    const isOwnProfile = !params.handle || params.handle === ownProfileData?.handle;
+    const isOwnProfile = !handle || handle === ownProfileData?.handle;
     const [profileData, setProfileDataState] = useState<ProfileData | null | undefined>(undefined);
 
     useEffect(() => {
@@ -257,7 +258,7 @@ export default function ProfilePage({ params }: { params: { handle: string } }) 
             targetProfile = ownProfileData || undefined;
         } else {
             // Find the community member and construct a ProfileData object
-            const member = communityMembers.find(m => m.handle === params.handle);
+            const member = communityMembers.find(m => m.handle === handle);
             if (member) {
                  targetProfile = {
                     name: member.name,
@@ -290,7 +291,7 @@ export default function ProfilePage({ params }: { params: { handle: string } }) 
              setUserPosts([]);
         }
 
-    }, [params.handle, ownProfileData, isOwnProfile]);
+    }, [handle, ownProfileData, isOwnProfile]);
 
 
     const adminGroups = profileData ? networkingGroups.filter(group => 
@@ -560,3 +561,5 @@ export default function ProfilePage({ params }: { params: { handle: string } }) 
     </div>
   );
 }
+
+    
