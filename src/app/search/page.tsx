@@ -17,8 +17,9 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { communityMembers, CommunityMember } from "@/lib/data.tsx";
 import { getStatusEmoji } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export default function SearchPage() {
+function SearchPageContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredMembers, setFilteredMembers] = useState<CommunityMember[]>(communityMembers);
 
@@ -91,4 +92,28 @@ export default function SearchPage() {
       </div>
     </div>
   );
+}
+
+export default function SearchPage() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted) {
+    return (
+        <div className="container py-8 md:py-12">
+          <div className="text-center mb-12 space-y-2">
+            <Skeleton className="h-10 w-3/4 mx-auto" />
+            <Skeleton className="h-6 w-1/2 mx-auto" />
+          </div>
+          <Skeleton className="h-16 mb-8 w-full" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <Skeleton className="h-80 w-full" />
+            <Skeleton className="h-80 w-full" />
+            <Skeleton className="h-80 w-full" />
+          </div>
+        </div>
+      );
+  }
+
+  return <SearchPageContent />;
 }
