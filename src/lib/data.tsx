@@ -4,6 +4,55 @@
 import React from 'react';
 import { Member, NetworkingGroup, Conversation } from "@/context/AppContext";
 
+export type Event = {
+  id: string;
+  title: string;
+  date: string;
+  location: string;
+  description: string;
+  image: string;
+  aiHint: string;
+};
+
+export const eventsData: Event[] = [
+  {
+    id: "annual-meet-2024",
+    title: "Annual Alumni Grand Meet 2024",
+    date: "October 25, 2024",
+    location: "College Auditorium, Pune",
+    description: "The flagship event of the year! Reconnect with old friends, network with peers, and relive your college days.",
+    image: "https://placehold.co/600x400.png",
+    aiHint: "people networking"
+  },
+  {
+    id: "tech-talk-ai",
+    title: "Tech Talk: AI & The Future",
+    date: "November 12, 2024",
+    location: "Virtual Event (Zoom)",
+    description: "Join us for an insightful session with industry experts on the future of Artificial Intelligence.",
+    image: "https://placehold.co/600x400.png",
+    aiHint: "technology conference"
+  },
+  {
+    id: "reunion-2014",
+    title: "Batch of 2014: 10-Year Reunion",
+    date: "December 7, 2024",
+    location: "The Westin, Pune",
+    description: "A special evening for the class of 2014 to celebrate a decade of memories and achievements.",
+    image: "https://placehold.co/600x400.png",
+    aiHint: "formal dinner"
+  },
+  {
+    id: "sports-day-2025",
+    title: "Alumni Sports Day",
+    date: "January 18, 2025",
+    location: "College Sports Complex",
+    description: "Get ready for some friendly competition in cricket, football, and more. Fun for the whole family!",
+    image: "https://placehold.co/600x400.png",
+    aiHint: "outdoor sports"
+  },
+];
+
 export type JobListing = {
   id: number;
   title: string;
@@ -115,6 +164,59 @@ export const stories: Story[] = [
     { id: 5, name: "Sneha R.", avatar: "https://placehold.co/100x100.png", images: ["https://placehold.co/400x700.png"], aiHint: "young professional", viewers: [] },
 ];
 
+export type SuccessStory = {
+    id: string;
+    name: string;
+    class: string;
+    role: string;
+    image: string;
+    aiHint: string;
+    story: string;
+    tags: string[];
+};
+
+export const successStories: SuccessStory[] = [
+  {
+    id: "sunita-narayan",
+    name: "Sunita Narayan",
+    class: "2009",
+    role: "CEO, Innovate Inc.",
+    image: "https://placehold.co/400x400.png",
+    aiHint: "professional woman portrait",
+    story: "Led her company through a successful IPO, becoming a leading voice in sustainable technology.",
+    tags: ["Leadership", "Technology", "Entrepreneurship"],
+  },
+  {
+    id: "rohan-gupta",
+    name: "Dr. Rohan Gupta",
+    class: "2005",
+    role: "Lead Researcher, CureAI",
+    image: "https://placehold.co/400x400.png",
+    aiHint: "male doctor",
+    story: "Pioneered a new AI-driven diagnostic tool that has significantly improved early cancer detection rates.",
+    tags: ["Healthcare", "AI/ML", "Research"],
+  },
+  {
+    id: "meera-desai",
+    name: "Meera Desai",
+    class: "2012",
+    role: "Award-Winning Architect",
+    image: "https://placehold.co/400x400.png",
+    aiHint: "female architect",
+    story: "Designed the iconic 'Green Tower' in Mumbai, a landmark of eco-friendly architecture.",
+    tags: ["Architecture", "Sustainability", "Design"],
+  },
+  {
+    id: "karan-malhotra",
+    name: "Karan Malhotra",
+    class: "2016",
+    role: "Forbes 30 Under 30, FinTech",
+    image: "https://placehold.co/400x400.png",
+    aiHint: "young businessman",
+    story: "Co-founded a FinTech startup that provides accessible financial services to rural communities.",
+    tags: ["Finance", "Startup", "Social Impact"],
+  },
+];
 
 export type Comment = {
   id: number;

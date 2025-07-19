@@ -20,7 +20,7 @@ import { AppContext, Message, Conversation } from "@/context/AppContext";
 import { ProfileContext } from "@/context/ProfileContext";
 import { Check, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { getContentDetails, communityMembers } from '@/lib/data.tsx';
+import { communityMembers } from '@/lib/data.tsx';
 
 type ShareDialogProps = {
   contentType: 'post' | 'job' | 'event' | 'story' | 'group';
@@ -88,28 +88,32 @@ export function ShareDialog({ contentType, contentId, children }: ShareDialogPro
   const handleShare = () => {
     if (!profileData || selectedTargets.size === 0) return;
 
-    let newShareMessage: Message;
-    let lastMessageText: string;
-
-    if (contentType === 'post') {
-      newShareMessage = {
+    let newShareMessage: Partial<Message> = {
         senderId: profileData.handle,
         senderName: profileData.name,
-        sharedPostId: contentId as number,
-      };
-      lastMessageText = `Shared a post.`;
-    } else {
-      const contentDetails = getContentDetails(contentType, contentId);
-      if (!contentDetails) return;
+    };
+    let lastMessageText: string = "Shared content.";
 
-      const { title, url } = contentDetails;
-      const shareMessageText = `Check this out: ${title}\n${window.location.origin}${url}`;
-      newShareMessage = {
-        senderId: profileData.handle,
-        senderName: profileData.name,
-        text: shareMessageText,
-      };
-      lastMessageText = `Shared a link.`;
+    switch (contentType) {
+        case 'post':
+            newShareMessage.sharedPostId = contentId as number;
+            lastMessageText = "Shared a post.";
+            break;
+        case 'job':
+            newShareMessage.sharedJobId = contentId as number;
+            lastMessageText = "Shared a job.";
+            break;
+        case 'event':
+            newShareMessage.sharedEventId = contentId as string;
+            lastMessageText = "Shared an event.";
+            break;
+        case 'story':
+            newShareMessage.sharedStoryId = contentId as string;
+            lastMessageText = "Shared a story.";
+            break;
+        default:
+            toast({ variant: "destructive", title: "Share failed", description: "Unknown content type." });
+            return;
     }
     
     // Update messages for all selected targets
@@ -117,7 +121,7 @@ export function ShareDialog({ contentType, contentId, children }: ShareDialogPro
       const newMessagesData = { ...prev };
       selectedTargets.forEach(targetName => {
         const conversationKey = targetName;
-        newMessagesData[conversationKey] = [...(newMessagesData[conversationKey] || []), newShareMessage];
+        newMessagesData[conversationKey] = [...(newMessagesData[conversationKey] || []), newShareMessage as Message];
       });
       return newMessagesData;
     });
@@ -224,5 +228,3 @@ export function ShareDialog({ contentType, contentId, children }: ShareDialogPro
     </Dialog>
   );
 }
-
-    

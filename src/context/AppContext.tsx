@@ -35,6 +35,9 @@ export type Message = {
     senderName: string;
     text?: string;
     sharedPostId?: number;
+    sharedJobId?: number;
+    sharedEventId?: string;
+    sharedStoryId?: string;
 };
 
 export type MessagesData = {
@@ -261,5 +264,3 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         </AppContext.Provider>
     );
 };
-
-    

@@ -42,6 +42,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { SharedPostCard } from "@/components/shared-post-card";
+import { SharedJobCard } from "@/components/shared-job-card";
+import { SharedEventCard } from "@/components/shared-event-card";
+import { SharedStoryCard } from "@/components/shared-story-card";
 
 function AddMemberDialog({ group, onOpenChange }: { group: NetworkingGroup, onOpenChange: (open: boolean) => void }) {
     const { addMemberToGroup } = useContext(AppContext);
@@ -385,6 +388,9 @@ export default function MessagesPage() {
                           )}
                           {msg.text && <p>{msg.text}</p>}
                           {msg.sharedPostId && <SharedPostCard postId={msg.sharedPostId} />}
+                          {msg.sharedJobId && <SharedJobCard jobId={msg.sharedJobId} />}
+                          {msg.sharedEventId && <SharedEventCard eventId={msg.sharedEventId} />}
+                          {msg.sharedStoryId && <SharedStoryCard storyId={msg.sharedStoryId} />}
                         </div>
                     </div>
                   </div>
