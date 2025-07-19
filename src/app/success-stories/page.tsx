@@ -12,37 +12,15 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, BrainCircuit, Send, PlusCircle } from "lucide-react";
+import { ArrowRight, BrainCircuit, Send } from "lucide-react";
 import Link from "next/link";
 import { ShareDialog } from "@/components/share-dialog";
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PostStoryDialog, StoryFormData } from "@/components/post-story-dialog";
-import { ProfileContext } from "@/context/ProfileContext";
-import type { SuccessStory } from "@/lib/data.tsx";
-import { successStories as initialSuccessStories } from "@/lib/data.tsx";
+import { successStories } from "@/lib/data.tsx";
+
 
 function SuccessStoriesContent() {
-  const [stories, setStories] = useState<SuccessStory[]>(initialSuccessStories);
-  const [isPostStoryOpen, setIsPostStoryOpen] = useState(false);
-  const { profileData } = useContext(ProfileContext);
-
-  const handleStorySubmit = (data: StoryFormData) => {
-    if (!profileData) return;
-
-    const newStory: SuccessStory = {
-      id: `story-${Date.now()}`,
-      name: profileData.name,
-      class: String(profileData.education.graduationYear),
-      role: data.headline,
-      story: data.story,
-      image: data.image || profileData.avatar,
-      aiHint: "user submitted story",
-      tags: data.tags ? data.tags.split(',').map(tag => tag.trim()) : [],
-    };
-    setStories(prev => [newStory, ...prev]);
-  };
-
   return (
     <div className="container py-8 md:py-12">
        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
@@ -52,15 +30,10 @@ function SuccessStoriesContent() {
             Be inspired by the remarkable achievements of your fellow graduates.
           </p>
         </div>
-        <Button className="mt-4 md:mt-0" onClick={() => setIsPostStoryOpen(true)}>
-          <PlusCircle className="mr-2 h-4 w-4" /> Share Your Story
-        </Button>
       </div>
       
-      <PostStoryDialog open={isPostStoryOpen} onOpenChange={setIsPostStoryOpen} onStorySubmit={handleStorySubmit} />
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-        {stories.map((story) => (
+        {successStories.map((story) => (
           <Card key={story.id} className="flex flex-col md:flex-row overflow-hidden hover:shadow-xl transition-shadow duration-300">
             <div className="relative md:w-1/3 h-64 md:h-auto">
               <Image
@@ -78,7 +51,7 @@ function SuccessStoriesContent() {
                   <CardDescription>Class of {story.class} | {story.role}</CardDescription>
                 </CardHeader>
                 <CardContent className="p-0 pt-4">
-                  <p className="text-sm text-muted-foreground">{story.story}</p>
+                  <p className="text-sm text-muted-foreground line-clamp-3">{story.story}</p>
                    <div className="flex flex-wrap gap-2 mt-4">
                     {story.tags.map((tag) => (
                       <Badge key={tag} variant="secondary">{tag}</Badge>
