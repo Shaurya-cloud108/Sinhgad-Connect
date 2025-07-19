@@ -2,7 +2,7 @@
 "use client";
 
 import React, { createContext, useState, ReactNode, useContext, useMemo, useCallback } from 'react';
-import { networkingGroups as initialNetworkingGroups, conversationsData as initialConversations, messagesData as initialMessagesData, communityMembers, jobListings as initialJobListings, JobListing } from '@/lib/data.tsx';
+import { networkingGroups as initialNetworkingGroups, conversationsData as initialConversations, messagesData as initialMessagesData, communityMembers, jobListings as initialJobListings, JobListing, ProfileData } from '@/lib/data.tsx';
 import { ProfileContext } from './ProfileContext';
 
 // Types
@@ -53,10 +53,10 @@ type AppContextType = {
     myGroups: NetworkingGroup[];
     exploreGroups: NetworkingGroup[];
     addNetworkingGroup: (group: Omit<NetworkingGroup, 'members'> & { members: Member[] }) => void;
-    addMemberToGroup: (groupTitle: string, member: Member) => void;
-    removeMemberFromGroup: (groupTitle: string, memberId: string) => void;
     toggleGroupMembership: (groupTitle: string) => void;
     updateMemberRole: (groupTitle: string, memberId: string, role: 'admin' | 'member') => void;
+    addMemberToGroup: (groupTitle: string, member: Member) => void;
+    removeMemberFromGroup: (groupTitle: string, memberId: string) => void;
     conversations: Conversation[];
     setConversations: React.Dispatch<React.SetStateAction<Conversation[]>>;
     messagesData: MessagesData;
@@ -74,10 +74,10 @@ export const AppContext = createContext<AppContextType>({
     myGroups: [],
     exploreGroups: [],
     addNetworkingGroup: () => {},
-    addMemberToGroup: () => {},
-    removeMemberFromGroup: () => {},
     toggleGroupMembership: () => {},
     updateMemberRole: () => {},
+    addMemberToGroup: () => {},
+    removeMemberFromGroup: () => {},
     conversations: [],
     setConversations: () => {},
     messagesData: {},
@@ -133,7 +133,48 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         };
         setConversations(prev => [newConversation, ...prev]);
     };
-    
+
+    const toggleGroupMembership = useCallback((groupTitle: string) => {
+        if (!profileData) return;
+
+        setNetworkingGroups(prevGroups => {
+            return prevGroups.map(group => {
+                if (group.title === groupTitle) {
+                    const isMember = group.members.some(m => m.id === profileData.handle);
+                    if (isMember) {
+                        // Leave group
+                        return { 
+                            ...group, 
+                            members: group.members.filter(m => m.id !== profileData.handle) 
+                        };
+                    } else {
+                        // Join group
+                        const newMember: Member = {
+                            id: profileData.handle,
+                            name: profileData.name,
+                            avatar: profileData.avatar,
+                            role: 'member'
+                        };
+                        return { ...group, members: [...group.members, newMember] };
+                    }
+                }
+                return group;
+            });
+        });
+    }, [profileData]);
+
+    const updateMemberRole = (groupTitle: string, memberId: string, role: 'admin' | 'member') => {
+        setNetworkingGroups(prevGroups => prevGroups.map(g => {
+            if (g.title === groupTitle) {
+                return {
+                    ...g,
+                    members: g.members.map(m => m.id === memberId ? { ...m, role } : m)
+                };
+            }
+            return g;
+        }));
+    };
+
     const addMemberToGroup = (groupTitle: string, member: Member) => {
         setNetworkingGroups(prevGroups => prevGroups.map(g => {
             if (g.title === groupTitle) {
@@ -153,85 +194,40 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         }));
     };
 
-    const toggleGroupMembership = useCallback((groupTitle: string) => {
-        if (!profileData) return;
-
-        setNetworkingGroups(prevGroups => 
-            prevGroups.map(group => {
-                if (group.title === groupTitle) {
-                    const isMember = group.members.some(member => member.id === profileData.handle);
-                    if (isMember) {
-                        // Leave group
-                        return { 
-                            ...group, 
-                            members: group.members.filter(m => m.id !== profileData.handle) 
-                        };
-                    } else {
-                        // Join group
-                        const newMember: Member = {
-                            id: profileData.handle,
-                            name: profileData.name,
-                            avatar: profileData.avatar,
-                            role: 'member'
-                        };
-                        return { ...group, members: [...group.members, newMember] };
-                    }
-                }
-                return group;
-            })
-        );
-    }, [profileData]);
-
-    const updateMemberRole = (groupTitle: string, memberId: string, role: 'admin' | 'member') => {
-        setNetworkingGroups(prevGroups => prevGroups.map(g => {
-            if (g.title === groupTitle) {
-                return {
-                    ...g,
-                    members: g.members.map(m => m.id === memberId ? { ...m, role } : m)
-                };
-            }
-            return g;
-        }));
-    };
-
-
     const setSelectedConversationByName = (name: string) => {
-        const conversation = conversations.find(c => c.name === name);
-        if (conversation) {
-            setSelectedConversation(conversation);
-            return;
-        }
+        let conversation = conversations.find(c => c.name === name);
 
-        const group = networkingGroups.find(g => g.title === name);
-        if (group) {
-            const newConversation: Conversation = {
-                name: group.title,
-                avatar: "https://placehold.co/100x100.png",
-                aiHint: "university logo",
-                lastMessage: "You joined the group.",
-                time: "Now",
-                unread: 0,
-                isGroup: true,
-            };
-            setConversations(prev => [newConversation, ...prev]);
-            setSelectedConversation(newConversation);
-            return;
+        if (!conversation) {
+            const group = networkingGroups.find(g => g.title === name);
+            if (group) {
+                conversation = {
+                    name: group.title,
+                    avatar: "https://placehold.co/100x100.png",
+                    aiHint: "university logo",
+                    lastMessage: "You joined the group.",
+                    time: "Now",
+                    unread: 0,
+                    isGroup: true,
+                };
+                setConversations(prev => [conversation!, ...prev.filter(c => c.name !== name)]);
+            } else {
+                const person = communityMembers.find(m => m.name === name || m.handle === name);
+                if (person) {
+                    conversation = {
+                         name: person.name,
+                         avatar: person.avatar,
+                         aiHint: person.aiHint,
+                         lastMessage: "Conversation started.",
+                         time: "Now",
+                         unread: 0,
+                         isGroup: false,
+                    };
+                    setConversations(prev => [conversation!, ...prev.filter(c => c.name !== name)]);
+                }
+            }
         }
-
-        const person = communityMembers.find(m => m.name === name || m.handle === name);
-        if (person) {
-            const newConversation: Conversation = {
-                 name: person.name,
-                 avatar: person.avatar,
-                 aiHint: person.aiHint,
-                 lastMessage: "Conversation started.",
-                 time: "Now",
-                 unread: 0,
-                 isGroup: false,
-            };
-            setConversations(prev => [newConversation, ...prev]);
-            setSelectedConversation(newConversation);
-        }
+        
+        setSelectedConversation(conversation || null);
     };
 
     const addJobListing = (job: JobListing) => {
@@ -243,10 +239,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         myGroups,
         exploreGroups,
         addNetworkingGroup,
-        addMemberToGroup,
-        removeMemberFromGroup,
         toggleGroupMembership,
         updateMemberRole,
+        addMemberToGroup,
+        removeMemberFromGroup,
         conversations,
         setConversations,
         messagesData,

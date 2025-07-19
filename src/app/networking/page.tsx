@@ -113,13 +113,13 @@ function GroupCard({ group, isMember }: { group: NetworkingGroup, isMember: bool
     const { toggleGroupMembership, setSelectedConversationByName } = useContext(AppContext);
     const router = useRouter();
 
-    const handleGoToChat = () => {
-        setSelectedConversationByName(group.title);
-        router.push("/messages");
-    }
-
-    const handleJoinGroup = () => {
-        toggleGroupMembership(group.title);
+    const handleActionClick = () => {
+        if (isMember) {
+            setSelectedConversationByName(group.title);
+            router.push("/messages");
+        } else {
+            toggleGroupMembership(group.title);
+        }
     }
 
     return (
@@ -135,15 +135,9 @@ function GroupCard({ group, isMember }: { group: NetworkingGroup, isMember: bool
                 <p className="text-sm text-muted-foreground line-clamp-2">{group.description}</p>
             </CardContent>
             <CardFooter className="gap-2">
-                {isMember ? (
-                <Button className="w-full" onClick={handleGoToChat}>
-                    <MessageSquare className="mr-2 h-4 w-4" /> Go to Chat
+                <Button className="w-full" onClick={handleActionClick}>
+                    {isMember ? <><MessageSquare className="mr-2 h-4 w-4" /> Go to Chat</> : 'Join Group'}
                 </Button>
-                ) : (
-                <Button className="w-full" onClick={handleJoinGroup}>
-                    Join Group
-                </Button>
-                )}
                 <ShareDialog contentType="group" contentId={group.title}>
                     <Button variant="outline" size="icon">
                         <Send className="h-4 w-4" />
@@ -253,5 +247,3 @@ export default function NetworkingPage() {
 
   return <NetworkingPageContent />;
 }
-
-    
