@@ -323,7 +323,8 @@ const groupMembers: { [key: string]: Member[] } = {
     { id: 'rohan-verma', name: 'Rohan Verma', avatar: 'https://placehold.co/100x100.png', role: 'member' },
   ],
   "Entrepreneurship Hub": [
-    { id: 'sunita-narayan', name: 'Sunita Narayan', avatar: 'https://placehold.co/100x100.png', role: 'admin' },
+     { id: 'priya-sharma-09', name: 'Priya Sharma', avatar: 'https://placehold.co/100x100.png', role: 'admin' },
+     { id: 'sunita-narayan', name: 'Sunita Narayan', avatar: 'https://placehold.co/100x100.png', role: 'admin' },
   ]
 };
 
@@ -369,14 +370,6 @@ export const networkingGroups: NetworkingGroup[] = [
 
 export const conversationsData = [
   {
-    name: "Priya Sharma",
-    avatar: "https://placehold.co/100x100.png",
-    aiHint: "professional woman",
-    lastMessage: "Sure, I can help with that. Let's connect tomorrow.",
-    time: "10:42 AM",
-    unread: 2,
-  },
-  {
     name: "Rohan Verma",
     avatar: "https://placehold.co/100x100.png",
     aiHint: "professional man",
@@ -410,5 +403,8 @@ export const messagesData = {
   ],
   "Vikram Singh": [
      { senderId: "vikram-singh", senderName: "Vikram Singh", text: "It was great meeting you at the reunion." }
+  ],
+  "Entrepreneurship Hub": [
+    { senderId: 'sunita-narayan', senderName: 'Sunita Narayan', text: "Welcome! Let's build the future together." },
   ]
 };

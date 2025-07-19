@@ -87,23 +87,25 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
 
     useEffect(() => {
-        // Initialize joined groups based on initial data and current user
         const userGroups = new Set<string>();
         initialNetworkingGroups.forEach(group => {
             if (group.members.some(member => member.id === profileData.handle)) {
                 userGroups.add(group.title);
             }
         });
-        
-        const groupConversations = initialNetworkingGroups.map(group => ({
-            name: group.title,
-            avatar: "https://placehold.co/100x100.png",
-            aiHint: "university logo",
-            lastMessage: messagesData[group.title]?.[messagesData[group.title].length - 1]?.text || "No messages yet.",
-            time: "Yesterday",
-            unread: 0,
-        }));
-        
+
+        // Filter groups to only those the user has joined, then create conversations
+        const groupConversations = initialNetworkingGroups
+            .filter(group => userGroups.has(group.title))
+            .map(group => ({
+                name: group.title,
+                avatar: "https://placehold.co/100x100.png",
+                aiHint: "university logo",
+                lastMessage: messagesData[group.title]?.[messagesData[group.title].length - 1]?.text || "No messages yet.",
+                time: "Yesterday",
+                unread: 0,
+            }));
+
         const allConversations = [...initialConversations, ...groupConversations.filter(gc => !initialConversations.some(ic => ic.name === gc.name))];
         
         setConversations(allConversations);
