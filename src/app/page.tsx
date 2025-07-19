@@ -59,6 +59,7 @@ import { cn } from "@/lib/utils";
 import { CommentSheet } from "@/components/comment-sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useRouter } from "next/navigation";
 
 function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean, onOpenChange: (open: boolean) => void, onPostSubmit: (post: FeedItem) => void }) {
   const { toast } = useToast();
@@ -328,6 +329,7 @@ function HomePageContent() {
   const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
   const { profileData } = useContext(ProfileContext);
   const [activeCommentPostId, setActiveCommentPostId] = useState<number | null>(null);
+  const router = useRouter();
   
   const searchParams = useSearchParams();
 
@@ -367,10 +369,7 @@ function HomePageContent() {
         const newStories = [...prevStories];
         const myStoryIndex = newStories.findIndex(s => s.isOwn);
         if (myStoryIndex !== -1) {
-            newStories[myStoryIndex] = {
-                ...newStories[myStoryIndex],
-                images: [...newStories[myStoryIndex].images, image]
-            };
+            newStories[myStoryIndex].images.push(image);
         }
         return newStories;
     });
@@ -484,7 +483,7 @@ function HomePageContent() {
                 <Award className="text-yellow-500" />
                 Achievement
               </Button>
-               <Button variant="ghost" className="w-full" onClick={() => setIsPostDialogOpen(true)}>
+               <Button variant="ghost" className="w-full" onClick={() => router.push('/jobs')}>
                 <Briefcase className="text-blue-500" />
                 Job
               </Button>
