@@ -1,10 +1,11 @@
+
 "use client";
 
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Send, ArrowLeft } from "lucide-react";
+import { Search, Send, ArrowLeft, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const conversations = [
