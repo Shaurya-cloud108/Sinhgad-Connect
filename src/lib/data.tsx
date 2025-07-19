@@ -79,6 +79,11 @@ export const jobListings: JobListing[] = [
   },
 ];
 
+export type StoryViewer = {
+  name: string;
+  avatar: string;
+};
+
 export type Story = {
   id: number;
   name: string;
@@ -86,14 +91,26 @@ export type Story = {
   images: string[];
   isOwn?: boolean;
   aiHint: string;
-}
+  viewers?: StoryViewer[];
+};
+
 
 export const stories: Story[] = [
-    { id: 1, name: "Your Story", avatar: "https://placehold.co/100x100.png", images: [], isOwn: true, aiHint: "add icon" },
-    { id: 2, name: "Rohan V.", avatar: "https://placehold.co/100x100.png", images: ["https://placehold.co/400x700.png"], aiHint: "professional man" },
-    { id: 3, name: "Anjali M.", avatar: "https://placehold.co/100x100.png", images: ["https://placehold.co/400x700.png"], aiHint: "corporate woman" },
-    { id: 4, name: "Vikram S.", avatar: "https://placehold.co/100x100.png", images: ["https://placehold.co/400x700.png"], aiHint: "corporate man" },
-    { id: 5, name: "Sneha R.", avatar: "https://placehold.co/100x100.png", images: ["https://placehold.co/400x700.png"], aiHint: "young professional" },
+    { id: 1, name: "Your Story", avatar: "https://placehold.co/100x100.png", images: [], isOwn: true, aiHint: "add icon", viewers: [] },
+    { 
+      id: 2, 
+      name: "Rohan V.", 
+      avatar: "https://placehold.co/100x100.png", 
+      images: ["https://placehold.co/400x700.png"], 
+      aiHint: "professional man",
+      viewers: [
+        { name: "Priya Sharma", avatar: "https://placehold.co/100x100.png" },
+        { name: "Anjali Mehta", avatar: "https://placehold.co/100x100.png" },
+      ]
+    },
+    { id: 3, name: "Anjali M.", avatar: "https://placehold.co/100x100.png", images: ["https://placehold.co/400x700.png"], aiHint: "corporate woman", viewers: [] },
+    { id: 4, name: "Vikram S.", avatar: "https://placehold.co/100x100.png", images: ["https://placehold.co/400x700.png"], aiHint: "corporate man", viewers: [] },
+    { id: 5, name: "Sneha R.", avatar: "https://placehold.co/100x100.png", images: ["https://placehold.co/400x700.png"], aiHint: "young professional", viewers: [] },
 ];
 
 

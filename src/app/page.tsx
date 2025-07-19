@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, Send, Plus, Image as ImageIcon, Award, Briefcase, X, MoreHorizontal, Trash2 } from "lucide-react";
+import { Heart, MessageCircle, Send, Plus, Image as ImageIcon, Award, Briefcase, X, MoreHorizontal, Trash2, Eye } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +20,13 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,12 +49,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useState, useContext, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { stories as initialStories, feedItems as initialFeedItems, FeedItem, Story, Comment } from "@/lib/data.tsx";
+import { stories as initialStories, feedItems as initialFeedItems, FeedItem, Story, Comment, StoryViewer } from "@/lib/data.tsx";
 import Image from "next/image";
 import { ProfileContext } from "@/context/ProfileContext";
 import { ShareDialog } from "@/components/share-dialog";
 import { cn } from "@/lib/utils";
 import { CommentSheet } from "@/components/comment-sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean, onOpenChange: (open: boolean) => void, onPostSubmit: (post: FeedItem) => void }) {
   const { toast } = useToast();
@@ -237,30 +245,74 @@ function CreateStoryDialog({ open, onOpenChange, onStorySubmit }: { open: boolea
     );
 }
 
+function StoryViewersSheet({ viewers, open, onOpenChange }: { viewers: StoryViewer[]; open: boolean; onOpenChange: (open: boolean) => void; }) {
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent>
+        <SheetHeader>
+          <SheetTitle>Viewed by</SheetTitle>
+          <SheetDescription>
+            {viewers.length} {viewers.length === 1 ? 'person' : 'people'} have seen your story.
+          </SheetDescription>
+        </SheetHeader>
+        <ScrollArea className="h-[calc(100%-120px)] my-4 pr-6 -mr-6">
+          <div className="space-y-4">
+            {viewers.map((viewer, index) => (
+              <div key={index} className="flex items-center gap-3">
+                <Avatar>
+                  <AvatarImage src={viewer.avatar} />
+                  <AvatarFallback>{viewer.name.substring(0, 2)}</AvatarFallback>
+                </Avatar>
+                <p className="font-semibold">{viewer.name}</p>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
 function StoryViewerDialog({ story, open, onOpenChange }: { story: Story | null; open: boolean; onOpenChange: (open: boolean) => void; }) {
+  const [isViewersSheetOpen, setIsViewersSheetOpen] = useState(false);
+
   if (!story || story.images.length === 0) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="p-0 border-0 max-w-md w-full h-[80vh] bg-black">
-        <div className="relative w-full h-full rounded-lg overflow-hidden">
-          <Image src={story.images[story.images.length - 1]} alt={`Story from ${story.name}`} layout="fill" objectFit="cover" data-ai-hint={story.aiHint} />
-          <div className="absolute top-0 left-0 p-4 flex items-center gap-3 bg-gradient-to-b from-black/50 to-transparent w-full">
-            <Avatar>
-              <AvatarImage src={story.avatar} />
-              <AvatarFallback>{story.name.substring(0, 2)}</AvatarFallback>
-            </Avatar>
-            <span className="font-semibold text-white">{story.name}</span>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="p-0 border-0 max-w-md w-full h-[80vh] bg-black">
+          <div className="relative w-full h-full rounded-lg overflow-hidden">
+            <Image src={story.images[story.images.length - 1]} alt={`Story from ${story.name}`} layout="fill" objectFit="cover" data-ai-hint={story.aiHint} />
+            <div className="absolute top-0 left-0 p-4 flex items-center justify-between bg-gradient-to-b from-black/50 to-transparent w-full">
+              <div className="flex items-center gap-3">
+                <Avatar>
+                  <AvatarImage src={story.avatar} />
+                  <AvatarFallback>{story.name.substring(0, 2)}</AvatarFallback>
+                </Avatar>
+                <span className="font-semibold text-white">{story.name}</span>
+              </div>
+              <DialogClose asChild>
+                <Button variant="ghost" size="icon" className="text-white hover:bg-black/50 hover:text-white">
+                  <X />
+                  <span className="sr-only">Close</span>
+                </Button>
+              </DialogClose>
+            </div>
+            {story.isOwn && story.viewers && (
+              <div 
+                className="absolute bottom-4 left-4 flex items-center gap-2 cursor-pointer bg-black/50 text-white p-2 rounded-lg"
+                onClick={() => setIsViewersSheetOpen(true)}
+              >
+                <Eye className="w-5 h-5" />
+                <span className="font-semibold text-sm">{story.viewers.length}</span>
+              </div>
+            )}
           </div>
-          <DialogClose asChild>
-            <Button variant="ghost" size="icon" className="absolute right-2 top-2 text-white hover:bg-black/50 hover:text-white">
-                <X />
-                <span className="sr-only">Close</span>
-            </Button>
-          </DialogClose>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+      <StoryViewersSheet viewers={story.viewers || []} open={isViewersSheetOpen} onOpenChange={setIsViewersSheetOpen} />
+    </>
   );
 }
 
@@ -362,7 +414,7 @@ export default function Home() {
                 "relative rounded-full p-0.5 border-2",
                 story.isOwn && story.images.length === 0 && "border-dashed",
                 story.isOwn && story.images.length > 0 && "border-primary",
-                !story.isOwn && "border-primary"
+                !story.isOwn && story.images.length > 0 && "border-primary"
               )}>
                 <Avatar className="w-16 h-16">
                   <AvatarImage src={story.isOwn ? profileData.avatar : story.avatar} data-ai-hint={story.aiHint} />
