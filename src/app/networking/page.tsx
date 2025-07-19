@@ -120,10 +120,11 @@ function NetworkingPageContent() {
   const myGroups = networkingGroups.filter(g => joinedGroups.has(g.title));
   const otherGroups = networkingGroups
     .filter(g => !joinedGroups.has(g.title))
-    .filter(g => 
-        g.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        g.description.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    .filter(g => {
+        const lowercasedQuery = searchQuery.toLowerCase();
+        return g.title.toLowerCase().includes(lowercasedQuery) || 
+               g.description.toLowerCase().includes(lowercasedQuery);
+    });
 
   return (
     <div className="container py-8 md:py-12">

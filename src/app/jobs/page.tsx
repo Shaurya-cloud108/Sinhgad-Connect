@@ -51,11 +51,12 @@ function JobsPageContent() {
 
   useEffect(() => {
     let results = jobListings;
+    const lowercasedQuery = searchQuery.toLowerCase();
 
     if (searchQuery) {
         results = results.filter(job => 
-            job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            job.company.toLowerCase().includes(searchQuery.toLowerCase())
+            job.title.toLowerCase().includes(lowercasedQuery) ||
+            job.company.toLowerCase().includes(lowercasedQuery)
         );
     }
     if (jobType && jobType !== 'all') {

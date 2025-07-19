@@ -40,7 +40,7 @@ export default function SearchPage() {
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      handleSearch(searchQuery);
+      handleSearch(e.target.value);
     }
   }
 
@@ -60,7 +60,7 @@ export default function SearchPage() {
               placeholder="Search by name, company, industry..."
               className="flex-grow"
               value={searchQuery}
-              onChange={(e) => handleSearch(e.target.value)}
+              onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={handleKeyDown}
             />
             <Button onClick={() => handleSearch(searchQuery)} className="w-full md:w-auto">Search</Button>

@@ -233,6 +233,7 @@ export default function MessagesPage() {
   const { profileData } = useContext(ProfileContext);
   const [newMessage, setNewMessage] = useState("");
   const [isGroupInfoOpen, setIsGroupInfoOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const currentGroup = useMemo(() => {
     return selectedConversation ? networkingGroups.find(g => g.title === selectedConversation.name) : null;
@@ -283,6 +284,10 @@ export default function MessagesPage() {
         toggleGroupMembership(currentGroup);
     }
   }
+  
+  const filteredConversations = conversations.filter(convo => 
+    convo.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const messages = selectedConversation ? messagesData[selectedConversation.name as keyof typeof messagesData] || [] : [];
   
@@ -306,11 +311,16 @@ export default function MessagesPage() {
           <h1 className="text-2xl font-headline font-bold">Chats</h1>
           <div className="relative mt-4">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input placeholder="Search messages..." className="pl-10" />
+            <Input 
+                placeholder="Search messages..." 
+                className="pl-10" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
         </div>
         <ScrollArea className="flex-grow">
-          {conversations.map((convo) => (
+          {filteredConversations.map((convo) => (
             <div
               key={convo.name}
               className={cn(
