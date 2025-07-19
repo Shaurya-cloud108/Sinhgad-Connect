@@ -44,9 +44,12 @@ import {
 
 function AddMemberDialog({ group, onOpenChange }: { group: NetworkingGroup, onOpenChange: (open: boolean) => void }) {
     const { addMemberToGroup } = useContext(AppContext);
+    const [searchQuery, setSearchQuery] = useState("");
     
     const memberIds = new Set(group.members.map(m => m.id));
-    const potentialMembers = communityMembers.filter(alumnus => !memberIds.has(alumnus.handle));
+    const potentialMembers = communityMembers
+        .filter(alumnus => !memberIds.has(alumnus.handle))
+        .filter(alumnus => alumnus.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
     const handleAddMember = (alumnus: typeof communityMembers[0]) => {
         const newMember: Member = {
@@ -64,7 +67,16 @@ function AddMemberDialog({ group, onOpenChange }: { group: NetworkingGroup, onOp
                 <DialogTitle>Add Members to {group.title}</DialogTitle>
                 <DialogDescription>Select users to add to the group.</DialogDescription>
             </DialogHeader>
-            <ScrollArea className="h-72">
+             <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input 
+                    placeholder="Search by name..." 
+                    className="pl-10"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
+            </div>
+            <ScrollArea className="h-64">
                 <div className="py-4 space-y-4 pr-6">
                     {potentialMembers.map(alumnus => (
                         <div key={alumnus.handle} className="flex items-center justify-between">
@@ -82,7 +94,7 @@ function AddMemberDialog({ group, onOpenChange }: { group: NetworkingGroup, onOp
                         </div>
                     ))}
                     {potentialMembers.length === 0 && (
-                        <p className="text-sm text-center text-muted-foreground pt-4">All users are already in this group.</p>
+                        <p className="text-sm text-center text-muted-foreground pt-4">No matching users found.</p>
                     )}
                 </div>
             </ScrollArea>
