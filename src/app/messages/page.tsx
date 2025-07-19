@@ -34,11 +34,22 @@ import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 
 function MessagesPageContent() {
-  const { conversations, setConversations, messagesData, setMessagesData, selectedConversation, setSelectedConversation } = useContext(AppContext);
+  const { conversations, setConversations, messagesData, setMessagesData, selectedConversation, setSelectedConversation: setAppContextSelectedConvo } = useContext(AppContext);
   const { profileData } = useContext(ProfileContext);
   const [newMessage, setNewMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  const setSelectedConversation = (convo: Conversation | null) => {
+    setAppContextSelectedConvo(convo);
+    if (convo && convo.unread > 0) {
+      setConversations(prev =>
+        prev.map(c =>
+          c.name === convo.name ? { ...c, unread: 0 } : c
+        )
+      );
+    }
+  };
 
   const handleSendMessage = () => {
     if (newMessage.trim() === "" || !selectedConversation || !profileData) return;
