@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2 } from "lucide-react";
+import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2, PlusCircle } from "lucide-react";
 import { feedItems as initialFeedItems, ProfileData, FeedItem, communityMembers } from "@/lib/data.tsx";
 import { useState, useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -49,7 +49,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
@@ -60,6 +60,7 @@ import { getStatusEmoji, cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShareDialog } from "@/components/share-dialog";
 import Link from 'next/link';
+import { Separator } from "@/components/ui/separator";
 
 
 const profileFormSchema = z.object({
@@ -70,6 +71,18 @@ const profileFormSchema = z.object({
   headline: z.string().min(5, "Headline is too short"),
   location: z.string().min(2, "Location is too short"),
   about: z.string().min(10, "About section is too short"),
+  experience: z.array(
+    z.object({
+      role: z.string().min(1, "Role is required"),
+      company: z.string().min(1, "Company is required"),
+      duration: z.string().min(1, "Duration is required"),
+    })
+  ),
+  education: z.object({
+      degree: z.string().min(1, "Degree is required"),
+      college: z.string().min(1, "College is required"),
+      yearRange: z.string().min(1, "Year range is required"),
+  }),
 });
 
 
@@ -86,7 +99,18 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
       headline: profile.headline,
       location: profile.location,
       about: profile.about,
+      experience: profile.experience,
+      education: {
+        degree: profile.education.degree,
+        college: profile.education.college,
+        yearRange: profile.education.yearRange,
+      }
     },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "experience",
   });
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>, setImagePreview: (url: string) => void) => {
@@ -96,16 +120,25 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
       };
-      reader.readDataURL(file);
+      reader.readAsDataURL(file);
     }
   };
 
   const onSubmit = (values: z.infer<typeof profileFormSchema>) => {
-    const updatedProfile: Partial<ProfileData> = { 
+    const updatedProfileData = {
       ...values,
+      education: {
+        ...profile.education, // retain non-editable fields like grad year/month
+        ...values.education
+      }
+    }
+
+    const updatedProfile: Partial<ProfileData> = { 
+      ...updatedProfileData,
       avatar: avatarPreview || profile.avatar,
       banner: bannerPreview || profile.banner,
     };
+
     onProfileUpdate(updatedProfile);
     toast({
       title: "Profile Updated",
@@ -116,125 +149,142 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg grid-rows-[auto_1fr_auto] max-h-[90vh]">
+      <DialogContent className="sm:max-w-2xl grid-rows-[auto_1fr_auto] max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>Edit Profile</DialogTitle>
           <DialogDescription>
             Make changes to your profile here. Click save when you're done.
           </DialogDescription>
         </DialogHeader>
-        <ScrollArea className="pr-6 -mr-6">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-              
-               <div className="space-y-2">
-                <FormLabel>Profile Picture</FormLabel>
-                <div className="flex items-center gap-4">
-                  <Avatar className="h-20 w-20">
-                    <AvatarImage src={avatarPreview || undefined} />
-                    <AvatarFallback>{profile.name.substring(0, 2)}</AvatarFallback>
-                  </Avatar>
-                  <Button asChild variant="outline">
-                     <label htmlFor="avatar-upload" className="cursor-pointer">
-                      <Upload className="mr-2 h-4 w-4"/>
-                      Upload Image
-                      <Input id="avatar-upload" type="file" className="sr-only" accept="image/*" onChange={(e) => handleImageUpload(e, setAvatarPreview)} />
-                    </label>
-                  </Button>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <ScrollArea className="pr-6 -mr-6 h-[calc(80vh-150px)]">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <FormLabel>Profile Picture</FormLabel>
+                  <div className="flex items-center gap-4">
+                    <Avatar className="h-20 w-20">
+                      <AvatarImage src={avatarPreview || undefined} />
+                      <AvatarFallback>{profile.name.substring(0, 2)}</AvatarFallback>
+                    </Avatar>
+                    <Button asChild variant="outline">
+                      <label htmlFor="avatar-upload" className="cursor-pointer">
+                        <Upload className="mr-2 h-4 w-4"/>
+                        Upload Image
+                        <Input id="avatar-upload" type="file" className="sr-only" accept="image/*" onChange={(e) => handleImageUpload(e, setAvatarPreview)} />
+                      </label>
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <FormLabel>Banner Image</FormLabel>
+                  <div className="aspect-[16/6] w-full relative bg-muted rounded-md overflow-hidden flex items-center justify-center">
+                    {bannerPreview && <Image src={bannerPreview} layout="fill" objectFit="cover" alt="Banner preview" />}
+                    <Button asChild variant="outline" className="z-10">
+                      <label htmlFor="banner-upload" className="cursor-pointer">
+                        <Upload className="mr-2 h-4 w-4"/>
+                        Upload Banner
+                        <Input id="banner-upload" type="file" className="sr-only" accept="image/*" onChange={(e) => handleImageUpload(e, setBannerPreview)} />
+                      </label>
+                    </Button>
+                  </div>
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
+                      <FormControl><Input {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="handle"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>User Handle</FormLabel>
+                      <FormControl><Input placeholder="e.g. priya-sharma" {...field} /></FormControl>
+                      <FormDescriptionComponent>This is your unique username on the platform.</FormDescriptionComponent>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="headline"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Headline</FormLabel>
+                      <FormControl><Input {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Location</FormLabel>
+                      <FormControl><Input {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="about"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>About / Bio</FormLabel>
+                      <FormControl><Textarea rows={4} {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Separator />
+                
+                <div>
+                    <FormLabel className="text-lg font-semibold">Experience</FormLabel>
+                    <div className="space-y-4 mt-2">
+                        {fields.map((field, index) => (
+                          <div key={field.id} className="p-4 border rounded-md relative space-y-2">
+                              <FormField control={form.control} name={`experience.${index}.role`} render={({ field }) => (<FormItem><FormLabel>Role</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                              <FormField control={form.control} name={`experience.${index}.company`} render={({ field }) => (<FormItem><FormLabel>Company</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                              <FormField control={form.control} name={`experience.${index}.duration`} render={({ field }) => (<FormItem><FormLabel>Duration</FormLabel><FormControl><Input placeholder="e.g. 2020 - Present" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                              <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => remove(index)}><Trash2 className="h-4 w-4" /></Button>
+                          </div>
+                        ))}
+                         <Button type="button" variant="outline" size="sm" onClick={() => append({ role: '', company: '', duration: '' })}>
+                            <PlusCircle className="mr-2 h-4 w-4" /> Add Experience
+                        </Button>
+                    </div>
+                </div>
+
+                <Separator />
+
+                 <div>
+                    <FormLabel className="text-lg font-semibold">Education</FormLabel>
+                    <div className="p-4 border rounded-md mt-2 space-y-2">
+                        <FormField control={form.control} name="education.college" render={({ field }) => (<FormItem><FormLabel>College</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={form.control} name="education.degree" render={({ field }) => (<FormItem><FormLabel>Degree</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={form.control} name="education.yearRange" render={({ field }) => (<FormItem><FormLabel>Years Attended</FormLabel><FormControl><Input placeholder="e.g. 2005 - 2009" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    </div>
                 </div>
               </div>
-
-              <div className="space-y-2">
-                <FormLabel>Banner Image</FormLabel>
-                <div className="aspect-[16/6] w-full relative bg-muted rounded-md overflow-hidden flex items-center justify-center">
-                  {bannerPreview && <Image src={bannerPreview} layout="fill" objectFit="cover" alt="Banner preview" />}
-                   <Button asChild variant="outline" className="z-10">
-                     <label htmlFor="banner-upload" className="cursor-pointer">
-                      <Upload className="mr-2 h-4 w-4"/>
-                      Upload Banner
-                      <Input id="banner-upload" type="file" className="sr-only" accept="image/*" onChange={(e) => handleImageUpload(e, setBannerPreview)} />
-                    </label>
-                  </Button>
-                </div>
-              </div>
-
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-               <FormField
-                control={form.control}
-                name="handle"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>User Handle</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. priya-sharma" {...field} />
-                    </FormControl>
-                     <FormDescriptionComponent>
-                      This is your unique username on the platform.
-                    </FormDescriptionComponent>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="headline"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Headline</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Location</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="about"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>About / Bio</FormLabel>
-                    <FormControl>
-                      <Textarea rows={4} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-               <DialogFooter className="pt-4 pr-6">
-                <DialogClose asChild>
-                  <Button type="button" variant="secondary">Cancel</Button>
-                </DialogClose>
-                <Button type="submit">Save Changes</Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </ScrollArea>
+            </ScrollArea>
+             <DialogFooter className="pt-4 pr-6">
+              <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
+              <Button type="submit">Save Changes</Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
@@ -419,12 +469,16 @@ function ProfilePageContent({ handle }: { handle: string }) {
                   <Card key={item.id}>
                     <CardHeader className="p-4 flex flex-row items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <Avatar className="w-10 h-10">
-                          <AvatarImage src={item.author.avatar} data-ai-hint={item.author.aiHint} />
-                          <AvatarFallback>{item.author.name.substring(0,2)}</AvatarFallback>
-                        </Avatar>
+                        <Link href={`/profile/${item.author.handle}`}>
+                            <Avatar className="w-10 h-10">
+                            <AvatarImage src={item.author.avatar} data-ai-hint={item.author.aiHint} />
+                            <AvatarFallback>{item.author.name.substring(0,2)}</AvatarFallback>
+                            </Avatar>
+                        </Link>
                         <div>
-                          <p className="font-semibold text-sm">{item.author.name}</p>
+                          <Link href={`/profile/${item.author.handle}`} className="hover:underline">
+                            <p className="font-semibold text-sm">{item.author.name}</p>
+                          </Link>
                           <p className="text-xs text-muted-foreground">@{item.author.handle}</p>
                         </div>
                       </div>
@@ -504,8 +558,8 @@ function ProfilePageContent({ handle }: { handle: string }) {
                     <CardTitle className="font-headline text-xl">Experience</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {profileData.experience.map(exp => (
-                        <div key={exp.company} className="flex gap-4">
+                    {profileData.experience.map((exp, index) => (
+                        <div key={index} className="flex gap-4">
                             <Briefcase className="h-8 w-8 text-muted-foreground mt-1"/>
                             <div>
                                 <p className="font-semibold">{exp.role}</p>
