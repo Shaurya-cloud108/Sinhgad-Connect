@@ -295,27 +295,74 @@ function StoryViewersSheet({ viewers, open, onOpenChange }: { viewers: StoryView
 function StoryViewerDialog({ story, open, onOpenChange, onDeleteStoryItem, currentUserId }: { story: Story | null; open: boolean; onOpenChange: (open: boolean) => void; onDeleteStoryItem: (storyId: number, itemId: number) => void; currentUserId: string | undefined }) {
   const [isViewersSheetOpen, setIsViewersSheetOpen] = useState(false);
   const [currentItemIndex, setCurrentItemIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const activeItems = story?.items.filter(item => Date.now() - item.timestamp < 24 * 60 * 60 * 1000) || [];
 
   useEffect(() => {
     if (story) {
-        setCurrentItemIndex(activeItems.length > 0 ? activeItems.length - 1 : 0);
+        setCurrentItemIndex(0);
     }
-  }, [story, activeItems.length]);
+  }, [story]);
+  
+  const handleNext = () => {
+    setCurrentItemIndex(prev => {
+        if (prev < activeItems.length - 1) {
+            return prev + 1;
+        }
+        onOpenChange(false); // Close when the last story finishes
+        return prev;
+    });
+  };
+
+  const handlePrevious = () => {
+    setCurrentItemIndex(prev => Math.max(0, prev - 1));
+  }
+  
+  useEffect(() => {
+    setProgress(0); // Reset progress when item changes
+    const currentItem = activeItems[currentItemIndex];
+
+    if (!currentItem) return;
+
+    if (currentItem.type === 'image') {
+        const timer = setTimeout(handleNext, 7000); // 7-second timer for images
+        const interval = setInterval(() => {
+            setProgress(p => p + 100 / (7000 / 50));
+        }, 50);
+
+        return () => {
+            clearTimeout(timer);
+            clearInterval(interval);
+        };
+    } else if (currentItem.type === 'video' && videoRef.current) {
+        const videoElement = videoRef.current;
+        
+        const updateProgress = () => {
+            if (videoElement.duration) {
+                setProgress((videoElement.currentTime / videoElement.duration) * 100);
+            }
+        };
+
+        const onVideoEnd = () => handleNext();
+        
+        videoElement.addEventListener('timeupdate', updateProgress);
+        videoElement.addEventListener('ended', onVideoEnd);
+        videoElement.play().catch(e => console.error("Video autoplay failed:", e));
+
+        return () => {
+            videoElement.removeEventListener('timeupdate', updateProgress);
+            videoElement.removeEventListener('ended', onVideoEnd);
+        };
+    }
+}, [currentItemIndex, activeItems]);
+
 
   if (!story || activeItems.length === 0) return null;
   
   const currentItem = activeItems[currentItemIndex];
   
-  const handlePrevious = () => {
-    setCurrentItemIndex(prev => Math.max(0, prev - 1));
-  }
-
-  const handleNext = () => {
-    setCurrentItemIndex(prev => Math.min(activeItems.length - 1, prev + 1));
-  }
-
   const handleDelete = () => {
     onDeleteStoryItem(story.id, currentItem.id);
     onOpenChange(false);
@@ -326,7 +373,7 @@ function StoryViewerDialog({ story, open, onOpenChange, onDeleteStoryItem, curre
   return (
     <>
       <Dialog open={open} onOpenChange={(val) => { if (!val) onOpenChange(false)}}>
-        <DialogContent className="p-0 border-0 max-w-md w-full h-[90vh] sm:h-[80vh] bg-black" onInteractOutside={(e) => e.preventDefault()}>
+        <DialogContent className="p-0 border-0 max-w-md w-full h-[90vh] sm:h-[80vh] bg-black" onInteractOutside={(e) => onOpenChange(false)}>
           <div className="relative w-full h-full rounded-lg overflow-hidden flex flex-col justify-center">
             {/* Click handlers for next/prev */}
             <div className="absolute left-0 top-0 h-full w-1/2 z-10" onClick={handlePrevious} />
@@ -335,14 +382,17 @@ function StoryViewerDialog({ story, open, onOpenChange, onDeleteStoryItem, curre
             {/* Story Content */}
             <div className="w-full h-full relative">
                 {currentItem.type === 'image' && <Image src={currentItem.url} alt={`Story from ${story.author.name}`} layout="fill" objectFit="contain" data-ai-hint={story.author.aiHint} />}
-                {currentItem.type === 'video' && <video src={currentItem.url} controls={false} autoPlay loop muted className="w-full h-full object-contain" />}
+                {currentItem.type === 'video' && <video ref={videoRef} src={currentItem.url} controls={false} muted className="w-full h-full object-contain" />}
             </div>
 
             {/* Progress bars */}
              <div className="absolute top-2 left-2 right-2 flex gap-1 z-20">
                 {activeItems.map((_, index) => (
-                    <div key={index} className="h-1 flex-1 bg-white/30 rounded-full">
-                        <div className={cn("h-full bg-white rounded-full", index <= currentItemIndex && "transition-all duration-300")} style={{ width: index === currentItemIndex ? '100%' : (index < currentItemIndex ? '100%' : '0%') }}/>
+                    <div key={index} className="h-1 flex-1 bg-white/30 rounded-full overflow-hidden">
+                        <div 
+                            className="h-full bg-white transition-all" 
+                            style={{ width: `${index < currentItemIndex ? 100 : (index === currentItemIndex ? progress : 0)}%` }}
+                        />
                     </div>
                 ))}
             </div>
