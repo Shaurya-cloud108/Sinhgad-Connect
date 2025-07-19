@@ -61,7 +61,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PostJobDialog } from "@/components/post-job-dialog";
 import { AppContext } from "@/context/AppContext";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useRouter } from "next/navigation";
 
 
@@ -446,7 +445,6 @@ function HomePageContent() {
   const activePostForComments = feedItems.find(item => item.id === activeCommentPostId);
 
   return (
-    <TooltipProvider>
     <div className="w-full max-w-2xl mx-auto">
       {/* Stories */}
       <div className="py-4 border-b">
@@ -596,16 +594,9 @@ function HomePageContent() {
                 </div>
                 <div>
                     <ShareDialog contentType="post" contentId={item.id}>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button variant="ghost" size="icon">
-                                    <Send className="w-5 h-5" />
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>Share</p>
-                            </TooltipContent>
-                        </Tooltip>
+                      <Button variant="ghost" size="icon">
+                          <Send className="w-5 h-5" />
+                      </Button>
                     </ShareDialog>
                 </div>
             </CardFooter>
@@ -613,7 +604,6 @@ function HomePageContent() {
         ))}
       </div>
     </div>
-    </TooltipProvider>
   );
 }
 

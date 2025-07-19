@@ -23,7 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 import { communityMembers } from '@/lib/data.tsx';
 
 type ShareDialogProps = {
-  contentType: 'post' | 'job' | 'event' | 'story' | 'group';
+  contentType: 'post' | 'job' | 'event' | 'story' | 'group' | 'profile';
   contentId: string | number;
   children: React.ReactNode;
 };
@@ -71,8 +71,10 @@ export function ShareDialog({ contentType, contentId, children }: ShareDialogPro
       }
     });
 
-    return Array.from(targetsMap.values());
-  }, [conversations, profileData]);
+    return Array.from(targetsMap.values()).filter(target => 
+      target.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [conversations, profileData, searchQuery]);
 
 
   const handleSelectTarget = (name: string) => {
@@ -111,6 +113,10 @@ export function ShareDialog({ contentType, contentId, children }: ShareDialogPro
             newShareMessage.sharedStoryId = contentId as string;
             lastMessageText = "Shared a story.";
             break;
+        case 'profile':
+            newShareMessage.sharedProfileId = contentId as string;
+            lastMessageText = "Shared a profile.";
+            break;
         default:
             toast({ variant: "destructive", title: "Share failed", description: "Unknown content type." });
             return;
@@ -131,23 +137,23 @@ export function ShareDialog({ contentType, contentId, children }: ShareDialogPro
         const conversationMap = new Map(prev.map(c => [c.name, c]));
 
         selectedTargets.forEach(targetName => {
-            const target = allShareTargets.find(t => t.name === targetName);
-            if (!target) return;
+            const targetInfo = allShareTargets.find(t => t.name === targetName);
+            if (!targetInfo) return;
 
             let updatedConvo: Conversation;
 
-            if (conversationMap.has(target.name)) {
+            if (conversationMap.has(targetInfo.name)) {
                 // Update existing conversation
                 updatedConvo = {
-                    ...conversationMap.get(target.name)!,
+                    ...conversationMap.get(targetInfo.name)!,
                     lastMessage: lastMessageText,
                     time: "Now",
                 };
             } else {
                 // This is a new 1-on-1 conversation, create it
                 updatedConvo = {
-                    name: target.name,
-                    avatar: target.avatar,
+                    name: targetInfo.name,
+                    avatar: targetInfo.avatar,
                     aiHint: "user avatar",
                     lastMessage: lastMessageText,
                     time: "Now",
@@ -155,7 +161,7 @@ export function ShareDialog({ contentType, contentId, children }: ShareDialogPro
                     isGroup: false,
                 };
             }
-            conversationMap.set(target.name, updatedConvo);
+            conversationMap.set(targetInfo.name, updatedConvo);
         });
 
         const allConversations = Array.from(conversationMap.values());
@@ -175,10 +181,6 @@ export function ShareDialog({ contentType, contentId, children }: ShareDialogPro
     setSearchQuery("");
   };
 
-  const filteredTargets = allShareTargets.filter(target => 
-    target.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
@@ -196,7 +198,7 @@ export function ShareDialog({ contentType, contentId, children }: ShareDialogPro
         </div>
         <ScrollArea className="h-64">
           <div className="py-2 space-y-1 pr-4">
-            {filteredTargets.map(target => (
+            {allShareTargets.map(target => (
               <div 
                 key={target.id}
                 className="flex items-center justify-between p-2 rounded-md hover:bg-muted cursor-pointer"
@@ -214,6 +216,9 @@ export function ShareDialog({ contentType, contentId, children }: ShareDialogPro
                 )}
               </div>
             ))}
+             {allShareTargets.length === 0 && (
+              <p className="text-center text-sm text-muted-foreground pt-4">No matching results found.</p>
+            )}
           </div>
         </ScrollArea>
         <DialogFooter>

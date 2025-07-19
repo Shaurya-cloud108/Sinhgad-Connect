@@ -38,6 +38,7 @@ export type Message = {
     sharedJobId?: number;
     sharedEventId?: string;
     sharedStoryId?: string;
+    sharedProfileId?: string;
 };
 
 export type MessagesData = {

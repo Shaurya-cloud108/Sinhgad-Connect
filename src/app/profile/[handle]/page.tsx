@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft } from "lucide-react";
+import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2 } from "lucide-react";
 import { feedItems as initialFeedItems, ProfileData, FeedItem, communityMembers } from "@/lib/data.tsx";
 import { useState, useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -58,6 +58,7 @@ import { ProfileContext } from "@/context/ProfileContext";
 import { AppContext } from "@/context/AppContext";
 import { getStatusEmoji, cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ShareDialog } from "@/components/share-dialog";
 
 
 const profileFormSchema = z.object({
@@ -387,9 +388,16 @@ export default function ProfilePage({ params }: { params: { handle: string } }) 
                                 <Button variant="outline" onClick={handleLogout} className="flex-1 sm:flex-none"><LogOut className="mr-2 h-4 w-4" /> Logout</Button>
                             </>
                         ) : (
+                          <>
                             <Button onClick={() => handleGroupClick(profileData.name)} className="w-full">
                                <MessageCircle className="mr-2 h-4 w-4" /> Message
                             </Button>
+                             <ShareDialog contentType="profile" contentId={profileData.handle}>
+                                <Button variant="outline" size="icon">
+                                    <Share2 className="h-4 w-4" />
+                                </Button>
+                            </ShareDialog>
+                          </>
                         )}
                     </div>
                 </div>
@@ -477,9 +485,11 @@ export default function ProfilePage({ params }: { params: { handle: string } }) 
                             <MessageCircle className="w-5 h-5" />
                              <span className="text-sm font-medium">{item.comments.length}</span>
                           </Button>
-                          <Button variant="ghost" size="sm">
-                            <Send className="w-5 h-5" />
-                          </Button>
+                          <ShareDialog contentType="post" contentId={item.id}>
+                            <Button variant="ghost" size="sm">
+                                <Send className="w-5 h-5" />
+                            </Button>
+                          </ShareDialog>
                       </div>
                     </CardContent>
                   </Card>
@@ -561,5 +571,3 @@ export default function ProfilePage({ params }: { params: { handle: string } }) 
     </div>
   );
 }
-
-    
