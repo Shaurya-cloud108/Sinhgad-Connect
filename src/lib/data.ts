@@ -1,4 +1,6 @@
 
+import { Member, NetworkingGroup } from "@/context/AppContext";
+
 export type JobListing = {
   title: string;
   company: string;
@@ -297,42 +299,52 @@ export const alumniData = [
 ];
 
 
-export const networkingGroups = [
+const groupMembers: { [key: string]: Member[] } = {
+  "Software & Tech Innovators": [
+    { id: 'priya-sharma-09', name: 'Priya Sharma', avatar: 'https://placehold.co/100x100.png', role: 'admin' },
+    { id: 'rohan-verma', name: 'Rohan Verma', avatar: 'https://placehold.co/100x100.png', role: 'member' },
+  ],
+  "Entrepreneurship Hub": [
+    { id: 'sunita-narayan', name: 'Sunita Narayan', avatar: 'https://placehold.co/100x100.png', role: 'admin' },
+  ]
+};
+
+export const networkingGroups: NetworkingGroup[] = [
   {
     title: "Software & Tech Innovators",
     description: "Connect with alumni in the tech industry. Share insights on coding, product development, and emerging technologies.",
     iconName: "code",
-    members: "12,500+ Members",
+    members: groupMembers["Software & Tech Innovators"],
   },
   {
     title: "Entrepreneurship Hub",
     description: "A group for founders, aspiring entrepreneurs, and investors. Discuss startup ideas, funding, and growth strategies.",
     iconName: "rocket",
-    members: "3,200+ Members",
+    members: groupMembers["Entrepreneurship Hub"],
   },
   {
     title: "Core Engineering Circle",
     description: "For alumni in Mechanical, Civil, and Electrical fields. Collaborate on projects and discuss industry trends.",
     iconName: "building",
-    members: "8,750+ Members",
+    members: [],
   },
   {
     title: "Management & Consulting",
     description: "Network with alumni in business management, finance, and consulting roles across various industries.",
     iconName: "briefcase",
-    members: "6,100+ Members",
+    members: [],
   },
   {
     title: "Bay Area Alumni Chapter",
     description: "Connect with fellow graduates living and working in the San Francisco Bay Area for local meetups and networking.",
     iconName: "globe",
-    members: "1,800+ Members",
+    members: [],
   },
    {
     title: "Higher Education & Academia",
     description: "A forum for alumni pursuing or working in research, teaching, and higher education.",
     iconName: "globe",
-    members: "2,400+ Members",
+    members: [],
   },
 ];
 
@@ -366,18 +378,19 @@ export const conversationsData = [
 
 export const messagesData = {
   "Priya Sharma": [
-    { sender: "other", text: "Hey! I'm a final year student and I saw your profile. Your work at Google is really inspiring!" },
-    { sender: "me", text: "Hi! Thanks for reaching out. Happy to help if you have any questions." },
-    { sender: "other", text: "That would be amazing. I'm preparing for interviews and would love to get your advice on my resume." },
-    { sender: "me", text: "Sure, I can help with that. Let's connect tomorrow." },
+    { senderId: "other-user", senderName: "Priya Sharma", text: "Hey! I'm a final year student and I saw your profile. Your work at Google is really inspiring!" },
+    { senderId: profileData.handle, senderName: profileData.name, text: "Hi! Thanks for reaching out. Happy to help if you have any questions." },
+    { senderId: "other-user", senderName: "Priya Sharma", text: "That would be amazing. I'm preparing for interviews and would love to get your advice on my resume." },
+    { senderId: profileData.handle, senderName: profileData.name, text: "Sure, I can help with that. Let's connect tomorrow." },
   ],
   "Rohan Verma": [
-    { sender: "other", text: "Thanks for the resume tips!" },
+    { senderId: "other-user", senderName: "Rohan Verma", text: "Thanks for the resume tips!" },
   ],
-  "Alumni Events Group": [
-    { sender: "other", text: "Don't forget the upcoming Tech Talk on AI." }
+  "Software & Tech Innovators": [
+    { senderId: 'priya-sharma-09', senderName: 'Priya Sharma', text: "Welcome to the group everyone! Let's talk about the latest in AI." },
+    { senderId: 'rohan-verma', senderName: 'Rohan Verma', text: "Great idea! I've been experimenting with some new frameworks." }
   ],
   "Vikram Singh": [
-     { sender: "other", text: "It was great meeting you at the reunion." }
+     { senderId: "other-user", senderName: "Vikram Singh", text: "It was great meeting you at the reunion." }
   ]
 };

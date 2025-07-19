@@ -26,19 +26,26 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { AppContext, NetworkingGroup } from "@/context/AppContext";
 import { useRouter } from "next/navigation";
+import { ProfileContext } from "@/context/ProfileContext";
 
 function CreateGroupDialog({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
   const { addNetworkingGroup } = useContext(AppContext);
+  const { profileData } = useContext(ProfileContext);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
   const handleSubmit = () => {
-    if (title && description) {
+    if (title && description && profileData) {
       addNetworkingGroup({
         title,
         description,
         iconName: "rocket", // Default icon for new groups
-        members: "1 Member",
+        members: [{
+          id: profileData.handle,
+          name: profileData.name,
+          avatar: profileData.avatar,
+          role: 'admin'
+        }],
       });
       onOpenChange(false);
       setTitle("");
@@ -143,7 +150,7 @@ export default function NetworkingPage() {
                               <GroupIcon iconName={group.iconName} />
                               <div className="flex-1">
                                   <CardTitle className="font-headline text-xl">{group.title}</CardTitle>
-                                  <CardDescription>{group.members}</CardDescription>
+                                  <CardDescription>{group.members.length} Members</CardDescription>
                               </div>
                           </CardHeader>
                           <CardContent className="flex-grow">
@@ -178,7 +185,7 @@ export default function NetworkingPage() {
                 <GroupIcon iconName={group.iconName} />
                 <div className="flex-1">
                   <CardTitle className="font-headline text-xl">{group.title}</CardTitle>
-                  <CardDescription>{group.members}</CardDescription>
+                  <CardDescription>{group.members.length} Members</CardDescription>
                 </div>
               </CardHeader>
               <CardContent className="flex-grow">

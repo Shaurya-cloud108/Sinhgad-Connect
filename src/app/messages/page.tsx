@@ -5,12 +5,16 @@ import { useState, useContext, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Send, ArrowLeft, MessageSquare } from "lucide-react";
+import { Search, Send, ArrowLeft, MessageSquare, Shield, Users, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { AppContext, Conversation, Message } from "@/context/AppContext";
+import { AppContext, Conversation, Message, Member, ProfileData } from "@/context/AppContext";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Badge } from "@/components/ui/badge";
+import { ProfileContext } from "@/context/ProfileContext";
 
 export default function MessagesPage() {
-  const { conversations, setConversations, messagesData, setMessagesData, selectedConversation, setSelectedConversation } = useContext(AppContext);
+  const { conversations, setConversations, messagesData, setMessagesData, selectedConversation, setSelectedConversation, networkingGroups, updateMemberRole } = useContext(AppContext);
+  const { profileData } = useContext(ProfileContext);
   const [newMessage, setNewMessage] = useState("");
 
   useEffect(() => {
@@ -22,7 +26,8 @@ export default function MessagesPage() {
     if (newMessage.trim() === "" || !selectedConversation) return;
 
     const newMessageObj: Message = {
-      sender: 'me',
+      senderId: profileData.handle,
+      senderName: profileData.name,
       text: newMessage,
     };
 
@@ -50,6 +55,9 @@ export default function MessagesPage() {
   }
 
   const messages = selectedConversation ? messagesData[selectedConversation.name as keyof typeof messagesData] || [] : [];
+  const currentGroup = selectedConversation ? networkingGroups.find(g => g.title === selectedConversation.name) : null;
+  const members: Member[] = currentGroup?.members || [];
+  const currentUserRole = members.find(m => m.id === profileData.handle)?.role;
 
   return (
     <div className="h-[calc(100vh-112px)] md:h-[calc(100vh-64px)] border-t md:border-t-0 flex">
@@ -100,28 +108,80 @@ export default function MessagesPage() {
       )}>
         {selectedConversation ? (
           <>
-            <div className="p-4 border-b flex items-center gap-4">
-               <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setSelectedConversation(null)}>
-                <ArrowLeft />
-              </Button>
-              <Avatar>
-                <AvatarImage src={selectedConversation.avatar} data-ai-hint={selectedConversation.aiHint}/>
-                <AvatarFallback>{selectedConversation.name.substring(0, 2)}</AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="font-semibold">{selectedConversation.name}</p>
-                <p className="text-sm text-muted-foreground">Online</p>
+            <div className="p-4 border-b flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                 <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setSelectedConversation(null)}>
+                  <ArrowLeft />
+                </Button>
+                <Avatar>
+                  <AvatarImage src={selectedConversation.avatar} data-ai-hint={selectedConversation.aiHint}/>
+                  <AvatarFallback>{selectedConversation.name.substring(0, 2)}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-semibold">{selectedConversation.name}</p>
+                  {currentGroup ? (
+                    <p className="text-sm text-muted-foreground">{members.length} Members</p>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Online</p>
+                  )}
+                </div>
               </div>
+              {currentGroup && (
+                 <Sheet>
+                  <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <Users />
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent>
+                    <SheetHeader>
+                      <SheetTitle>Group Members</SheetTitle>
+                    </SheetHeader>
+                    <div className="py-4 space-y-4">
+                      {members.map(member => (
+                        <div key={member.id} className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-9 w-9">
+                              <AvatarImage src={member.avatar} />
+                              <AvatarFallback>{member.name.substring(0,2)}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                                <p className="font-semibold text-sm">{member.name}</p>
+                                <p className="text-xs text-muted-foreground">{member.role}</p>
+                            </div>
+                          </div>
+                           {currentUserRole === 'admin' && member.id !== profileData.handle && (
+                              <Button 
+                                size="sm" 
+                                variant={member.role === 'admin' ? "secondary" : "outline"}
+                                onClick={() => updateMemberRole(currentGroup.title, member.id, member.role === 'admin' ? 'member' : 'admin')}
+                              >
+                                {member.role === 'admin' ? "Revoke Admin" : "Make Admin"}
+                                <Crown className="ml-2 h-4 w-4" />
+                              </Button>
+                            )}
+                            {member.id === profileData.handle && <Badge variant="secondary">You</Badge>}
+                        </div>
+                      ))}
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              )}
             </div>
             <div className="flex-grow p-4 overflow-y-auto bg-secondary/30">
               <div className="space-y-4">
                 {messages.map((msg, index) => (
-                  <div key={index} className={cn("flex", msg.sender === 'me' ? 'justify-end' : 'justify-start')}>
-                    <div className={cn(
-                      "max-w-xs lg:max-w-md p-3 rounded-lg",
-                      msg.sender === 'me' ? "bg-primary text-primary-foreground" : "bg-muted"
-                    )}>
-                      {msg.text}
+                  <div key={index} className={cn("flex", msg.senderId === profileData.handle ? 'justify-end' : 'justify-start')}>
+                     <div className={cn("flex items-start gap-2 max-w-xs lg:max-w-md", msg.senderId === profileData.handle && 'flex-row-reverse')}>
+                        <div className={cn(
+                          "p-3 rounded-lg",
+                          msg.senderId === profileData.handle ? "bg-primary text-primary-foreground" : "bg-muted"
+                        )}>
+                          {msg.senderId !== profileData.handle && (
+                            <p className="text-xs font-semibold mb-1">{msg.senderName}</p>
+                          )}
+                          {msg.text}
+                        </div>
                     </div>
                   </div>
                 ))}

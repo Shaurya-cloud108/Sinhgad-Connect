@@ -1,15 +1,24 @@
 
 "use client";
 
-import React, { createContext, useState, ReactNode } from 'react';
+import React, { createContext, useState, ReactNode, useContext } from 'react';
 import { networkingGroups as initialNetworkingGroups, conversationsData as initialConversations, messagesData as initialMessagesData } from '@/lib/data';
+import { ProfileContext } from './ProfileContext';
+import { ProfileData } from '@/lib/data';
 
 // Types
+export type Member = {
+  id: string; // user handle
+  name: string;
+  avatar: string;
+  role: 'admin' | 'member';
+};
+
 export type NetworkingGroup = {
   title: string;
   description: string;
   iconName: string;
-  members: string;
+  members: Member[];
 };
 
 export type Conversation = {
@@ -22,7 +31,8 @@ export type Conversation = {
 };
 
 export type Message = { 
-    sender: 'me' | 'other'; 
+    senderId: string;
+    senderName: string;
     text: string 
 };
 
@@ -37,6 +47,7 @@ type AppContextType = {
     addNetworkingGroup: (group: NetworkingGroup) => void;
     joinedGroups: Set<string>;
     toggleGroupMembership: (group: NetworkingGroup) => void;
+    updateMemberRole: (groupTitle: string, memberId: string, role: 'admin' | 'member') => void;
     conversations: Conversation[];
     setConversations: React.Dispatch<React.SetStateAction<Conversation[]>>;
     messagesData: MessagesData;
@@ -52,6 +63,7 @@ export const AppContext = createContext<AppContextType>({
     addNetworkingGroup: () => {},
     joinedGroups: new Set(),
     toggleGroupMembership: () => {},
+    updateMemberRole: () => {},
     conversations: [],
     setConversations: () => {},
     messagesData: {},
@@ -63,6 +75,7 @@ export const AppContext = createContext<AppContextType>({
 
 // Provider
 export const AppProvider = ({ children }: { children: ReactNode }) => {
+    const { profileData } = useContext(ProfileContext);
     const [networkingGroups, setNetworkingGroups] = useState<NetworkingGroup[]>(initialNetworkingGroups);
     const [joinedGroups, setJoinedGroups] = useState<Set<string>>(new Set());
     const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
@@ -71,18 +84,50 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const addNetworkingGroup = (group: NetworkingGroup) => {
         setNetworkingGroups(prev => [group, ...prev]);
+        setJoinedGroups(prev => new Set(prev).add(group.title));
+        
+        const newConversation: Conversation = {
+            name: group.title,
+            avatar: "https://placehold.co/100x100.png",
+            aiHint: "university logo",
+            lastMessage: "You created the group.",
+            time: "Now",
+            unread: 0,
+        };
+        setConversations(prev => [newConversation, ...prev]);
+        
+        setMessagesData(prev => ({
+            ...prev,
+            [group.title]: [{ senderId: 'system', senderName: 'System', text: 'Welcome to the group! You are the admin.' }]
+        }));
     };
 
     const toggleGroupMembership = (group: NetworkingGroup) => {
         const newJoinedGroups = new Set(joinedGroups);
-        if (newJoinedGroups.has(group.title)) {
-            newJoinedGroups.delete(group.title);
-            // Remove from conversations
-            setConversations(prev => prev.filter(c => c.name !== group.title));
+        const alreadyMember = newJoinedGroups.has(group.title);
+        
+        setNetworkingGroups(prevGroups => prevGroups.map(g => {
+            if (g.title === group.title) {
+                if (alreadyMember) {
+                    return { ...g, members: g.members.filter(m => m.id !== profileData.handle) };
+                } else {
+                    const newMember: Member = {
+                        id: profileData.handle,
+                        name: profileData.name,
+                        avatar: profileData.avatar,
+                        role: 'member'
+                    };
+                    return { ...g, members: [...g.members, newMember] };
+                }
+            }
+            return g;
+        }));
 
+        if (alreadyMember) {
+            newJoinedGroups.delete(group.title);
+            setConversations(prev => prev.filter(c => c.name !== group.title));
         } else {
             newJoinedGroups.add(group.title);
-            // Add to conversations
             const newConversation: Conversation = {
                 name: group.title,
                 avatar: "https://placehold.co/100x100.png",
@@ -92,14 +137,29 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 unread: 0,
             };
             setConversations(prev => [newConversation, ...prev]);
-            // Add initial message for the group
-            setMessagesData(prev => ({
-                ...prev,
-                [group.title]: [{ sender: 'other', text: 'Welcome to the group!' }]
-            }));
+
+            if (!messagesData[group.title]) {
+                 setMessagesData(prev => ({
+                    ...prev,
+                    [group.title]: [{ senderId: 'system', senderName: 'System', text: 'Welcome to the group!' }]
+                }));
+            }
         }
         setJoinedGroups(newJoinedGroups);
     };
+
+    const updateMemberRole = (groupTitle: string, memberId: string, role: 'admin' | 'member') => {
+        setNetworkingGroups(prevGroups => prevGroups.map(g => {
+            if (g.title === groupTitle) {
+                return {
+                    ...g,
+                    members: g.members.map(m => m.id === memberId ? { ...m, role } : m)
+                };
+            }
+            return g;
+        }));
+    };
+
 
     const setSelectedConversationByName = (name: string) => {
         const conversation = conversations.find(c => c.name === name);
@@ -113,6 +173,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         addNetworkingGroup,
         joinedGroups,
         toggleGroupMembership,
+        updateMemberRole,
         conversations,
         setConversations,
         messagesData,
