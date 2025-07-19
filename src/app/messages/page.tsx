@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,9 +10,13 @@ import { cn } from "@/lib/utils";
 import { AppContext, Conversation, Message } from "@/context/AppContext";
 
 export default function MessagesPage() {
-  const { conversations, setConversations, messagesData, setMessagesData } = useContext(AppContext);
-  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  const { conversations, setConversations, messagesData, setMessagesData, selectedConversation, setSelectedConversation } = useContext(AppContext);
   const [newMessage, setNewMessage] = useState("");
+
+  useEffect(() => {
+    // This effect ensures that if a conversation was selected via context (e.g., from networking page),
+    // it remains selected. The context is the source of truth.
+  }, [selectedConversation]);
 
   const handleSendMessage = () => {
     if (newMessage.trim() === "" || !selectedConversation) return;

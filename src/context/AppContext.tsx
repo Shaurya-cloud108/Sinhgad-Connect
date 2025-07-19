@@ -41,6 +41,9 @@ type AppContextType = {
     setConversations: React.Dispatch<React.SetStateAction<Conversation[]>>;
     messagesData: MessagesData;
     setMessagesData: React.Dispatch<React.SetStateAction<MessagesData>>;
+    selectedConversation: Conversation | null;
+    setSelectedConversation: React.Dispatch<React.SetStateAction<Conversation | null>>;
+    setSelectedConversationByName: (name: string) => void;
 };
 
 // Context
@@ -53,6 +56,9 @@ export const AppContext = createContext<AppContextType>({
     setConversations: () => {},
     messagesData: {},
     setMessagesData: () => {},
+    selectedConversation: null,
+    setSelectedConversation: () => {},
+    setSelectedConversationByName: () => {},
 });
 
 // Provider
@@ -61,6 +67,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [joinedGroups, setJoinedGroups] = useState<Set<string>>(new Set());
     const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
     const [messagesData, setMessagesData] = useState<MessagesData>(initialMessagesData);
+    const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
 
     const addNetworkingGroup = (group: NetworkingGroup) => {
         setNetworkingGroups(prev => [group, ...prev]);
@@ -94,6 +101,13 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setJoinedGroups(newJoinedGroups);
     };
 
+    const setSelectedConversationByName = (name: string) => {
+        const conversation = conversations.find(c => c.name === name);
+        if (conversation) {
+            setSelectedConversation(conversation);
+        }
+    };
+
     const value = {
         networkingGroups,
         addNetworkingGroup,
@@ -102,7 +116,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         conversations,
         setConversations,
         messagesData,
-        setMessagesData
+        setMessagesData,
+        selectedConversation,
+        setSelectedConversation,
+        setSelectedConversationByName,
     };
 
     return (

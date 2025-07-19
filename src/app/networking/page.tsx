@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useContext } from "react";
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -10,7 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Code, Briefcase, Rocket, Building, Globe, PlusCircle } from "lucide-react";
+import { ArrowRight, Code, Briefcase, Rocket, Building, Globe, PlusCircle, MessageSquare } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -24,6 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { AppContext, NetworkingGroup } from "@/context/AppContext";
+import { useRouter } from "next/navigation";
 
 function CreateGroupDialog({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
   const { addNetworkingGroup } = useContext(AppContext);
@@ -96,13 +98,28 @@ function GroupIcon({ iconName }: { iconName: string }) {
 
 
 export default function NetworkingPage() {
-  const { networkingGroups, joinedGroups, toggleGroupMembership } = useContext(AppContext);
+  const { networkingGroups, joinedGroups, toggleGroupMembership, setSelectedConversationByName } = useContext(AppContext);
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const router = useRouter();
+
+  const handleGroupClick = (group: NetworkingGroup) => {
+      setSelectedConversationByName(group.title);
+      router.push("/messages");
+  }
+
+  const myGroups = networkingGroups.filter(g => joinedGroups.has(g.title));
+  const otherGroups = networkingGroups
+    .filter(g => !joinedGroups.has(g.title))
+    .filter(g => 
+        g.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        g.description.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
   return (
     <div className="container py-8 md:py-12">
-      <div className="flex justify-between items-center mb-12">
-        <div className="text-left">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+        <div className="text-left mb-4 md:mb-0">
             <h1 className="text-4xl font-headline font-bold">Networking Hub</h1>
             <p className="mt-2 text-lg text-muted-foreground">
             Join groups based on your interests, profession, and location.
@@ -115,10 +132,47 @@ export default function NetworkingPage() {
 
       <CreateGroupDialog open={isCreateGroupOpen} onOpenChange={setIsCreateGroupOpen} />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {networkingGroups.map((group) => {
-          const isJoined = joinedGroups.has(group.title);
-          return (
+      {/* My Groups Section */}
+      {myGroups.length > 0 && (
+          <div className="mb-12">
+              <h2 className="text-2xl font-headline font-bold mb-6">My Groups</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {myGroups.map((group) => (
+                      <Card key={group.title} className="flex flex-col hover:shadow-lg transition-shadow duration-300">
+                          <CardHeader className="flex-row items-center gap-4">
+                              <GroupIcon iconName={group.iconName} />
+                              <div className="flex-1">
+                                  <CardTitle className="font-headline text-xl">{group.title}</CardTitle>
+                                  <CardDescription>{group.members}</CardDescription>
+                              </div>
+                          </CardHeader>
+                          <CardContent className="flex-grow">
+                              <p className="text-sm text-muted-foreground">{group.description}</p>
+                          </CardContent>
+                          <CardContent>
+                            <Button className="w-full" onClick={() => handleGroupClick(group)}>
+                                <MessageSquare className="mr-2 h-4 w-4" /> Go to Chat
+                            </Button>
+                          </CardContent>
+                      </Card>
+                  ))}
+              </div>
+          </div>
+      )}
+
+      {/* Explore Groups Section */}
+      <div>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+            <h2 className="text-2xl font-headline font-bold mb-4 md:mb-0">Explore Groups</h2>
+            <Input 
+                placeholder="Search for groups..."
+                className="w-full md:max-w-sm"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+            />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {otherGroups.map((group) => (
             <Card key={group.title} className="flex flex-col hover:shadow-lg transition-shadow duration-300">
               <CardHeader className="flex-row items-center gap-4">
                 <GroupIcon iconName={group.iconName} />
@@ -132,17 +186,24 @@ export default function NetworkingPage() {
               </CardContent>
               <CardContent>
                 <Button 
-                  variant={isJoined ? "secondary" : "outline"} 
+                  variant="outline" 
                   className="w-full"
                   onClick={() => toggleGroupMembership(group)}
                 >
-                  {isJoined ? "Leave Group" : "Join Group"}
-                  {!isJoined && <ArrowRight className="ml-2 h-4 w-4" />}
+                  Join Group
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </CardContent>
             </Card>
-          );
-        })}
+            ))}
+        </div>
+        {otherGroups.length === 0 && searchQuery && (
+             <Card>
+              <CardContent className="p-6 text-center text-muted-foreground">
+                <p>No groups found matching "{searchQuery}".</p>
+              </CardContent>
+            </Card>
+        )}
       </div>
     </div>
   );
