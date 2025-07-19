@@ -458,7 +458,7 @@ function HomePageContent() {
   const handleStorySubmit = (imageUrl: string) => {
     if (!profileData) return;
     setStories(prevStories => {
-        return prevStories.map(story => {
+        const newStories = prevStories.map(story => {
             if (story.author.handle === profileData.handle) {
                 const newStoryItem: StoryItem = {
                     id: Date.now(),
@@ -472,17 +472,35 @@ function HomePageContent() {
             }
             return story;
         });
+        // This ensures that if for some reason the user's story object wasn't there, it gets created.
+        if (!newStories.some(s => s.author.handle === profileData.handle)) {
+             const newStoryItem: StoryItem = {
+                id: Date.now(),
+                url: imageUrl,
+                timestamp: Date.now(),
+            };
+             const newStory: Story = {
+                id: Date.now(),
+                author: { name: profileData.name, avatar: profileData.avatar, handle: profileData.handle, aiHint: profileData.aiHint },
+                items: [newStoryItem],
+                viewers: [],
+            }
+            return [newStory, ...newStories.filter(s => s.author.handle !== profileData.handle)];
+        }
+        return newStories;
     });
   };
 
   const handleStoryClick = (story: Story) => {
     const activeItems = story.items.filter(item => Date.now() - item.timestamp < 24 * 60 * 60 * 1000);
+    const isOwnStory = story.author.handle === profileData?.handle;
 
-    if (story.author.handle === profileData.handle) {
-        setIsCreateStoryDialogOpen(true);
-    } else if (activeItems.length > 0) {
+    if (activeItems.length > 0) {
       setSelectedStory(story);
       setIsStoryViewerOpen(true);
+    } else if (isOwnStory) {
+      // If user has no active stories, open create dialog
+      setIsCreateStoryDialogOpen(true);
     }
   };
 
@@ -549,22 +567,28 @@ function HomePageContent() {
             const hasActiveStory = activeItems.length > 0;
             
             return (
-                <div key={story.id} className="flex-shrink-0 text-center cursor-pointer" onClick={() => handleStoryClick(story)}>
-                <div className={cn(
-                    "relative rounded-full p-0.5 border-2",
-                    isOwn ? "border-dashed" : (hasActiveStory ? "border-primary" : "border-transparent")
-                )}>
-                    <Avatar className="w-16 h-16">
-                    <AvatarImage src={story.author.avatar} data-ai-hint={story.author.aiHint} />
-                    <AvatarFallback>{story.author.name.substring(0,2)}</AvatarFallback>
-                    {isOwn && (
-                        <div className="absolute bottom-0 right-0 bg-primary rounded-full p-0.5 border-2 border-background">
-                        <Plus className="w-4 h-4 text-primary-foreground" />
-                        </div>
+                <div key={story.id} className="flex-shrink-0 text-center cursor-pointer">
+                    <div
+                        className={cn(
+                            "relative rounded-full p-0.5 border-2",
+                            isOwn ? "border-dashed" : (hasActiveStory ? "border-primary" : "border-transparent")
+                        )}
+                        onClick={() => handleStoryClick(story)}
+                    >
+                        <Avatar className="w-16 h-16">
+                            <AvatarImage src={story.author.avatar} data-ai-hint={story.author.aiHint} />
+                            <AvatarFallback>{story.author.name.substring(0,2)}</AvatarFallback>
+                        </Avatar>
+                    </div>
+                     {isOwn && (
+                        <button className="text-xs mt-1.5" onClick={() => setIsCreateStoryDialogOpen(true)}>
+                            Add Story
+                            <div className="relative w-6 h-6 mx-auto mt-1 flex items-center justify-center bg-primary rounded-full p-0.5 border-2 border-background">
+                                <Plus className="w-4 h-4 text-primary-foreground" />
+                            </div>
+                        </button>
                     )}
-                    </Avatar>
-                </div>
-                <p className="text-xs mt-1.5">{isOwn ? 'Your Story' : story.author.name}</p>
+                    {!isOwn && <p className="text-xs mt-1.5" onClick={() => handleStoryClick(story)}>{story.author.name}</p>}
                 </div>
             )
           })}
@@ -729,7 +753,3 @@ export default function Home() {
         </React.Suspense>
     )
 }
-
-    
-
-    
