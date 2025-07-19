@@ -3,11 +3,18 @@
 
 import Image from "next/image";
 import { RegisterForm } from "./register-form";
+import { LoginForm } from "./login-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useSearchParams } from 'next/navigation'
+
 
 function RegisterPageContent() {
+  const searchParams = useSearchParams()
+  const defaultTab = searchParams.get('tab') || 'register';
+
   return (
     <div className="container grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
       <div className="hidden lg:block">
@@ -27,23 +34,36 @@ function RegisterPageContent() {
         />
       </div>
       <div>
-        <Card className="w-full max-w-md mx-auto shadow-xl transition-all duration-300">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-headline">Create Your Account</CardTitle>
-            <CardDescription>
-              Join as a student or an alumnus. It's free!
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <RegisterForm />
-          </CardContent>
-        </Card>
+        <Tabs defaultValue={defaultTab} className="w-full max-w-md mx-auto">
+            <Card className="shadow-xl transition-all duration-300">
+                <CardHeader className="text-center pb-2">
+                    <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="register">Create Account</TabsTrigger>
+                        <TabsTrigger value="login">Login</TabsTrigger>
+                    </TabsList>
+                </CardHeader>
+                <CardContent>
+                    <TabsContent value="register">
+                        <CardDescription className="text-center mb-4">
+                            Join as a student or an alumnus. It's free!
+                        </CardDescription>
+                        <RegisterForm />
+                    </TabsContent>
+                    <TabsContent value="login">
+                         <CardDescription className="text-center mb-4">
+                            Welcome back! Sign in to your account.
+                        </CardDescription>
+                        <LoginForm />
+                    </TabsContent>
+                </CardContent>
+            </Card>
+        </Tabs>
       </div>
     </div>
   );
 }
 
-export default function RegisterPage() {
+function RegisterPageWrapper() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
@@ -66,4 +86,12 @@ export default function RegisterPage() {
       )}
     </div>
   );
+}
+
+export default function RegisterPage() {
+    return (
+        <React.Suspense fallback={<div>Loading...</div>}>
+            <RegisterPageWrapper />
+        </React.Suspense>
+    )
 }

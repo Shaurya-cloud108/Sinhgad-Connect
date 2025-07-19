@@ -2,7 +2,7 @@
 "use client";
 
 import React, { createContext, useState, ReactNode, useContext, useEffect } from 'react';
-import { networkingGroups as initialNetworkingGroups, conversationsData as initialConversations, messagesData as initialMessagesData, alumniData } from '@/lib/data';
+import { networkingGroups as initialNetworkingGroups, conversationsData as initialConversations, messagesData as initialMessagesData, communityMembers } from '@/lib/data';
 import { ProfileContext } from './ProfileContext';
 import { ProfileData } from '@/lib/data';
 
@@ -87,6 +87,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
 
     useEffect(() => {
+        if (!profileData) {
+            setConversations([]);
+            setJoinedGroups(new Set());
+            return;
+        };
+
         const userGroups = new Set<string>();
         initialNetworkingGroups.forEach(group => {
             if (group.members.some(member => member.id === profileData.handle)) {
@@ -94,7 +100,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             }
         });
 
-        // Filter groups to only those the user has joined, then create conversations
+        const directMessages = initialConversations.filter(c => communityMembers.some(m => m.name === c.name));
+
         const groupConversations = initialNetworkingGroups
             .filter(group => userGroups.has(group.title))
             .map(group => ({
@@ -106,15 +113,16 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 unread: 0,
             }));
 
-        const allConversations = [...initialConversations, ...groupConversations.filter(gc => !initialConversations.some(ic => ic.name === gc.name))];
+        const allConversations = [...directMessages, ...groupConversations];
         
         setConversations(allConversations);
         setJoinedGroups(userGroups);
 
-    }, [profileData.handle]);
+    }, [profileData]);
 
 
     const addNetworkingGroup = (group: NetworkingGroup) => {
+        if (!profileData) return;
         setNetworkingGroups(prev => [group, ...prev]);
         setJoinedGroups(prev => new Set(prev).add(group.title));
         
@@ -130,7 +138,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         
         setMessagesData(prev => ({
             ...prev,
-            [group.title]: [{ senderId: 'system', senderName: 'System', text: 'Welcome to the group! You are the admin.' }]
+            [group.title]: [{ senderId: profileData.handle, senderName: profileData.name, text: 'Welcome to the group! You are the admin.' }]
         }));
     };
     
@@ -155,6 +163,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const toggleGroupMembership = (group: NetworkingGroup) => {
+        if (!profileData) return;
         const newJoinedGroups = new Set(joinedGroups);
         const alreadyMember = newJoinedGroups.has(group.title);
         

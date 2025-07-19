@@ -7,6 +7,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { BottomNav } from '@/components/layout/bottom-nav';
 import { ProfileProvider } from '@/context/ProfileContext';
 import { AppProvider } from '@/context/AppContext';
+import React from 'react';
 
 export const metadata: Metadata = {
   title: 'Sinhgad Alumni Connect',

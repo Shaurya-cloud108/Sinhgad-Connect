@@ -104,13 +104,11 @@ function GroupIcon({ iconName }: { iconName: string }) {
 }
 
 
-export default function NetworkingPage() {
+function NetworkingPageContent() {
   const { networkingGroups, joinedGroups, toggleGroupMembership, setSelectedConversationByName } = useContext(AppContext);
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
 
 
   const handleGroupClick = (group: NetworkingGroup) => {
@@ -125,10 +123,6 @@ export default function NetworkingPage() {
         g.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
         g.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
-
-  if (!mounted) {
-    return null; // or a loading spinner
-  }
 
   return (
     <div className="container py-8 md:py-12">
@@ -221,4 +215,15 @@ export default function NetworkingPage() {
       </div>
     </div>
   );
+}
+
+export default function NetworkingPage() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted) {
+    return null; // or a loading spinner
+  }
+
+  return <NetworkingPageContent />;
 }

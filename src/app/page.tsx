@@ -74,6 +74,8 @@ function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean,
       return;
     }
     
+    if (!profileData) return;
+
     const newPost: FeedItem = {
         id: Date.now(), // Simple unique ID
         author: {
@@ -176,6 +178,8 @@ function CreateStoryDialog({ open, onOpenChange, onStorySubmit }: { open: boolea
             return;
         }
 
+        if (!profileData) return;
+
         const newStory: Story = {
             name: profileData.name,
             avatar: profileData.avatar,
@@ -275,6 +279,10 @@ export default function Home() {
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
   const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
   const { profileData } = useContext(ProfileContext);
+
+  if (!profileData) {
+      return <div>Loading profile...</div>;
+  }
 
   const handlePostSubmit = (newPost: FeedItem) => {
     setFeedItems(prev => [newPost, ...prev]);

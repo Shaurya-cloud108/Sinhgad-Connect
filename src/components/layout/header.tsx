@@ -23,9 +23,12 @@ export function AppHeader() {
   const isRegisterPage = pathname === "/register";
   const { profileData } = useContext(ProfileContext);
 
-  if (!profileData) {
-    return null; // Or a loading state
+  if (!profileData && !isRegisterPage) {
+    return null; // Or a loading state for non-auth pages
   }
+  
+  const showAuthButtons = !profileData || isRegisterPage;
+
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background">
@@ -55,7 +58,7 @@ export function AppHeader() {
                 Sinhgad Alumni Connect
                 </span>
             </Link>
-            {!isRegisterPage && (
+            {!showAuthButtons && (
               <nav className="flex items-center space-x-4 text-sm font-medium">
                 {navLinks.map((link) => (
                   <Link
@@ -69,13 +72,13 @@ export function AppHeader() {
               </nav>
             )}
             <div className="flex flex-1 items-center justify-end space-x-4">
-              {isRegisterPage ? (
+              {showAuthButtons ? (
                 <>
                   <Button variant="ghost" asChild>
-                    <Link href="/register">Login</Link>
+                    <Link href="/register?tab=login">Login</Link>
                   </Button>
                   <Button asChild>
-                    <Link href="/register">Join Now</Link>
+                    <Link href="/register?tab=register">Join Now</Link>
                   </Button>
                 </>
               ) : (

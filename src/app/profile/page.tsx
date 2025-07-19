@@ -246,22 +246,24 @@ export default function ProfilePage() {
     useEffect(() => {
         if (profileData) {
             setUserPosts(initialFeedItems.filter(item => item.author.handle === profileData.handle));
+        } else {
+            setUserPosts([]);
         }
     }, [profileData]);
 
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const router = useRouter();
     
-    const adminGroups = networkingGroups.filter(group => 
-        group.members.some(member => member.id === profileData?.handle && member.role === 'admin')
-    );
+    const adminGroups = profileData ? networkingGroups.filter(group => 
+        group.members.some(member => member.id === profileData.handle && member.role === 'admin')
+    ) : [];
 
     const handleProfileUpdate = (updatedData: Partial<ProfileData>) => {
-        setProfileData(prev => ({...prev, ...updatedData}));
+        setProfileData(prev => prev ? {...prev, ...updatedData} : null);
     };
 
     const handleLogout = () => {
-        router.push("/register");
+        router.push("/register?tab=login");
     }
 
     const handleDeletePost = (postId: number) => {
@@ -274,7 +276,7 @@ export default function ProfilePage() {
     }
 
     if (!profileData) {
-        return <div>Loading...</div>;
+        return <div>Loading profile...</div>;
     }
 
   return (
@@ -466,7 +468,7 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
       </div>
-      {profileData && <EditProfileDialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} profile={profileData} onProfileUpdate={handleProfileUpdate} />}
+      <EditProfileDialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} profile={profileData} onProfileUpdate={handleProfileUpdate} />
     </div>
   );
 }

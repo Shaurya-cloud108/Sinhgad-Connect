@@ -111,6 +111,8 @@ function GroupInfoDialog({ group, currentUserRole, onOpenChange }: { group: Netw
         toggleGroupMembership(group);
         onOpenChange(false);
     }
+    
+    if (!profileData) return null;
 
     return (
         <DialogContent className="max-w-md">
@@ -235,10 +237,10 @@ export default function MessagesPage() {
   const isUserMember = currentGroup ? joinedGroups.has(currentGroup.title) : false;
 
   const members: Member[] = currentGroup?.members || [];
-  const currentUserRole = members.find(m => m.id === profileData.handle)?.role;
+  const currentUserRole = profileData ? members.find(m => m.id === profileData.handle)?.role : undefined;
 
   const handleSendMessage = () => {
-    if (newMessage.trim() === "" || !selectedConversation) return;
+    if (newMessage.trim() === "" || !selectedConversation || !profileData) return;
 
     const newMessageObj: Message = {
       senderId: profileData.handle,
@@ -275,6 +277,16 @@ export default function MessagesPage() {
   }
 
   const messages = selectedConversation ? messagesData[selectedConversation.name as keyof typeof messagesData] || [] : [];
+  
+  if (!profileData) {
+      return (
+          <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+            <MessageSquare className="h-20 w-20 mb-4" />
+            <h2 className="text-xl font-semibold">Please log in</h2>
+            <p>Log in to view your messages.</p>
+          </div>
+      )
+  }
  
   return (
     <div className="h-[calc(100vh-112px)] md:h-[calc(100vh-64px)] border-t md:border-t-0 flex">
@@ -387,9 +399,9 @@ export default function MessagesPage() {
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    disabled={!isUserMember && !!currentGroup}
+                    disabled={(!isUserMember && !!currentGroup) || !profileData}
                 />
-                <Button size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-10" onClick={handleSendMessage} disabled={!isUserMember && !!currentGroup}>
+                <Button size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-10" onClick={handleSendMessage} disabled={(!isUserMember && !!currentGroup) || !profileData}>
                   <Send className="h-5 w-5" />
                 </Button>
               </div>
