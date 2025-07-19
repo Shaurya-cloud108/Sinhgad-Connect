@@ -12,7 +12,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Code, Briefcase, Rocket, Building, Globe, PlusCircle, MessageSquare, Send, CheckCircle } from "lucide-react";
+import { ArrowRight, Code, Briefcase, Rocket, Building, Globe, PlusCircle, MessageSquare, Send } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -30,7 +30,6 @@ import { useRouter } from "next/navigation";
 import { ProfileContext } from "@/context/ProfileContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShareDialog } from "@/components/share-dialog";
-import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 
 function CreateGroupDialog({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
@@ -117,13 +116,13 @@ function NetworkingPageContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
 
-  const handleGroupClick = (group: NetworkingGroup) => {
+  const handleGoToChat = (group: NetworkingGroup) => {
       setSelectedConversationByName(group.title);
       router.push("/messages");
   }
   
-  const handleJoinToggle = (group: NetworkingGroup) => {
-    toggleGroupMembership(group.title);
+  const handleJoinToggle = (groupTitle: string) => {
+    toggleGroupMembership(groupTitle);
   }
 
   const { myGroups, exploreGroups } = useMemo(() => {
@@ -155,8 +154,7 @@ function NetworkingPageContent() {
 
       <CreateGroupDialog open={isCreateGroupOpen} onOpenChange={setIsCreateGroupOpen} />
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-        <h2 className="text-2xl font-headline font-bold mb-4 md:mb-0">Find Groups</h2>
+      <div className="mb-8">
         <Input 
             placeholder="Search for groups..."
             className="w-full md:max-w-sm"
@@ -168,7 +166,7 @@ function NetworkingPageContent() {
       {/* My Groups Section */}
       {myGroups.length > 0 && (
         <div className="mb-12">
-            <h3 className="text-xl font-headline font-bold mb-4">My Groups</h3>
+            <h2 className="text-2xl font-headline font-bold mb-4">My Groups</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {myGroups.map(group => (
                     <Card key={group.title} className="flex flex-col hover:shadow-lg transition-shadow duration-300">
@@ -183,7 +181,7 @@ function NetworkingPageContent() {
                         <p className="text-sm text-muted-foreground line-clamp-2">{group.description}</p>
                       </CardContent>
                       <CardFooter className="gap-2">
-                        <Button className="w-full" variant="secondary" onClick={() => handleGroupClick(group)}>
+                        <Button className="w-full" onClick={() => handleGoToChat(group)}>
                             <MessageSquare className="mr-2 h-4 w-4" /> Go to Chat
                         </Button>
                         <ShareDialog contentType="group" contentId={group.title}>
@@ -202,42 +200,44 @@ function NetworkingPageContent() {
 
       {/* Explore Groups Section */}
       <div>
-        <h3 className="text-xl font-headline font-bold mb-4">Explore Groups</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {exploreGroups.map((group) => (
-              <Card key={group.title} className="flex flex-col hover:shadow-lg transition-shadow duration-300">
-                <CardHeader className="flex-row items-center gap-4">
-                  <GroupIcon iconName={group.iconName} />
-                  <div className="flex-1">
-                    <CardTitle className="font-headline text-xl">{group.title}</CardTitle>
-                    <CardDescription>{group.members.length} Members</CardDescription>
-                  </div>
-                </CardHeader>
-                <CardContent className="flex-grow">
-                  <p className="text-sm text-muted-foreground line-clamp-2">{group.description}</p>
-                </CardContent>
-                <CardFooter className="gap-2">
-                  <Button className="w-full" onClick={() => handleJoinToggle(group)}>
-                    Join Group <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                  <ShareDialog contentType="group" contentId={group.title}>
-                      <Button variant="outline" size="icon">
-                          <Send className="h-4 w-4" />
-                      </Button>
-                  </ShareDialog>
-                </CardFooter>
-              </Card>
-            ))}
-        </div>
-        {exploreGroups.length === 0 && myGroups.length === 0 && (
+        <h2 className="text-2xl font-headline font-bold mb-4">Explore Groups</h2>
+        {exploreGroups.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {exploreGroups.map((group) => (
+                <Card key={group.title} className="flex flex-col hover:shadow-lg transition-shadow duration-300">
+                  <CardHeader className="flex-row items-center gap-4">
+                    <GroupIcon iconName={group.iconName} />
+                    <div className="flex-1">
+                      <CardTitle className="font-headline text-xl">{group.title}</CardTitle>
+                      <CardDescription>{group.members.length} Members</CardDescription>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex-grow">
+                    <p className="text-sm text-muted-foreground line-clamp-2">{group.description}</p>
+                  </CardContent>
+                  <CardFooter className="gap-2">
+                    <Button className="w-full" onClick={() => handleJoinToggle(group.title)}>
+                      Join Group <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                    <ShareDialog contentType="group" contentId={group.title}>
+                        <Button variant="outline" size="icon">
+                            <Send className="h-4 w-4" />
+                        </Button>
+                    </ShareDialog>
+                  </CardFooter>
+                </Card>
+              ))}
+          </div>
+        ) : (
              <Card>
               <CardContent className="p-6 text-center text-muted-foreground">
-                <p>No groups found matching "{searchQuery}". Try a different search.</p>
+                {searchQuery ? (
+                  <p>No groups found matching "{searchQuery}". Try a different search.</p>
+                ) : (
+                  <p>You have joined all available groups. Why not create a new one?</p>
+                )}
               </CardContent>
             </Card>
-        )}
-         {exploreGroups.length === 0 && myGroups.length > 0 && (
-             <p className="text-center text-muted-foreground pt-4">You have joined all available groups.</p>
         )}
       </div>
     </div>

@@ -113,17 +113,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         syncUserGroups();
-    }, [syncUserGroups]);
+    }, [profileData, networkingGroups]);
 
 
-    const addNetworkingGroup = (group: NetworkingGroup) => {
+    const addNetworkingGroup = (group: Omit<NetworkingGroup, 'iconName' | 'members'> & { iconName: string; members: Member[] }) => {
         if (!profileData) return;
         
         // Add group
-        setNetworkingGroups(prev => [group, ...prev]);
-
-        // Add to joined groups
-        setJoinedGroups(prev => new Set(prev).add(group.title));
+        const newGroup = { ...group };
+        setNetworkingGroups(prev => [newGroup, ...prev]);
         
         // Create conversation for the new group
         const newConversation = {
@@ -150,14 +148,18 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     };
     
     const removeMemberFromGroup = (groupTitle: string, memberId: string) => {
+        let wasMember = false;
         setNetworkingGroups(prevGroups => prevGroups.map(g => {
             if (g.title === groupTitle) {
+                if (g.members.some(m => m.id === memberId)) {
+                    wasMember = true;
+                }
                 return { ...g, members: g.members.filter(m => m.id !== memberId) };
             }
             return g;
         }));
-
-        if (selectedConversation?.name === groupTitle && profileData?.handle === memberId) {
+        
+        if (wasMember && profileData?.handle === memberId && selectedConversation?.name === groupTitle) {
             setSelectedConversation(null);
         }
     };
@@ -169,17 +171,45 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         if (!group) return;
 
         const isMember = group.members.some(m => m.id === profileData.handle);
+        const updatedGroups = networkingGroups.map(g => {
+            if (g.title === groupTitle) {
+                if (isMember) {
+                    // Leave group
+                    return { ...g, members: g.members.filter(m => m.id !== profileData.handle) };
+                } else {
+                    // Join group
+                    const newMember: Member = {
+                        id: profileData.handle,
+                        name: profileData.name,
+                        avatar: profileData.avatar,
+                        role: 'member'
+                    };
+                    return { ...g, members: [...g.members, newMember] };
+                }
+            }
+            return g;
+        });
+        
+        setNetworkingGroups(updatedGroups);
 
-        if (isMember) {
-             removeMemberFromGroup(groupTitle, profileData.handle);
-        } else {
-            const newMember: Member = {
-                id: profileData.handle,
-                name: profileData.name,
-                avatar: profileData.avatar,
-                role: 'member'
-            };
-            addMemberToGroup(groupTitle, newMember);
+        if (!isMember) {
+            // If user just joined, check if a conversation exists, if not create one.
+            const conversationExists = conversations.some(c => c.name === groupTitle);
+            if (!conversationExists) {
+                const newConversation = {
+                    name: groupTitle,
+                    avatar: "https://placehold.co/100x100.png",
+                    aiHint: "university logo",
+                    lastMessage: "You joined the group.",
+                    time: "Now",
+                    unread: 0,
+                    isGroup: true,
+                };
+                setConversations(prev => [newConversation, ...prev]);
+            }
+        } else if (selectedConversation?.name === groupTitle) {
+            // If user just left the group they were viewing, deselect it
+            setSelectedConversation(null);
         }
     };
 
