@@ -243,7 +243,7 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
 
 function ProfilePageContent({ handle }: { handle: string }) {
     const { profileData: ownProfileData, setProfileData } = useContext(ProfileContext);
-    const { networkingGroups, setSelectedConversationByName } = useContext(AppContext);
+    const { setSelectedConversationByName } = useContext(AppContext);
     
     const router = useRouter();
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -292,10 +292,6 @@ function ProfilePageContent({ handle }: { handle: string }) {
 
     }, [handle, ownProfileData, isOwnProfile]);
 
-
-    const adminGroups = profileData ? networkingGroups.filter(group => 
-        group.members.some(member => member.id === profileData!.handle && member.role === 'admin')
-    ) : [];
 
     const handleProfileUpdate = (updatedData: Partial<ProfileData>) => {
         if (isOwnProfile) {
@@ -535,32 +531,6 @@ function ProfilePageContent({ handle }: { handle: string }) {
                     </div>
                   </CardContent>
                 </Card>
-                 {isOwnProfile && adminGroups.length > 0 && (
-                    <Card>
-                    <CardHeader>
-                        <CardTitle className="font-headline text-xl">Groups Administered</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        {adminGroups.map(group => (
-                            <div key={group.title} className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-muted rounded-md">
-                                        <Users className="h-5 w-5 text-muted-foreground"/>
-                                    </div>
-                                    <p className="font-semibold text-sm">{group.title}</p>
-                                </div>
-                                <Button 
-                                    variant="outline" 
-                                    size="sm"
-                                    onClick={() => handleMessageClick()}
-                                >
-                                    Go to Chat
-                                </Button>
-                            </div>
-                        ))}
-                    </CardContent>
-                    </Card>
-                )}
               </TabsContent>
             </Tabs>
           </CardContent>
@@ -572,7 +542,6 @@ function ProfilePageContent({ handle }: { handle: string }) {
 }
 
 export default function ProfilePage({ params }: { params: { handle: string } }) {
-  const { handle } = params;
   // Use a client component to render the main content and pass the handle
-  return <ProfilePageContent handle={handle} />;
+  return <ProfilePageContent handle={params.handle} />;
 }
