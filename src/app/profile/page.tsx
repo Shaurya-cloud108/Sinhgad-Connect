@@ -204,8 +204,8 @@ export default function ProfilePage() {
                     </Avatar>
                 </div>
                  <div className="flex justify-end pt-4 gap-2">
-                    <Button variant="outline" onClick={() => setIsEditDialogOpen(true)}><Edit className="mr-2" /> Edit Profile</Button>
-                    <Button variant="outline" onClick={handleLogout}><LogOut className="mr-2" /> Logout</Button>
+                    <Button variant="outline" onClick={() => setIsEditDialogOpen(true)}><Edit className="mr-2 h-4 w-4" /> Edit Profile</Button>
+                    <Button variant="outline" onClick={handleLogout}><LogOut className="mr-2 h-4 w-4" /> Logout</Button>
                 </div>
                 <div className="pt-10">
                     <CardTitle className="text-2xl font-bold font-headline">{profileData.name}</CardTitle>
@@ -328,7 +328,7 @@ export default function ProfilePage() {
                  <Card className="mt-6">
                   <CardHeader>
                     <CardTitle className="font-headline text-xl">Education</CardTitle>
-                  </Header>
+                  </CardHeader>
                   <CardContent className="space-y-4">
                      <div className="flex gap-4">
                         <GraduationCap className="h-8 w-8 text-muted-foreground mt-1"/>
@@ -349,3 +349,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    
