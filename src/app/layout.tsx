@@ -8,6 +8,19 @@ import { BottomNav } from '@/components/layout/bottom-nav';
 import { ProfileProvider } from '@/context/ProfileContext';
 import { AppProvider } from '@/context/AppContext';
 import React from 'react';
+import { Playfair_Display, PT_Sans } from 'next/font/google';
+
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  weight: ['700'],
+  variable: '--font-playfair',
+});
+
+const ptSans = PT_Sans({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-pt-sans',
+});
 
 export const metadata: Metadata = {
   title: 'Sinhgad Alumni Connect',
@@ -20,12 +33,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
-      </head>
+    <html lang="en" className={`${playfair.variable} ${ptSans.variable}`}>
       <body className="font-body antialiased">
         <AppProvider>
           <ProfileProvider>

@@ -4,7 +4,6 @@
 import React, { createContext, useState, ReactNode, useContext, useEffect } from 'react';
 import { networkingGroups as initialNetworkingGroups, conversationsData as initialConversations, messagesData as initialMessagesData, communityMembers } from '@/lib/data.tsx';
 import { ProfileContext } from './ProfileContext';
-import { ProfileData } from '@/lib/data.tsx';
 
 // Types
 export type Member = {
@@ -28,6 +27,7 @@ export type Conversation = {
     lastMessage: string;
     time: string;
     unread: number;
+    isGroup?: boolean;
 };
 
 export type Message = { 
@@ -93,17 +93,17 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             return;
         };
 
-        const userGroups = new Set<string>();
-        initialNetworkingGroups.forEach(group => {
+        const userGroupTitles = new Set<string>();
+        networkingGroups.forEach(group => {
             if (group.members.some(member => member.id === profileData.handle)) {
-                userGroups.add(group.title);
+                userGroupTitles.add(group.title);
             }
         });
 
-        const directMessages = initialConversations.filter(c => communityMembers.some(m => m.name === c.name));
+        const directMessages = initialConversations.filter(c => !c.isGroup);
 
-        const groupConversations = initialNetworkingGroups
-            .filter(group => userGroups.has(group.title))
+        const groupConversations = networkingGroups
+            .filter(group => userGroupTitles.has(group.title))
             .map(group => ({
                 name: group.title,
                 avatar: "https://placehold.co/100x100.png",
@@ -111,41 +111,25 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 lastMessage: messagesData[group.title]?.[messagesData[group.title].length - 1]?.text || "No messages yet.",
                 time: "Yesterday",
                 unread: 0,
+                isGroup: true,
             }));
 
         const allConversations = [...directMessages, ...groupConversations];
         
         setConversations(allConversations);
-        setJoinedGroups(userGroups);
+        setJoinedGroups(userGroupTitles);
 
-    }, [profileData]);
+    }, [profileData, networkingGroups, messagesData]);
 
 
     const addNetworkingGroup = (group: NetworkingGroup) => {
         if (!profileData) return;
         setNetworkingGroups(prev => [group, ...prev]);
-        setJoinedGroups(prev => new Set(prev).add(group.title));
-        
-        const newConversation: Conversation = {
-            name: group.title,
-            avatar: "https://placehold.co/100x100.png",
-            aiHint: "university logo",
-            lastMessage: "You created the group.",
-            time: "Now",
-            unread: 0,
-        };
-        setConversations(prev => [newConversation, ...prev]);
-        
-        setMessagesData(prev => ({
-            ...prev,
-            [group.title]: [{ senderId: profileData.handle, senderName: profileData.name, text: 'Welcome to the group! You are the admin.' }]
-        }));
     };
     
     const addMemberToGroup = (groupTitle: string, member: Member) => {
         setNetworkingGroups(prevGroups => prevGroups.map(g => {
             if (g.title === groupTitle) {
-                // Avoid adding duplicate members
                 if (g.members.some(m => m.id === member.id)) return g;
                 return { ...g, members: [...g.members, member] };
             }
@@ -164,8 +148,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const toggleGroupMembership = (group: NetworkingGroup) => {
         if (!profileData) return;
-        const newJoinedGroups = new Set(joinedGroups);
-        const alreadyMember = newJoinedGroups.has(group.title);
+        
+        const alreadyMember = joinedGroups.has(group.title);
         
         setNetworkingGroups(prevGroups => prevGroups.map(g => {
             if (g.title === group.title) {
@@ -183,33 +167,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             }
             return g;
         }));
-
-        if (alreadyMember) {
-            newJoinedGroups.delete(group.title);
-        } else {
-            newJoinedGroups.add(group.title);
-            
-            const groupExistsInConvos = conversations.some(c => c.name === group.title);
-            if (!groupExistsInConvos) {
-                const newConversation: Conversation = {
-                    name: group.title,
-                    avatar: "https://placehold.co/100x100.png",
-                    aiHint: "university logo",
-                    lastMessage: "You joined the group.",
-                    time: "Now",
-                    unread: 0,
-                };
-                setConversations(prev => [newConversation, ...prev]);
-            }
-
-            if (!messagesData[group.title]) {
-                 setMessagesData(prev => ({
-                    ...prev,
-                    [group.title]: [{ senderId: 'system', senderName: 'System', text: 'Welcome to the group!' }]
-                }));
-            }
-        }
-        setJoinedGroups(newJoinedGroups);
     };
 
     const updateMemberRole = (groupTitle: string, memberId: string, role: 'admin' | 'member') => {
@@ -229,6 +186,21 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         const conversation = conversations.find(c => c.name === name);
         if (conversation) {
             setSelectedConversation(conversation);
+        } else {
+            const group = networkingGroups.find(g => g.name === name);
+            if (group) {
+                const newConversation: Conversation = {
+                    name: group.title,
+                    avatar: "https://placehold.co/100x100.png",
+                    aiHint: "university logo",
+                    lastMessage: "You joined the group.",
+                    time: "Now",
+                    unread: 0,
+                    isGroup: true,
+                };
+                setConversations(prev => [...prev, newConversation]);
+                setSelectedConversation(newConversation);
+            }
         }
     };
 

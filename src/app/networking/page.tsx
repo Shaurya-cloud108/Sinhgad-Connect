@@ -27,6 +27,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { AppContext, NetworkingGroup } from "@/context/AppContext";
 import { useRouter } from "next/navigation";
 import { ProfileContext } from "@/context/ProfileContext";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function CreateGroupDialog({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
   const { addNetworkingGroup } = useContext(AppContext);
@@ -222,7 +223,35 @@ export default function NetworkingPage() {
   useEffect(() => setMounted(true), []);
 
   if (!mounted) {
-    return null; // or a loading spinner
+    return (
+        <div className="container py-8 md:py-12">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                <div className="space-y-2 mb-4 md:mb-0">
+                    <Skeleton className="h-10 w-72" />
+                    <Skeleton className="h-6 w-96" />
+                </div>
+                <Skeleton className="h-10 w-36" />
+            </div>
+            <div className="mb-12">
+                <Skeleton className="h-8 w-48 mb-6" />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <Skeleton className="h-56 w-full" />
+                    <Skeleton className="h-56 w-full" />
+                </div>
+            </div>
+             <div>
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                    <Skeleton className="h-8 w-48 mb-4 md:mb-0" />
+                    <Skeleton className="h-10 w-full md:max-w-sm" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <Skeleton className="h-56 w-full" />
+                    <Skeleton className="h-56 w-full" />
+                    <Skeleton className="h-56 w-full" />
+                </div>
+            </div>
+        </div>
+    );
   }
 
   return <NetworkingPageContent />;

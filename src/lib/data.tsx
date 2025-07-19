@@ -2,8 +2,7 @@
 "use client";
 
 import React from 'react';
-import { Member, NetworkingGroup } from "@/context/AppContext";
-import { profileData as currentUserProfileData } from './data'; // Renamed to avoid conflict
+import { Member, NetworkingGroup, Conversation } from "@/context/AppContext";
 
 export type JobListing = {
   id: number;
@@ -96,7 +95,10 @@ export type Story = {
 
 
 export const stories: Story[] = [
-    { id: 1, name: "Your Story", avatar: "https://placehold.co/100x100.png", images: [], isOwn: true, aiHint: "add icon", viewers: [] },
+    { id: 1, name: "Your Story", avatar: "https://placehold.co/100x100.png", images: [], isOwn: true, aiHint: "add icon", viewers: [
+        { name: "Sunita Narayan", avatar: "https://placehold.co/100x100.png" },
+        { name: "Kavya Iyer", avatar: "https://placehold.co/100x100.png" },
+    ] },
     { 
       id: 2, 
       name: "Rohan V.", 
@@ -196,7 +198,7 @@ export const feedItems: FeedItem[] = [
     id: 4,
     author: {
       name: "Priya Sharma",
-      avatar: "https://placehold.co/100x100.png",
+      avatar: "https://placehold.co/150x150.png",
       handle: "priya-sharma-09",
       aiHint: "professional woman"
     },
@@ -211,7 +213,7 @@ export const feedItems: FeedItem[] = [
     id: 5,
     author: {
       name: "Priya Sharma",
-      avatar: "https://placehold.co/100x100.png",
+      avatar: "https://placehold.co/150x150.png",
       handle: "priya-sharma-09",
       aiHint: "professional woman"
     },
@@ -421,12 +423,12 @@ export const communityMembers: CommunityMember[] = [
 
 const groupMembers: { [key: string]: Member[] } = {
   "Software & Tech Innovators": [
-    { id: 'priya-sharma-09', name: 'Priya Sharma', avatar: 'https://placehold.co/100x100.png', role: 'admin' },
+    { id: 'priya-sharma-09', name: 'Priya Sharma', avatar: profileData.avatar, role: 'admin' },
     { id: 'rohan-verma', name: 'Rohan Verma', avatar: 'https://placehold.co/100x100.png', role: 'member' },
     { id: 'kavya-iyer', name: 'Kavya Iyer', avatar: 'https://placehold.co/100x100.png', role: 'member' },
   ],
   "Entrepreneurship Hub": [
-     { id: 'priya-sharma-09', name: 'Priya Sharma', avatar: 'https://placehold.co/100x100.png', role: 'admin' },
+     { id: 'priya-sharma-09', name: 'Priya Sharma', avatar: profileData.avatar, role: 'admin' },
      { id: 'sunita-narayan', name: "Sunita Narayan", avatar: 'https://placehold.co/100x100.png', role: 'admin' },
   ]
 };
@@ -471,7 +473,7 @@ export const networkingGroups: NetworkingGroup[] = [
 ];
 
 
-export const conversationsData = [
+export const conversationsData: Conversation[] = [
   {
     name: "Rohan Verma",
     avatar: "https://placehold.co/100x100.png",
@@ -479,6 +481,7 @@ export const conversationsData = [
     lastMessage: "Thanks for the resume tips!",
     time: "9:15 AM",
     unread: 0,
+    isGroup: false,
   },
   {
     name: "Kavya Iyer",
@@ -487,6 +490,7 @@ export const conversationsData = [
     lastMessage: "Thank you for the mentorship!",
     time: "Yesterday",
     unread: 1,
+    isGroup: false,
   },
 ];
 
@@ -496,12 +500,12 @@ export const messagesData: { [key: string]: { senderId: string; senderName: stri
   ],
   "Kavya Iyer": [
       { senderId: 'kavya-iyer', senderName: 'Kavya Iyer', text: "Hi Priya! I had a question about my project." },
-      { senderId: currentUserProfileData.handle, senderName: currentUserProfileData.name, text: "Of course, ask away!" },
+      { senderId: profileData.handle, senderName: profileData.name, text: "Of course, ask away!" },
       { senderId: 'kavya-iyer', senderName: 'Kavya Iyer', text: "Thank you for the mentorship!" },
   ],
   "Software & Tech Innovators": [
       { senderId: 'rohan-verma', senderName: 'Rohan Verma', text: 'Has anyone worked with the new Bun APIs?' },
-      { senderId: currentUserProfileData.handle, senderName: currentUserProfileData.name, text: 'I have! It’s incredibly fast. What are you building?' },
+      { senderId: profileData.handle, senderName: profileData.name, text: 'I have! It’s incredibly fast. What are you building?' },
   ],
   "Entrepreneurship Hub": [
       { senderId: 'sunita-narayan', senderName: 'Sunita Narayan', text: 'Seed funding secured! Big things coming soon.' },

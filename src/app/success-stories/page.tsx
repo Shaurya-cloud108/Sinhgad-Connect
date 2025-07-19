@@ -15,6 +15,8 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowRight, BrainCircuit, Send } from "lucide-react";
 import Link from "next/link";
 import { ShareDialog } from "@/components/share-dialog";
+import { useState, useEffect } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const successStories = [
   {
@@ -59,7 +61,7 @@ const successStories = [
   },
 ];
 
-export default function SuccessStoriesPage() {
+function SuccessStoriesContent() {
   return (
     <div className="container py-8 md:py-12">
       <div className="text-center mb-12">
@@ -97,8 +99,10 @@ export default function SuccessStoriesPage() {
                 </CardContent>
               </div>
               <CardFooter className="p-0 pt-6 flex items-center justify-between">
-                <Button variant="link" className="p-0 text-primary">
-                   Read Full Story & AI Insights <ArrowRight className="ml-2 h-4 w-4" />
+                <Button asChild variant="link" className="p-0 text-primary">
+                   <Link href={`/success-stories/${story.id}`}>
+                     Read Full Story & AI Insights <ArrowRight className="ml-2 h-4 w-4" />
+                   </Link>
                 </Button>
                 <ShareDialog contentType="story" contentId={story.id}>
                     <Button variant="ghost" size="icon">
@@ -111,7 +115,7 @@ export default function SuccessStoriesPage() {
         ))}
       </div>
       
-      <Card className="mt-16 bg-primary/5">
+      <Card className="mt-16 bg-primary/5 border-primary/20">
         <CardHeader className="text-center">
             <BrainCircuit className="h-10 w-10 mx-auto text-primary" />
             <CardTitle className="font-headline text-2xl">GenAI Career Advisor</CardTitle>
@@ -122,4 +126,28 @@ export default function SuccessStoriesPage() {
       </Card>
     </div>
   );
+}
+
+export default function SuccessStoriesPage() {
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => setMounted(true), []);
+
+    if (!mounted) {
+        return (
+            <div className="container py-8 md:py-12">
+                <div className="text-center mb-12 space-y-2">
+                    <Skeleton className="h-10 w-3/4 mx-auto" />
+                    <Skeleton className="h-6 w-1/2 mx-auto" />
+                </div>
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+                    <Skeleton className="h-64 w-full" />
+                    <Skeleton className="h-64 w-full" />
+                    <Skeleton className="h-64 w-full" />
+                    <Skeleton className="h-64 w-full" />
+                </div>
+            </div>
+        )
+    }
+
+    return <SuccessStoriesContent />
 }

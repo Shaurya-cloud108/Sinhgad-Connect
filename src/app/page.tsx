@@ -56,6 +56,7 @@ import { ShareDialog } from "@/components/share-dialog";
 import { cn } from "@/lib/utils";
 import { CommentSheet } from "@/components/comment-sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean, onOpenChange: (open: boolean) => void, onPostSubmit: (post: FeedItem) => void }) {
   const { toast } = useToast();
@@ -328,7 +329,14 @@ export default function Home() {
   const [activeCommentPostId, setActiveCommentPostId] = useState<number | null>(null);
 
   if (!profileData) {
-      return <div>Loading profile...</div>;
+      return (
+        <div className="w-full max-w-2xl mx-auto py-4 space-y-4">
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-40 w-full" />
+            <Skeleton className="h-96 w-full" />
+            <Skeleton className="h-96 w-full" />
+        </div>
+      );
   }
 
   const handlePostSubmit = (newPost: FeedItem) => {
@@ -336,17 +344,17 @@ export default function Home() {
   };
   
   const handleStorySubmit = (image: string) => {
-    setStories(prev => 
-      prev.map(story => {
-        if (story.isOwn) {
-          return {
-            ...story,
-            images: [...story.images, image],
-          }
+    setStories(prevStories => {
+        const newStories = [...prevStories];
+        const myStoryIndex = newStories.findIndex(s => s.isOwn);
+        if (myStoryIndex !== -1) {
+            newStories[myStoryIndex] = {
+                ...newStories[myStoryIndex],
+                images: [...newStories[myStoryIndex].images, image]
+            };
         }
-        return story;
-      })
-    );
+        return newStories;
+    });
   }
 
   const handleStoryClick = (story: Story) => {

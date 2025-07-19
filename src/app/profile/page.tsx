@@ -56,7 +56,8 @@ import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ProfileContext } from "@/context/ProfileContext";
 import { AppContext } from "@/context/AppContext";
-import { getStatusEmoji } from "@/lib/utils";
+import { getStatusEmoji, cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 
 const profileFormSchema = z.object({
@@ -276,7 +277,27 @@ export default function ProfilePage() {
     }
 
     if (!profileData) {
-        return <div>Loading profile...</div>;
+        return (
+            <div className="bg-secondary/40">
+                <div className="max-w-4xl mx-auto">
+                    <Card className="rounded-none md:rounded-lg overflow-hidden">
+                        <CardHeader className="p-0">
+                            <Skeleton className="h-40 md:h-48 w-full" />
+                        </CardHeader>
+                        <CardContent className="p-6 pt-20">
+                            <Skeleton className="h-8 w-1/2 mb-2" />
+                            <Skeleton className="h-4 w-1/4 mb-4" />
+                            <Skeleton className="h-4 w-3/4 mb-2" />
+                            <Skeleton className="h-4 w-1/3 mb-4" />
+                            <div className="flex gap-4">
+                                <Skeleton className="h-5 w-24" />
+                                <Skeleton className="h-5 w-24" />
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        );
     }
 
   return (
