@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useContext, useMemo, useEffect } from "react";
+import { useState, useContext, useMemo, useEffect, useRef } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,10 +54,11 @@ function AddMemberDialog({ group, onOpenChange }: { group: NetworkingGroup, onOp
     const [potentialMembers, setPotentialMembers] = useState<CommunityMember[]>([]);
 
     useEffect(() => {
+        const lowercasedQuery = searchQuery.toLowerCase();
         const memberIds = new Set(group.members.map(m => m.id));
         const filtered = communityMembers
             .filter(alumnus => !memberIds.has(alumnus.handle))
-            .filter(alumnus => alumnus.name.toLowerCase().includes(searchQuery.toLowerCase()));
+            .filter(alumnus => alumnus.name.toLowerCase().includes(lowercasedQuery));
         setPotentialMembers(filtered);
     }, [searchQuery, group.members]);
 
@@ -119,7 +120,9 @@ function GroupInfoDialog({ group, currentUserRole, onOpenChange }: { group: Netw
     const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
 
     const handleLeaveGroup = () => {
-        toggleGroupMembership(group);
+        if (profileData) {
+            toggleGroupMembership(group.title, profileData.handle);
+        }
         onOpenChange(false);
     }
     
@@ -241,13 +244,14 @@ export default function MessagesPage() {
   const [newMessage, setNewMessage] = useState("");
   const [isGroupInfoOpen, setIsGroupInfoOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   const currentGroup = useMemo(() => {
-    return selectedConversation ? networkingGroups.find(g => g.title === selectedConversation.name) : null;
+    return selectedConversation?.isGroup ? networkingGroups.find(g => g.title === selectedConversation.name) : null;
   }, [selectedConversation, networkingGroups]);
 
-  const isUserMember = currentGroup ? joinedGroups.has(currentGroup.title) : false;
-
+  const isUserMember = currentGroup ? joinedGroups.has(currentGroup.title) : true;
+  
   const members: Member[] = currentGroup?.members || [];
   const currentUserRole = profileData ? members.find(m => m.id === profileData.handle)?.role : undefined;
 
@@ -287,8 +291,8 @@ export default function MessagesPage() {
   }
 
   const handleRejoinGroup = () => {
-    if (currentGroup) {
-        toggleGroupMembership(currentGroup);
+    if (currentGroup && profileData) {
+        toggleGroupMembership(currentGroup.title, profileData.handle);
     }
   }
   
@@ -298,6 +302,12 @@ export default function MessagesPage() {
 
   const messages = selectedConversation ? messagesData[selectedConversation.name as keyof typeof messagesData] || [] : [];
   
+  useEffect(() => {
+    if (chatContainerRef.current) {
+        chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [messages]);
+
   if (!profileData) {
       return (
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
@@ -391,7 +401,7 @@ export default function MessagesPage() {
                  </Dialog>
               )}
             </div>
-            <div className="flex-grow p-4 overflow-y-auto bg-secondary/30 relative">
+            <div className="flex-grow p-4 overflow-y-auto bg-secondary/30 relative" ref={chatContainerRef}>
               <div className={cn("space-y-4", !isUserMember && currentGroup && "blur-sm")}>
                 {messages.map((msg, index) => (
                   <div key={index} className={cn("flex", msg.senderId === profileData.handle ? 'justify-end' : 'justify-start')}>
@@ -426,14 +436,14 @@ export default function MessagesPage() {
             <div className="p-4 border-t bg-background">
               <div className="relative">
                 <Input 
-                    placeholder={!isUserMember && currentGroup ? "You must join to send messages" : "Type a message..."}
+                    placeholder={!isUserMember && currentGroup ? "You must rejoin to send messages" : "Type a message..."}
                     className="pr-12"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    disabled={(!isUserMember && !!currentGroup) || !profileData}
+                    disabled={!isUserMember}
                 />
-                <Button size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-10" onClick={handleSendMessage} disabled={(!isUserMember && !!currentGroup) || !profileData}>
+                <Button size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-10" onClick={handleSendMessage} disabled={!isUserMember}>
                   <Send className="h-5 w-5" />
                 </Button>
               </div>

@@ -34,6 +34,7 @@ function CreateGroupDialog({ open, onOpenChange }: { open: boolean, onOpenChange
   const { profileData } = useContext(ProfileContext);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const router = useRouter();
 
   const handleSubmit = () => {
     if (title && description && profileData) {
@@ -51,6 +52,7 @@ function CreateGroupDialog({ open, onOpenChange }: { open: boolean, onOpenChange
       onOpenChange(false);
       setTitle("");
       setDescription("");
+      router.push('/messages');
     }
   };
 
@@ -107,6 +109,7 @@ function GroupIcon({ iconName }: { iconName: string }) {
 
 function NetworkingPageContent() {
   const { networkingGroups, joinedGroups, toggleGroupMembership, setSelectedConversationByName } = useContext(AppContext);
+  const { profileData } = useContext(ProfileContext);
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
@@ -115,6 +118,11 @@ function NetworkingPageContent() {
   const handleGroupClick = (group: NetworkingGroup) => {
       setSelectedConversationByName(group.title);
       router.push("/messages");
+  }
+  
+  const handleJoinGroup = (group: NetworkingGroup) => {
+    if(!profileData) return;
+    toggleGroupMembership(group.title, profileData.handle);
   }
 
   const myGroups = useMemo(() => {
@@ -204,7 +212,7 @@ function NetworkingPageContent() {
                 <Button 
                   variant="outline" 
                   className="w-full"
-                  onClick={() => toggleGroupMembership(group)}
+                  onClick={() => handleJoinGroup(group)}
                 >
                   Join Group
                   <ArrowRight className="ml-2 h-4 w-4" />
