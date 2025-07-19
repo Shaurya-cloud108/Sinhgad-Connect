@@ -139,20 +139,21 @@ export type StoryViewer = {
   avatar: string;
 };
 
-// This type is kept for backwards compatibility but is no longer the primary type for new stories.
-export type StoryMedia = {
-  type: 'image' | 'video';
+export type StoryItem = {
+  id: number;
   url: string;
   timestamp: number;
-}
+};
 
 export type Story = {
   id: number;
-  name: string;
-  avatar: string;
-  images: string[];
-  isOwn?: boolean;
-  aiHint: string;
+  author: {
+    name: string;
+    avatar: string;
+    handle: string;
+    aiHint: string;
+  };
+  items: StoryItem[];
   viewers?: StoryViewer[];
 };
 
@@ -566,31 +567,55 @@ export const feedItems: FeedItem[] = [
   }
 ];
 
-export const stories: Story[] = [
-    { 
-      id: 1, 
-      name: "Your Story", 
-      avatar: "https://placehold.co/100x100.png", 
-      images: [], 
-      isOwn: true, 
-      aiHint: "add icon", 
-      viewers: []
+const allUsersAsStories: Story[] = communityMembers.map((member, index) => ({
+    id: index + 1,
+    author: {
+        name: member.name,
+        avatar: member.avatar,
+        handle: member.handle,
+        aiHint: member.aiHint,
     },
-    { 
-      id: 2, 
-      name: "Rohan Verma", 
-      avatar: "https://placehold.co/100x100.png", 
-      images: ["https://placehold.co/400x700.png"],
-      aiHint: "professional man",
-      viewers: [
+    items: [],
+    viewers: [],
+}));
+
+// Let's add a story for one user to start with
+const rohanVermaStory = allUsersAsStories.find(s => s.author.handle === 'rohan-verma');
+if (rohanVermaStory) {
+    rohanVermaStory.items.push({
+        id: Date.now(),
+        url: 'https://placehold.co/400x700.png',
+        timestamp: Date.now() - 12 * 60 * 60 * 1000, // 12 hours ago
+    });
+    rohanVermaStory.viewers = [
         { name: "Priya Sharma", avatar: "https://placehold.co/100x100.png" },
         { name: "Anjali Mehta", avatar: "https://placehold.co/100x100.png" },
-      ]
-    },
-    { id: 3, name: "Anjali Mehta", avatar: "https://placehold.co/100x100.png", images: ["https://placehold.co/400x700.png"], aiHint: "corporate woman", viewers: [] },
-    { id: 4, name: "Vikram Singh", avatar: "https://placehold.co/100x100.png", images: [], aiHint: "corporate man", viewers: [] },
-    { id: 5, name: "Sneha Reddy", avatar: "https://placehold.co/100x100.png", images: [], aiHint: "young professional", viewers: [] },
-];
+    ];
+}
+
+// Ensure the current user (Priya Sharma) is in the list
+const currentUserInStories = allUsersAsStories.find(s => s.author.handle === profileData.handle);
+if (!currentUserInStories) {
+    allUsersAsStories.unshift({
+        id: 0,
+        author: {
+            name: profileData.name,
+            avatar: profileData.avatar,
+            handle: profileData.handle,
+            aiHint: profileData.aiHint,
+        },
+        items: [],
+        viewers: [],
+    });
+} else {
+    // Make sure the current user is first in the list
+    const index = allUsersAsStories.findIndex(s => s.author.handle === profileData.handle);
+    const [currentUserStory] = allUsersAsStories.splice(index, 1);
+    allUsersAsStories.unshift(currentUserStory);
+}
+
+export const stories: Story[] = allUsersAsStories;
+
 
 export const conversationsData: Conversation[] = [
     { name: 'Rohan Verma', avatar: 'https://placehold.co/100x100.png', aiHint: 'professional man', lastMessage: 'You\'re welcome! Let me know if you need more help.', time: '2h', unread: 0, isGroup: false },

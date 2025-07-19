@@ -51,7 +51,7 @@ import { useState, useContext, useRef, useEffect } from "react";
 import { useSearchParams } from 'next/navigation'
 import React from 'react';
 import { useToast } from "@/hooks/use-toast";
-import { stories as initialStories, feedItems as initialFeedItems, FeedItem, Story, Comment, StoryViewer, JobListing, StoryMedia } from "@/lib/data.tsx";
+import { stories as initialStories, feedItems as initialFeedItems, FeedItem, Story, Comment, StoryViewer, JobListing, StoryItem } from "@/lib/data.tsx";
 import Image from "next/image";
 import { ProfileContext } from "@/context/ProfileContext";
 import { ShareDialog } from "@/components/share-dialog";
@@ -178,8 +178,8 @@ function CreateStoryDialog({ open, onOpenChange, onStorySubmit }: { open: boolea
     const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            if (file.size > 5 * 1024 * 1024) { // 5MB limit
-                toast({ variant: "destructive", title: "File too large", description: "Please select an image smaller than 5MB." });
+            if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                toast({ variant: "destructive", title: "File too large", description: "Please select an image smaller than 10MB." });
                 return;
             }
             const reader = new FileReader();
@@ -284,35 +284,107 @@ function StoryViewersSheet({ viewers, open, onOpenChange }: { viewers: StoryView
   );
 }
 
-function StoryViewerDialog({ story, open, onOpenChange }: { story: Story | null; open: boolean; onOpenChange: (open: boolean) => void; }) {
+function StoryViewerDialog({ story, open, onOpenChange, onDeleteStoryItem, currentUserId }: { story: Story | null; open: boolean; onOpenChange: (open: boolean) => void; onDeleteStoryItem: (storyId: number, itemId: number) => void; currentUserId: string | undefined }) {
   const [isViewersSheetOpen, setIsViewersSheetOpen] = useState(false);
+  const [currentItemIndex, setCurrentItemIndex] = useState(0);
+
+  const activeItems = story?.items.filter(item => Date.now() - item.timestamp < 24 * 60 * 60 * 1000) || [];
+
+  useEffect(() => {
+    if (story) {
+        setCurrentItemIndex(activeItems.length > 0 ? activeItems.length - 1 : 0);
+    }
+  }, [story, activeItems.length]);
+
+  if (!story || activeItems.length === 0) return null;
   
-  if (!story || story.images.length === 0) return null;
+  const currentItem = activeItems[currentItemIndex];
+  
+  const handlePrevious = () => {
+    setCurrentItemIndex(prev => Math.max(0, prev - 1));
+  }
+
+  const handleNext = () => {
+    setCurrentItemIndex(prev => Math.min(activeItems.length - 1, prev + 1));
+  }
+
+  const handleDelete = () => {
+    onDeleteStoryItem(story.id, currentItem.id);
+    onOpenChange(false);
+  };
+
+  const isOwnStory = story.author.handle === currentUserId;
 
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="p-0 border-0 max-w-md w-full h-[80vh] bg-black">
-          <div className="relative w-full h-full rounded-lg overflow-hidden">
-             <Image src={story.images[story.images.length-1]} alt={`Story from ${story.name}`} layout="fill" objectFit="cover" data-ai-hint={story.aiHint} />
-            <div className="absolute top-0 left-0 p-4 flex items-center justify-between bg-gradient-to-b from-black/50 to-transparent w-full">
+      <Dialog open={open} onOpenChange={(val) => { if (!val) onOpenChange(false)}}>
+        <DialogContent className="p-0 border-0 max-w-md w-full h-[90vh] sm:h-[80vh] bg-black" onInteractOutside={(e) => e.preventDefault()}>
+          <div className="relative w-full h-full rounded-lg overflow-hidden flex flex-col justify-center">
+            {/* Click handlers for next/prev */}
+            <div className="absolute left-0 top-0 h-full w-1/2 z-10" onClick={handlePrevious} />
+            <div className="absolute right-0 top-0 h-full w-1/2 z-10" onClick={handleNext} />
+            
+            {/* Story Content */}
+            <div className="w-full h-full relative">
+                <Image src={currentItem.url} alt={`Story from ${story.author.name}`} layout="fill" objectFit="contain" data-ai-hint={story.author.aiHint} />
+            </div>
+
+            {/* Progress bars */}
+             <div className="absolute top-2 left-2 right-2 flex gap-1">
+                {activeItems.map((_, index) => (
+                    <div key={index} className="h-1 flex-1 bg-white/30 rounded-full">
+                        <div className={cn("h-full bg-white rounded-full", index <= currentItemIndex && "transition-all duration-300")} style={{ width: index === currentItemIndex ? '100%' : (index < currentItemIndex ? '100%' : '0%') }}/>
+                    </div>
+                ))}
+            </div>
+
+            <div className="absolute top-4 left-0 p-4 flex items-center justify-between bg-gradient-to-b from-black/50 to-transparent w-full z-20">
               <div className="flex items-center gap-3">
                 <Avatar>
-                  <AvatarImage src={story.avatar} />
-                  <AvatarFallback>{story.name.substring(0, 2)}</AvatarFallback>
+                  <AvatarImage src={story.author.avatar} />
+                  <AvatarFallback>{story.author.name.substring(0, 2)}</AvatarFallback>
                 </Avatar>
-                <span className="font-semibold text-white">{story.name}</span>
+                <span className="font-semibold text-white">{story.author.name}</span>
               </div>
-              <DialogClose asChild>
-                <Button variant="ghost" size="icon" className="text-white hover:bg-black/50 hover:text-white">
+              <div className="flex items-center">
+                {isOwnStory && (
+                   <AlertDialog>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="text-white hover:bg-black/50 hover:text-white">
+                          <MoreHorizontal />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <AlertDialogTrigger asChild>
+                          <DropdownMenuItem className="text-destructive cursor-pointer">
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete Story
+                          </DropdownMenuItem>
+                        </AlertDialogTrigger>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                     <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete this story item?</AlertDialogTitle>
+                        <AlertDialogDescription>This action cannot be undone and will permanently delete this part of your story.</AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
+                <Button variant="ghost" size="icon" className="text-white hover:bg-black/50 hover:text-white" onClick={() => onOpenChange(false)}>
                   <X />
                   <span className="sr-only">Close</span>
                 </Button>
-              </DialogClose>
+              </div>
             </div>
-            {story.isOwn && story.viewers && (
+            {isOwnStory && story.viewers && (
               <div 
-                className="absolute bottom-4 left-4 flex items-center gap-2 cursor-pointer bg-black/50 text-white p-2 rounded-lg"
+                className="absolute bottom-4 left-4 flex items-center gap-2 cursor-pointer bg-black/50 text-white p-2 rounded-lg z-20"
                 onClick={() => setIsViewersSheetOpen(true)}
               >
                 <Eye className="w-5 h-5" />
@@ -385,25 +457,30 @@ function HomePageContent() {
   
   const handleStorySubmit = (imageUrl: string) => {
     if (!profileData) return;
-
     setStories(prevStories => {
-      const myStory = prevStories.find(s => s.isOwn);
-      if (myStory) {
-        const updatedStories = prevStories.map(s => 
-          s.isOwn 
-          ? { ...s, images: [...s.images, imageUrl], avatar: profileData.avatar } 
-          : s
-        );
-        return updatedStories;
-      }
-      return prevStories;
+        return prevStories.map(story => {
+            if (story.author.handle === profileData.handle) {
+                const newStoryItem: StoryItem = {
+                    id: Date.now(),
+                    url: imageUrl,
+                    timestamp: Date.now(),
+                };
+                return {
+                    ...story,
+                    items: [...story.items, newStoryItem]
+                };
+            }
+            return story;
+        });
     });
   };
 
   const handleStoryClick = (story: Story) => {
-    if (story.isOwn) {
+    const activeItems = story.items.filter(item => Date.now() - item.timestamp < 24 * 60 * 60 * 1000);
+
+    if (story.author.handle === profileData.handle) {
         setIsCreateStoryDialogOpen(true);
-    } else if (story.images.length > 0) {
+    } else if (activeItems.length > 0) {
       setSelectedStory(story);
       setIsStoryViewerOpen(true);
     }
@@ -447,6 +524,18 @@ function HomePageContent() {
     ));
   };
 
+  const handleDeleteStoryItem = (storyId: number, itemId: number) => {
+    setStories(prev => prev.map(story => {
+        if (story.id === storyId) {
+            return {
+                ...story,
+                items: story.items.filter(item => item.id !== itemId)
+            };
+        }
+        return story;
+    }));
+  };
+
   const activePostForComments = feedItems.find(item => item.id === activeCommentPostId);
 
   return (
@@ -455,25 +544,27 @@ function HomePageContent() {
       <div className="py-4 border-b">
         <div className="px-4 flex items-center space-x-4 overflow-x-auto">
           {stories.map((story) => {
-            const hasStory = story.images.length > 0;
+            const isOwn = story.author.handle === profileData.handle;
+            const activeItems = story.items.filter(item => Date.now() - item.timestamp < 24 * 60 * 60 * 1000);
+            const hasActiveStory = activeItems.length > 0;
             
             return (
                 <div key={story.id} className="flex-shrink-0 text-center cursor-pointer" onClick={() => handleStoryClick(story)}>
                 <div className={cn(
                     "relative rounded-full p-0.5 border-2",
-                    story.isOwn ? "border-dashed" : (hasStory ? "border-primary" : "border-transparent")
+                    isOwn ? "border-dashed" : (hasActiveStory ? "border-primary" : "border-transparent")
                 )}>
                     <Avatar className="w-16 h-16">
-                    <AvatarImage src={story.isOwn ? profileData.avatar : story.avatar} data-ai-hint={story.aiHint} />
-                    <AvatarFallback>{story.name.substring(0,2)}</AvatarFallback>
-                    {story.isOwn && (
+                    <AvatarImage src={story.author.avatar} data-ai-hint={story.author.aiHint} />
+                    <AvatarFallback>{story.author.name.substring(0,2)}</AvatarFallback>
+                    {isOwn && (
                         <div className="absolute bottom-0 right-0 bg-primary rounded-full p-0.5 border-2 border-background">
                         <Plus className="w-4 h-4 text-primary-foreground" />
                         </div>
                     )}
                     </Avatar>
                 </div>
-                <p className="text-xs mt-1.5">{story.isOwn ? 'Your Story' : story.name}</p>
+                <p className="text-xs mt-1.5">{isOwn ? 'Your Story' : story.author.name}</p>
                 </div>
             )
           })}
@@ -517,7 +608,7 @@ function HomePageContent() {
       <CreatePostDialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen} onPostSubmit={handlePostSubmit} />
       <PostJobDialog open={isPostJobDialogOpen} onOpenChange={setIsPostJobDialogOpen} onJobSubmit={handleJobSubmit}/>
       <CreateStoryDialog open={isCreateStoryDialogOpen} onOpenChange={setIsCreateStoryDialogOpen} onStorySubmit={handleStorySubmit} />
-      <StoryViewerDialog story={selectedStory} open={isStoryViewerOpen} onOpenChange={setIsStoryViewerOpen} />
+      <StoryViewerDialog story={selectedStory} open={isStoryViewerOpen} onOpenChange={setIsStoryViewerOpen} onDeleteStoryItem={handleDeleteStoryItem} currentUserId={profileData?.handle}/>
       <CommentSheet
         open={!!activeCommentPostId}
         onOpenChange={(isOpen) => {

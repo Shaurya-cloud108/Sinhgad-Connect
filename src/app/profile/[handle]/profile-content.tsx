@@ -399,7 +399,7 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
         
         if (targetProfile) {
             setUserPosts(feedItems.filter(item => item.author.handle === targetProfile!.handle));
-            const story = stories.find(s => (isOwnProfile && s.isOwn) || (!isOwnProfile && s.name === targetProfile!.name));
+            const story = stories.find(s => s.author.handle === targetProfile!.handle);
             setUserStories(story || null);
         } else {
              setUserPosts([]);
@@ -467,7 +467,8 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
     }
 
     const primaryEducation = profileData.education.find(e => e.graduationYear);
-    
+    const activeStoryItems = userStories?.items.filter(item => Date.now() - item.timestamp < 24 * 60 * 60 * 1000) || [];
+
   return (
     <div className="bg-secondary/40">
       <div className="max-w-4xl mx-auto">
@@ -614,11 +615,11 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
                 )) : <p className="text-center text-muted-foreground py-8">This user hasn't posted anything yet.</p>}
               </TabsContent>
               <TabsContent value="stories" className="mt-6">
-                {userStories && userStories.images.length > 0 ? (
+                {activeStoryItems.length > 0 ? (
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
-                    {userStories.images.map((img, index) => (
-                        <div key={index} className="aspect-square relative rounded-md overflow-hidden">
-                           <Image src={img} alt={`Story content ${index+1}`} layout="fill" objectFit="cover" />
+                    {activeStoryItems.map((item, index) => (
+                        <div key={item.id} className="aspect-square relative rounded-md overflow-hidden">
+                           <Image src={item.url} alt={`Story content ${index+1}`} layout="fill" objectFit="cover" />
                         </div>
                     ))}
                     </div>
