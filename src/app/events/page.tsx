@@ -1,3 +1,6 @@
+
+"use client";
+
 import Image from "next/image";
 import {
   Card,
@@ -8,10 +11,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Users } from "lucide-react";
+import { Calendar, MapPin, Users, Send } from "lucide-react";
+import { ShareDialog } from "@/components/share-dialog";
 
 const eventsData = [
   {
+    id: "annual-meet-2024",
     title: "Annual Alumni Grand Meet 2024",
     date: "October 25, 2024",
     location: "College Auditorium, Pune",
@@ -20,6 +25,7 @@ const eventsData = [
     aiHint: "people networking"
   },
   {
+    id: "tech-talk-ai",
     title: "Tech Talk: AI & The Future",
     date: "November 12, 2024",
     location: "Virtual Event (Zoom)",
@@ -28,6 +34,7 @@ const eventsData = [
     aiHint: "technology conference"
   },
   {
+    id: "reunion-2014",
     title: "Batch of 2014: 10-Year Reunion",
     date: "December 7, 2024",
     location: "The Westin, Pune",
@@ -36,6 +43,7 @@ const eventsData = [
     aiHint: "formal dinner"
   },
   {
+    id: "sports-day-2025",
     title: "Alumni Sports Day",
     date: "January 18, 2025",
     location: "College Sports Complex",
@@ -77,10 +85,15 @@ export default function EventsPage() {
             <CardContent className="flex-grow">
               <CardDescription>{event.description}</CardDescription>
             </CardContent>
-            <CardFooter>
+            <CardFooter className="gap-2">
               <Button className="w-full">
                 <Users className="mr-2 h-4 w-4" /> Register Now
               </Button>
+              <ShareDialog contentType="event" contentId={event.id}>
+                <Button variant="outline" size="icon">
+                    <Send className="h-4 w-4"/>
+                </Button>
+              </ShareDialog>
             </CardFooter>
           </Card>
         ))}

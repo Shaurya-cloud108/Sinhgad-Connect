@@ -45,6 +45,8 @@ import { useToast } from "@/hooks/use-toast";
 import { stories as initialStories, feedItems as initialFeedItems, FeedItem, Story } from "@/lib/data";
 import Image from "next/image";
 import { ProfileContext } from "@/context/ProfileContext";
+import { ShareDialog } from "@/components/share-dialog";
+import { cn } from "@/lib/utils";
 
 function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean, onOpenChange: (open: boolean) => void, onPostSubmit: (post: FeedItem) => void }) {
   const { toast } = useToast();
@@ -88,6 +90,7 @@ function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean,
         image: imagePreview,
         aiHint: "user uploaded",
         likes: 0,
+        liked: false,
         comments: 0
     };
 
@@ -312,6 +315,14 @@ export default function Home() {
   const handleDeletePost = (postId: number) => {
     setFeedItems(prev => prev.filter(item => item.id !== postId));
   };
+  
+  const handleLike = (postId: number) => {
+    setFeedItems(prev => prev.map(item => 
+        item.id === postId 
+        ? {...item, liked: !item.liked, likes: item.liked ? item.likes - 1 : item.likes + 1}
+        : item
+    ));
+  };
 
   return (
     <div className="w-full max-w-2xl mx-auto">
@@ -434,17 +445,19 @@ export default function Home() {
             </CardContent>
             <CardFooter className="p-4 flex flex-col items-start space-y-3">
                <div className="flex items-center space-x-4 text-muted-foreground">
-                  <Button variant="ghost" size="sm" className="flex items-center gap-2">
-                    <Heart className="w-5 h-5" />
+                  <Button variant="ghost" size="sm" className={cn("flex items-center gap-2", item.liked && "text-red-500")} onClick={() => handleLike(item.id)}>
+                    <Heart className={cn("w-5 h-5", item.liked && "fill-current")} />
                     <span className="text-sm font-medium">{item.likes}</span>
                   </Button>
                   <Button variant="ghost" size="sm" className="flex items-center gap-2">
                     <MessageCircle className="w-5 h-5" />
                      <span className="text-sm font-medium">{item.comments}</span>
                   </Button>
-                  <Button variant="ghost" size="sm">
-                    <Send className="w-5 h-5" />
-                  </Button>
+                  <ShareDialog contentType="post" contentId={item.id}>
+                    <Button variant="ghost" size="sm">
+                      <Send className="w-5 h-5" />
+                    </Button>
+                  </ShareDialog>
               </div>
             </CardFooter>
           </Card>

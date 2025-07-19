@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Briefcase, MapPin, PlusCircle, ExternalLink } from "lucide-react";
+import { Briefcase, MapPin, PlusCircle, ExternalLink, Send } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -46,6 +46,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { jobListings as initialJoblistings, JobListing } from "@/lib/data";
+import { ShareDialog } from "@/components/share-dialog";
 
 const postJobSchema = z.object({
   title: z.string().min(3, "Job title must be at least 3 characters."),
@@ -100,6 +101,7 @@ function JobsPageContent() {
 
   function onSubmit(values: z.infer<typeof postJobSchema>) {
     const newJob: JobListing = {
+        id: Date.now(),
         ...values,
         tags: [], // Tags can be derived or added via another field
         postedBy: "Current User" // Placeholder for logged-in user
@@ -289,7 +291,14 @@ function JobsPageContent() {
               </CardContent>
               <CardFooter className="flex justify-between items-center text-sm text-muted-foreground">
                 <p>Posted by: <span className="text-primary font-medium">{job.postedBy}</span></p>
-                <Button onClick={() => handleViewDetails(job)}>View Details</Button>
+                <div className="flex items-center gap-2">
+                    <ShareDialog contentType="job" contentId={job.id}>
+                        <Button variant="ghost" size="icon">
+                            <Send className="h-4 w-4" />
+                        </Button>
+                    </ShareDialog>
+                    <Button onClick={() => handleViewDetails(job)}>View Details</Button>
+                </div>
               </CardFooter>
             </Card>
           ))

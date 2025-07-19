@@ -1,3 +1,6 @@
+
+"use client";
+
 import Image from "next/image";
 import {
   Card,
@@ -9,11 +12,13 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, BrainCircuit } from "lucide-react";
+import { ArrowRight, BrainCircuit, Send } from "lucide-react";
 import Link from "next/link";
+import { ShareDialog } from "@/components/share-dialog";
 
 const successStories = [
   {
+    id: "sunita-narayan",
     name: "Sunita Narayan",
     class: "2009",
     role: "CEO, Innovate Inc.",
@@ -23,6 +28,7 @@ const successStories = [
     tags: ["Leadership", "Technology", "Entrepreneurship"],
   },
   {
+    id: "rohan-gupta",
     name: "Dr. Rohan Gupta",
     class: "2005",
     role: "Lead Researcher, CureAI",
@@ -32,6 +38,7 @@ const successStories = [
     tags: ["Healthcare", "AI/ML", "Research"],
   },
   {
+    id: "meera-desai",
     name: "Meera Desai",
     class: "2012",
     role: "Award-Winning Architect",
@@ -41,6 +48,7 @@ const successStories = [
     tags: ["Architecture", "Sustainability", "Design"],
   },
   {
+    id: "karan-malhotra",
     name: "Karan Malhotra",
     class: "2016",
     role: "Forbes 30 Under 30, FinTech",
@@ -88,10 +96,15 @@ export default function SuccessStoriesPage() {
                   </div>
                 </CardContent>
               </div>
-              <CardFooter className="p-0 pt-6">
+              <CardFooter className="p-0 pt-6 flex items-center justify-between">
                 <Button variant="link" className="p-0 text-primary">
                    Read Full Story & AI Insights <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
+                <ShareDialog contentType="story" contentId={story.id}>
+                    <Button variant="ghost" size="icon">
+                        <Send className="h-4 w-4"/>
+                    </Button>
+                </ShareDialog>
               </CardFooter>
             </div>
           </Card>

@@ -2,6 +2,7 @@
 import { Member, NetworkingGroup } from "@/context/AppContext";
 
 export type JobListing = {
+  id: number;
   title: string;
   company: string;
   location: string;
@@ -13,6 +14,7 @@ export type JobListing = {
 
 export const jobListings: JobListing[] = [
   {
+    id: 1,
     title: "Senior Frontend Engineer",
     company: "Innovate Inc.",
     location: "Remote",
@@ -22,6 +24,7 @@ export const jobListings: JobListing[] = [
     description: "Innovate Inc. is seeking a passionate Senior Frontend Engineer to build and scale our next-generation sustainable tech products. You will work with a modern tech stack and a talented team to create beautiful, responsive, and high-performance web applications."
   },
   {
+    id: 2,
     title: "Data Scientist",
     company: "DataDriven Co.",
     location: "Pune, India",
@@ -31,6 +34,7 @@ export const jobListings: JobListing[] = [
     description: "Join DataDriven Co. and help us solve complex problems with data. As a Data Scientist, you will be responsible for designing and implementing machine learning models, performing statistical analysis, and communicating insights to stakeholders."
   },
   {
+    id: 3,
     title: "Product Manager",
     company: "Connectify",
     location: "Bangalore, India",
@@ -40,6 +44,7 @@ export const jobListings: JobListing[] = [
     description: "Connectify is looking for a user-centric Product Manager to lead our product strategy and roadmap. You will work closely with engineering, design, and marketing to deliver products that our users love."
   },
   {
+    id: 4,
     title: "UX/UI Designer",
     company: "Creative Solutions",
     location: "Remote",
@@ -49,6 +54,7 @@ export const jobListings: JobListing[] = [
     description: "We are looking for a talented UX/UI Designer to create amazing user experiences. The ideal candidate will have a strong portfolio of design projects and be proficient in Figma, user research, and prototyping."
   },
   {
+    id: 5,
     title: "DevOps Engineer",
     company: "CloudLeap",
     location: "Hyderabad, India",
@@ -58,6 +64,7 @@ export const jobListings: JobListing[] = [
     description: "CloudLeap is hiring a DevOps Engineer to manage and improve our cloud infrastructure. You will be responsible for our CI/CD pipelines, automation, and ensuring the reliability and scalability of our systems."
   },
   {
+    id: 6,
     title: "Marketing Intern",
     company: "GrowthX",
     location: "Mumbai, India",
@@ -97,6 +104,7 @@ export type FeedItem = {
     image: string | null;
     aiHint: string;
     likes: number;
+    liked?: boolean;
     comments: number;
 }
 
@@ -114,6 +122,7 @@ export const feedItems: FeedItem[] = [
     aiHint: "people networking",
     likes: 256,
     comments: 32,
+    liked: false,
   },
   {
     id: 2,
@@ -128,6 +137,7 @@ export const feedItems: FeedItem[] = [
     aiHint: "",
     likes: 189,
     comments: 15,
+    liked: true,
   },
   {
     id: 3,
@@ -142,6 +152,7 @@ export const feedItems: FeedItem[] = [
     aiHint: "modern office",
     likes: 98,
     comments: 7,
+    liked: false,
   },
   {
     id: 4,
@@ -156,6 +167,7 @@ export const feedItems: FeedItem[] = [
     aiHint: "",
     likes: 152,
     comments: 18,
+    liked: true,
   },
   {
     id: 5,
@@ -170,6 +182,7 @@ export const feedItems: FeedItem[] = [
     aiHint: "mentoring session",
     likes: 98,
     comments: 7,
+    liked: false,
   }
 ];
 
@@ -430,14 +443,6 @@ export const conversationsData = [
     unread: 0,
   },
   {
-    name: "Vikram Singh",
-    avatar: "https://placehold.co/100x100.png",
-    aiHint: "corporate man",
-    lastMessage: "It was great meeting you at the reunion.",
-    time: "3d ago",
-    unread: 0,
-  },
-  {
     name: "Kavya Iyer",
     avatar: "https://placehold.co/100x100.png",
     aiHint: "female student",
@@ -451,12 +456,33 @@ export const messagesData = {
   "Rohan Verma": [
     { senderId: "rohan-verma", senderName: "Rohan Verma", text: "Thanks for the resume tips!" },
   ],
-  "Vikram Singh": [
-     { senderId: "vikram-singh", senderName: "Vikram Singh", text: "It was great meeting you at the reunion." }
-  ],
   "Kavya Iyer": [
       { senderId: 'kavya-iyer', senderName: 'Kavya Iyer', text: "Hi Priya! I had a question about my project." },
       { senderId: profileData.handle, senderName: profileData.name, text: "Of course, ask away!" },
       { senderId: 'kavya-iyer', senderName: 'Kavya Iyer', text: "Thank you for the mentorship!" },
+  ],
+  "Software & Tech Innovators": [
+      { senderId: 'kavya-iyer', senderName: 'Kavya Iyer', text: "Hey everyone, has anyone used the new Bun 1.0 release?" },
+      { senderId: profileData.handle, senderName: profileData.name, text: "I have! It's incredibly fast. The built-in package manager is a game changer." },
   ]
 };
+
+// Helper function to get content details for sharing
+export const getContentDetails = (contentType: string, contentId: string | number) => {
+    switch (contentType) {
+        case 'post':
+            const post = feedItems.find(item => item.id === contentId);
+            return post ? { title: `A post by ${post.author.name}`, url: `/` } : null;
+        case 'job':
+            const job = jobListings.find(item => item.id === contentId);
+            return job ? { title: `Job: ${job.title} at ${job.company}`, url: `/jobs` } : null;
+        case 'event':
+            // This is a placeholder as events don't have unique IDs yet
+            return { title: `Event: ${contentId}`, url: `/events` };
+        case 'story':
+             // This is a placeholder as stories don't have unique IDs yet
+            return { title: `Success Story: ${contentId}`, url: `/success-stories` };
+        default:
+            return null;
+    }
+}
