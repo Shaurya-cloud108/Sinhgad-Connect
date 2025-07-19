@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, Send, Plus, Image as ImageIcon, Award, Briefcase, X, MoreHorizontal, Trash2, Eye, Video } from "lucide-react";
+import { Heart, MessageCircle, Send, Plus, Image as ImageIcon, Award, Briefcase, X, MoreHorizontal, Trash2, Eye, Video, Film } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -170,49 +170,56 @@ function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean,
   );
 }
 
-function CreateStoryDialog({ open, onOpenChange, onStorySubmit }: { open: boolean, onOpenChange: (open: boolean) => void, onStorySubmit: (imageUrl: string) => void }) {
+function CreateStoryDialog({ open, onOpenChange, onStorySubmit }: { open: boolean, onOpenChange: (open: boolean) => void, onStorySubmit: (fileUrl: string, fileType: 'image' | 'video') => void }) {
     const { toast } = useToast();
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
-    const imageInputRef = useRef<HTMLInputElement>(null);
+    const [filePreview, setFilePreview] = useState<string | null>(null);
+    const [fileType, setFileType] = useState<'image' | 'video' | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            if (file.size > 10 * 1024 * 1024) { // 10MB limit
-                toast({ variant: "destructive", title: "File too large", description: "Please select an image smaller than 10MB." });
-                return;
-            }
             const reader = new FileReader();
             reader.onloadend = () => {
-                setImagePreview(reader.result as string);
+                setFilePreview(reader.result as string);
+                setFileType(file.type.startsWith('video/') ? 'video' : 'image');
             };
             reader.readAsDataURL(file);
         }
     };
 
     const handleSubmit = () => {
-        if (!imagePreview) {
+        if (!filePreview || !fileType) {
             toast({
                 variant: "destructive",
-                title: "No Image Selected",
-                description: "Please select an image for your story.",
+                title: "No File Selected",
+                description: "Please select an image or video for your story.",
             });
             return;
         }
 
-        onStorySubmit(imagePreview);
+        onStorySubmit(filePreview, fileType);
 
         toast({
             title: "Story Posted!",
             description: "Your story is now visible to your network.",
         });
 
-        setImagePreview(null);
-        if(imageInputRef.current) {
-            imageInputRef.current.value = "";
+        setFilePreview(null);
+        setFileType(null);
+        if(fileInputRef.current) {
+            fileInputRef.current.value = "";
         }
         onOpenChange(false);
     };
+    
+    const handleReset = () => {
+      setFilePreview(null);
+      setFileType(null);
+      if(fileInputRef.current) {
+          fileInputRef.current.value = "";
+      }
+    }
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -222,23 +229,24 @@ function CreateStoryDialog({ open, onOpenChange, onStorySubmit }: { open: boolea
                 </DialogHeader>
                 <div className="py-4">
                     <div className="flex flex-col items-center justify-center gap-4">
-                        {imagePreview ? (
+                        {filePreview ? (
                             <div className="relative aspect-[9/16] w-64 bg-black rounded-lg">
-                                <Image src={imagePreview} alt="Story preview" layout="fill" objectFit="cover" className="rounded-lg" />
-                                <Button variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => setImagePreview(null)}>
+                                {fileType === 'image' && <Image src={filePreview} alt="Story preview" layout="fill" objectFit="cover" className="rounded-lg" />}
+                                {fileType === 'video' && <video src={filePreview} controls autoPlay loop className="w-full h-full rounded-lg object-cover" />}
+                                <Button variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={handleReset}>
                                     <X className="h-4 w-4" />
                                 </Button>
                             </div>
                         ) : (
                             <div className="flex flex-col items-center justify-center w-full h-80 border-2 border-dashed rounded-lg">
-                                <ImageIcon className="h-16 w-16 text-muted-foreground mb-4" />
+                                <Film className="h-16 w-16 text-muted-foreground mb-4" />
                                 <Button asChild>
-                                    <label htmlFor="story-image-upload">
-                                        Upload Image
-                                        <Input id="story-image-upload" type="file" className="sr-only" accept="image/*" onChange={handleImageUpload} ref={imageInputRef} />
+                                    <label htmlFor="story-file-upload">
+                                        Upload Image or Video
+                                        <Input id="story-file-upload" type="file" className="sr-only" accept="image/*,video/*" onChange={handleFileUpload} ref={fileInputRef} />
                                     </label>
                                 </Button>
-                                <p className="text-xs text-muted-foreground mt-2">Upload a photo for your story.</p>
+                                <p className="text-xs text-muted-foreground mt-2">Share a moment with your network.</p>
                             </div>
                         )}
                     </div>
@@ -249,7 +257,7 @@ function CreateStoryDialog({ open, onOpenChange, onStorySubmit }: { open: boolea
                             Cancel
                         </Button>
                     </DialogClose>
-                    <Button onClick={handleSubmit} disabled={!imagePreview}>Post Story</Button>
+                    <Button onClick={handleSubmit} disabled={!filePreview}>Post Story</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
@@ -326,11 +334,12 @@ function StoryViewerDialog({ story, open, onOpenChange, onDeleteStoryItem, curre
             
             {/* Story Content */}
             <div className="w-full h-full relative">
-                <Image src={currentItem.url} alt={`Story from ${story.author.name}`} layout="fill" objectFit="contain" data-ai-hint={story.author.aiHint} />
+                {currentItem.type === 'image' && <Image src={currentItem.url} alt={`Story from ${story.author.name}`} layout="fill" objectFit="contain" data-ai-hint={story.author.aiHint} />}
+                {currentItem.type === 'video' && <video src={currentItem.url} controls={false} autoPlay loop muted className="w-full h-full object-contain" />}
             </div>
 
             {/* Progress bars */}
-             <div className="absolute top-2 left-2 right-2 flex gap-1">
+             <div className="absolute top-2 left-2 right-2 flex gap-1 z-20">
                 {activeItems.map((_, index) => (
                     <div key={index} className="h-1 flex-1 bg-white/30 rounded-full">
                         <div className={cn("h-full bg-white rounded-full", index <= currentItemIndex && "transition-all duration-300")} style={{ width: index === currentItemIndex ? '100%' : (index < currentItemIndex ? '100%' : '0%') }}/>
@@ -455,37 +464,35 @@ function HomePageContent() {
     });
   }
   
-  const handleStorySubmit = (imageUrl: string) => {
+  const handleStorySubmit = (fileUrl: string, fileType: 'image' | 'video') => {
     if (!profileData) return;
     setStories(prevStories => {
-        const newStories = prevStories.map(story => {
-            if (story.author.handle === profileData.handle) {
-                const newStoryItem: StoryItem = {
-                    id: Date.now(),
-                    url: imageUrl,
-                    timestamp: Date.now(),
-                };
-                return {
-                    ...story,
-                    items: [...story.items, newStoryItem]
-                };
-            }
-            return story;
-        });
-        // This ensures that if for some reason the user's story object wasn't there, it gets created.
-        if (!newStories.some(s => s.author.handle === profileData.handle)) {
-             const newStoryItem: StoryItem = {
-                id: Date.now(),
-                url: imageUrl,
-                timestamp: Date.now(),
+        const newStories = [...prevStories];
+        const userStoryIndex = newStories.findIndex(story => story.author.handle === profileData.handle);
+        
+        const newStoryItem: StoryItem = {
+            id: Date.now(),
+            url: fileUrl,
+            type: fileType,
+            timestamp: Date.now(),
+        };
+
+        if (userStoryIndex !== -1) {
+            // User already has a story object, add to it
+            const updatedStory = {
+                ...newStories[userStoryIndex],
+                items: [...newStories[userStoryIndex].items, newStoryItem]
             };
-             const newStory: Story = {
+            newStories[userStoryIndex] = updatedStory;
+        } else {
+            // New user story object
+            const newStory: Story = {
                 id: Date.now(),
                 author: { name: profileData.name, avatar: profileData.avatar, handle: profileData.handle, aiHint: profileData.aiHint },
                 items: [newStoryItem],
                 viewers: [],
-            }
-            return [newStory, ...newStories.filter(s => s.author.handle !== profileData.handle)];
+            };
+            newStories.unshift(newStory);
         }
         return newStories;
     });
@@ -567,11 +574,11 @@ function HomePageContent() {
             const hasActiveStory = activeItems.length > 0;
             
             return (
-                <div key={story.id} className="flex-shrink-0 text-center cursor-pointer">
+                <div key={story.id} className="flex-shrink-0 text-center cursor-pointer flex flex-col items-center">
                     <div
                         className={cn(
-                            "relative rounded-full p-0.5 border-2",
-                            isOwn ? "border-dashed" : (hasActiveStory ? "border-primary" : "border-transparent")
+                            "relative rounded-full p-0.5 border-2 w-20 h-20 flex items-center justify-center",
+                            isOwn && !hasActiveStory ? "border-dashed" : (hasActiveStory ? "border-primary" : "border-transparent")
                         )}
                         onClick={() => handleStoryClick(story)}
                     >
@@ -579,16 +586,15 @@ function HomePageContent() {
                             <AvatarImage src={story.author.avatar} data-ai-hint={story.author.aiHint} />
                             <AvatarFallback>{story.author.name.substring(0,2)}</AvatarFallback>
                         </Avatar>
+                        {isOwn && (
+                          <button 
+                              className="absolute -bottom-2 -right-1 w-7 h-7 flex items-center justify-center bg-primary rounded-full p-0.5 border-2 border-background" 
+                              onClick={(e) => { e.stopPropagation(); setIsCreateStoryDialogOpen(true); }}>
+                              <Plus className="w-4 h-4 text-primary-foreground" />
+                          </button>
+                        )}
                     </div>
-                     {isOwn && (
-                        <button className="text-xs mt-1.5" onClick={() => setIsCreateStoryDialogOpen(true)}>
-                            Add Story
-                            <div className="relative w-6 h-6 mx-auto mt-1 flex items-center justify-center bg-primary rounded-full p-0.5 border-2 border-background">
-                                <Plus className="w-4 h-4 text-primary-foreground" />
-                            </div>
-                        </button>
-                    )}
-                    {!isOwn && <p className="text-xs mt-1.5" onClick={() => handleStoryClick(story)}>{story.author.name}</p>}
+                    <p className="text-xs mt-1.5 w-20 truncate" onClick={() => handleStoryClick(story)}>{isOwn ? "Your Story" : story.author.name}</p>
                 </div>
             )
           })}
@@ -753,3 +759,5 @@ export default function Home() {
         </React.Suspense>
     )
 }
+
+    

@@ -142,6 +142,7 @@ export type StoryViewer = {
 export type StoryItem = {
   id: number;
   url: string;
+  type: 'image' | 'video';
   timestamp: number;
 };
 
@@ -585,6 +586,7 @@ if (rohanVermaStory) {
     rohanVermaStory.items.push({
         id: Date.now(),
         url: 'https://placehold.co/400x700.png',
+        type: 'image',
         timestamp: Date.now() - 12 * 60 * 60 * 1000, // 12 hours ago
     });
     rohanVermaStory.viewers = [
@@ -593,9 +595,12 @@ if (rohanVermaStory) {
     ];
 }
 
-// Ensure the current user (Priya Sharma) is in the list
-const currentUserInStories = allUsersAsStories.find(s => s.author.handle === profileData.handle);
-if (!currentUserInStories) {
+// Ensure the current user (Priya Sharma) is in the list and first
+const currentUserIndex = allUsersAsStories.findIndex(s => s.author.handle === profileData.handle);
+if (currentUserIndex !== -1) {
+    const [currentUserStory] = allUsersAsStories.splice(currentUserIndex, 1);
+    allUsersAsStories.unshift(currentUserStory);
+} else {
     allUsersAsStories.unshift({
         id: 0,
         author: {
@@ -607,11 +612,6 @@ if (!currentUserInStories) {
         items: [],
         viewers: [],
     });
-} else {
-    // Make sure the current user is first in the list
-    const index = allUsersAsStories.findIndex(s => s.author.handle === profileData.handle);
-    const [currentUserStory] = allUsersAsStories.splice(index, 1);
-    allUsersAsStories.unshift(currentUserStory);
 }
 
 export const stories: Story[] = allUsersAsStories;

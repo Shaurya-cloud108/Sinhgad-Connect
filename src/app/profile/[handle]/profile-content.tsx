@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2, PlusCircle, Linkedin, Github, Mail, Link as LinkIcon, Camera } from "lucide-react";
+import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2, PlusCircle, Linkedin, Github, Mail, Link as LinkIcon, Camera, Video } from "lucide-react";
 import { ProfileData, FeedItem, communityMembers, EducationEntry, feedItems, stories, Story } from "@/lib/data.tsx";
 import { useState, useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -618,8 +618,16 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
                 {activeStoryItems.length > 0 ? (
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
                     {activeStoryItems.map((item, index) => (
-                        <div key={item.id} className="aspect-square relative rounded-md overflow-hidden">
-                           <Image src={item.url} alt={`Story content ${index+1}`} layout="fill" objectFit="cover" />
+                        <div key={item.id} className="aspect-[9/16] relative rounded-md overflow-hidden bg-muted">
+                           {item.type === 'image' && <Image src={item.url} alt={`Story content ${index+1}`} layout="fill" objectFit="cover" />}
+                           {item.type === 'video' && (
+                            <>
+                               <video src={item.url} className="w-full h-full object-cover" />
+                               <div className="absolute bottom-2 right-2 bg-black/50 rounded-full p-1">
+                                   <Video className="h-4 w-4 text-white" />
+                               </div>
+                            </>
+                           )}
                         </div>
                     ))}
                     </div>
