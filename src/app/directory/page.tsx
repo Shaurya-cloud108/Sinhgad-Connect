@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Linkedin } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 const alumniData = [
   {
