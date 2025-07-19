@@ -1,4 +1,7 @@
 
+"use client";
+
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -15,6 +18,27 @@ import { Badge } from "@/components/ui/badge";
 import { alumniData } from "@/lib/data";
 
 export default function SearchPage() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredAlumni, setFilteredAlumni] = useState(alumniData);
+
+  const handleSearch = () => {
+    const lowercasedQuery = searchQuery.toLowerCase();
+    if (!lowercasedQuery) {
+      setFilteredAlumni(alumniData);
+      return;
+    }
+    const results = alumniData.filter((alumni) =>
+      alumni.name.toLowerCase().includes(lowercasedQuery)
+    );
+    setFilteredAlumni(results);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  }
+
   return (
     <div className="container py-8 md:py-12">
       <div className="text-center mb-12">
@@ -27,14 +51,20 @@ export default function SearchPage() {
       <Card className="mb-8">
         <CardContent className="p-4">
           <div className="flex flex-col md:flex-row gap-4 items-center">
-            <Input placeholder="Search by name..." className="flex-grow" />
-            <Button className="w-full md:w-auto">Search</Button>
+            <Input
+              placeholder="Search by name..."
+              className="flex-grow"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+            <Button onClick={handleSearch} className="w-full md:w-auto">Search</Button>
           </div>
         </CardContent>
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {alumniData.map((alumni) => (
+        {filteredAlumni.map((alumni) => (
           <Card key={alumni.name} className="flex flex-col">
             <CardHeader className="items-center text-center">
               <Avatar className="w-24 h-24 mb-4">
