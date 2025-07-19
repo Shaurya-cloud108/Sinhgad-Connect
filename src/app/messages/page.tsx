@@ -156,8 +156,8 @@ function GroupInfoDialog({ group, currentUserRole, onOpenChange }: { group: Netw
                 <div className="space-y-4">
                     {group.members.map(member => {
                         const memberDetails = communityMembers.find(m => m.handle === member.id);
-                        const gradYear = memberDetails?.graduationYear || 0;
-                        const gradMonth = memberDetails?.graduationMonth || 0;
+                        const gradYear = memberDetails?.education.graduationYear || 0;
+                        const gradMonth = memberDetails?.education.graduationMonth || 0;
                         return (
                         <div key={member.id} className="flex items-center justify-between">
                             <Link href={`/profile/${member.id}`} className="flex items-center gap-3 group">
@@ -242,7 +242,7 @@ function GroupInfoDialog({ group, currentUserRole, onOpenChange }: { group: Netw
 }
 
 function MessagesPageContent() {
-  const { conversations, setConversations, messagesData, setMessagesData, selectedConversation, setSelectedConversation, networkingGroups, joinedGroups, toggleGroupMembership } = useContext(AppContext);
+  const { conversations, setConversations, messagesData, setMessagesData, selectedConversation, setSelectedConversation, networkingGroups, myGroups, toggleGroupMembership } = useContext(AppContext);
   const { profileData } = useContext(ProfileContext);
   const [newMessage, setNewMessage] = useState("");
   const [isGroupInfoOpen, setIsGroupInfoOpen] = useState(false);
@@ -253,7 +253,7 @@ function MessagesPageContent() {
     return selectedConversation?.isGroup ? networkingGroups.find(g => g.title === selectedConversation.name) : null;
   }, [selectedConversation, networkingGroups]);
 
-  const isUserMember = currentGroup ? joinedGroups.has(currentGroup.title) : true;
+  const isUserMember = currentGroup ? myGroups.some(g => g.title === currentGroup.title) : true;
   
   const members: Member[] = currentGroup?.members || [];
   const currentUserRole = profileData ? members.find(m => m.id === profileData.handle)?.role : undefined;
@@ -413,7 +413,7 @@ function MessagesPageContent() {
                           "p-3 rounded-lg",
                           msg.senderId === profileData.handle ? "bg-primary text-primary-foreground" : "bg-muted"
                         )}>
-                          {msg.senderId !== profileData.handle && (
+                          {msg.senderId !== profileData.handle && currentGroup && (
                             <Link href={`/profile/${msg.senderId}`} className="hover:underline">
                               <p className="text-xs font-semibold mb-1">{msg.senderName}</p>
                             </Link>

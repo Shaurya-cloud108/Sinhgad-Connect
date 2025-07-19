@@ -111,7 +111,7 @@ function GroupIcon({ iconName }: { iconName: string }) {
 
 
 function NetworkingPageContent() {
-  const { networkingGroups, joinedGroups, toggleGroupMembership, setSelectedConversationByName } = useContext(AppContext);
+  const { myGroups, exploreGroups, toggleGroupMembership, setSelectedConversationByName } = useContext(AppContext);
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
@@ -125,18 +125,23 @@ function NetworkingPageContent() {
     toggleGroupMembership(groupTitle);
   }
 
-  const { myGroups, exploreGroups } = useMemo(() => {
+  const filteredMyGroups = useMemo(() => {
     const lowercasedQuery = searchQuery.toLowerCase();
-    const filtered = networkingGroups.filter(g => 
+    if (!searchQuery) return myGroups;
+    return myGroups.filter(g => 
         g.title.toLowerCase().includes(lowercasedQuery) || 
         g.description.toLowerCase().includes(lowercasedQuery)
     );
-    
-    const myGroups = filtered.filter(g => joinedGroups.has(g.title));
-    const exploreGroups = filtered.filter(g => !joinedGroups.has(g.title));
-    
-    return { myGroups, exploreGroups };
-  }, [networkingGroups, joinedGroups, searchQuery]);
+  }, [myGroups, searchQuery]);
+
+  const filteredExploreGroups = useMemo(() => {
+    const lowercasedQuery = searchQuery.toLowerCase();
+     if (!searchQuery) return exploreGroups;
+    return exploreGroups.filter(g => 
+        g.title.toLowerCase().includes(lowercasedQuery) || 
+        g.description.toLowerCase().includes(lowercasedQuery)
+    );
+  }, [exploreGroups, searchQuery]);
 
   return (
     <div className="container py-8 md:py-12">
@@ -164,11 +169,11 @@ function NetworkingPageContent() {
       </div>
 
       {/* My Groups Section */}
-      {myGroups.length > 0 && (
+      {filteredMyGroups.length > 0 && (
         <div className="mb-12">
             <h2 className="text-2xl font-headline font-bold mb-4">My Groups</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {myGroups.map(group => (
+                {filteredMyGroups.map(group => (
                     <Card key={group.title} className="flex flex-col hover:shadow-lg transition-shadow duration-300">
                       <CardHeader className="flex-row items-center gap-4">
                         <GroupIcon iconName={group.iconName} />
@@ -196,14 +201,14 @@ function NetworkingPageContent() {
         </div>
       )}
       
-      {myGroups.length > 0 && exploreGroups.length > 0 && <Separator className="my-12"/>}
+      {filteredMyGroups.length > 0 && filteredExploreGroups.length > 0 && <Separator className="my-12"/>}
 
       {/* Explore Groups Section */}
       <div>
         <h2 className="text-2xl font-headline font-bold mb-4">Explore Groups</h2>
-        {exploreGroups.length > 0 ? (
+        {filteredExploreGroups.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {exploreGroups.map((group) => (
+              {filteredExploreGroups.map((group) => (
                 <Card key={group.title} className="flex flex-col hover:shadow-lg transition-shadow duration-300">
                   <CardHeader className="flex-row items-center gap-4">
                     <GroupIcon iconName={group.iconName} />
@@ -234,7 +239,7 @@ function NetworkingPageContent() {
                 {searchQuery ? (
                   <p>No groups found matching "{searchQuery}". Try a different search.</p>
                 ) : (
-                  <p>You have joined all available groups. Why not create a new one?</p>
+                  myGroups.length > 0 ? <p>There are no more groups to join. Why not create a new one?</p> : <p>No groups found. Why not create a new one?</p>
                 )}
               </CardContent>
             </Card>
@@ -258,11 +263,11 @@ export default function NetworkingPage() {
                 </div>
                 <Skeleton className="h-10 w-36" />
             </div>
-             <div>
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-                    <Skeleton className="h-8 w-48 mb-4 md:mb-0" />
-                    <Skeleton className="h-10 w-full md:max-w-sm" />
-                </div>
+             <div className="mb-8">
+                <Skeleton className="h-10 w-full md:max-w-sm" />
+            </div>
+            <div>
+                <h2 className="text-2xl font-headline font-bold mb-4"><Skeleton className="h-8 w-48"/></h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     <Skeleton className="h-56 w-full" />
                     <Skeleton className="h-56 w-full" />

@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { createContext, useState, ReactNode, useContext, useEffect, useCallback } from 'react';
+import React, { createContext, useState, ReactNode, useContext, useMemo, useCallback } from 'react';
 import { networkingGroups as initialNetworkingGroups, conversationsData as initialConversations, messagesData as initialMessagesData, communityMembers, jobListings as initialJobListings, JobListing } from '@/lib/data.tsx';
 import { ProfileContext } from './ProfileContext';
 
@@ -50,10 +50,11 @@ export type MessagesData = {
 // Context Type
 type AppContextType = {
     networkingGroups: NetworkingGroup[];
+    myGroups: NetworkingGroup[];
+    exploreGroups: NetworkingGroup[];
     addNetworkingGroup: (group: Omit<NetworkingGroup, 'members'> & { members: Member[] }) => void;
     addMemberToGroup: (groupTitle: string, member: Member) => void;
     removeMemberFromGroup: (groupTitle: string, memberId: string) => void;
-    joinedGroups: Set<string>;
     toggleGroupMembership: (groupTitle: string) => void;
     updateMemberRole: (groupTitle: string, memberId: string, role: 'admin' | 'member') => void;
     conversations: Conversation[];
@@ -70,10 +71,11 @@ type AppContextType = {
 // Context
 export const AppContext = createContext<AppContextType>({
     networkingGroups: [],
+    myGroups: [],
+    exploreGroups: [],
     addNetworkingGroup: () => {},
     addMemberToGroup: () => {},
     removeMemberFromGroup: () => {},
-    joinedGroups: new Set(),
     toggleGroupMembership: () => {},
     updateMemberRole: () => {},
     conversations: [],
@@ -91,39 +93,35 @@ export const AppContext = createContext<AppContextType>({
 export const AppProvider = ({ children }: { children: ReactNode }) => {
     const { profileData } = useContext(ProfileContext);
     const [networkingGroups, setNetworkingGroups] = useState<NetworkingGroup[]>(initialNetworkingGroups);
-    const [joinedGroups, setJoinedGroups] = useState<Set<string>>(new Set());
     const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
     const [messagesData, setMessagesData] = useState<MessagesData>(initialMessagesData);
     const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
     const [jobListings, setJobListings] = useState<JobListing[]>(initialJobListings);
 
-    const syncUserGroups = useCallback(() => {
-        if (profileData) {
-            const userGroups = new Set<string>();
+    const { myGroups, exploreGroups } = useMemo(() => {
+        const myGroups: NetworkingGroup[] = [];
+        const exploreGroups: NetworkingGroup[] = [];
+        if (profileData?.handle) {
             networkingGroups.forEach(group => {
                 if (group.members.some(member => member.id === profileData.handle)) {
-                    userGroups.add(group.title);
+                    myGroups.push(group);
+                } else {
+                    exploreGroups.push(group);
                 }
             });
-            setJoinedGroups(userGroups);
         } else {
-            setJoinedGroups(new Set());
+             exploreGroups.push(...networkingGroups);
         }
-    }, [profileData, networkingGroups]);
-
-    useEffect(() => {
-        syncUserGroups();
+        return { myGroups, exploreGroups };
     }, [profileData, networkingGroups]);
 
 
     const addNetworkingGroup = (group: Omit<NetworkingGroup, 'iconName' | 'members'> & { iconName: string; members: Member[] }) => {
         if (!profileData) return;
         
-        // Add group
         const newGroup = { ...group };
         setNetworkingGroups(prev => [newGroup, ...prev]);
         
-        // Create conversation for the new group
         const newConversation = {
             name: group.title,
             avatar: "https://placehold.co/100x100.png",
@@ -148,70 +146,39 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     };
     
     const removeMemberFromGroup = (groupTitle: string, memberId: string) => {
-        let wasMember = false;
         setNetworkingGroups(prevGroups => prevGroups.map(g => {
             if (g.title === groupTitle) {
-                if (g.members.some(m => m.id === memberId)) {
-                    wasMember = true;
-                }
                 return { ...g, members: g.members.filter(m => m.id !== memberId) };
             }
             return g;
         }));
-        
-        if (wasMember && profileData?.handle === memberId && selectedConversation?.name === groupTitle) {
-            setSelectedConversation(null);
-        }
     };
 
-    const toggleGroupMembership = (groupTitle: string) => {
+    const toggleGroupMembership = useCallback((groupTitle: string) => {
         if (!profileData) return;
-        
-        const group = networkingGroups.find(g => g.title === groupTitle);
-        if (!group) return;
 
-        const isMember = group.members.some(m => m.id === profileData.handle);
-        const updatedGroups = networkingGroups.map(g => {
-            if (g.title === groupTitle) {
-                if (isMember) {
-                    // Leave group
-                    return { ...g, members: g.members.filter(m => m.id !== profileData.handle) };
-                } else {
-                    // Join group
-                    const newMember: Member = {
-                        id: profileData.handle,
-                        name: profileData.name,
-                        avatar: profileData.avatar,
-                        role: 'member'
-                    };
-                    return { ...g, members: [...g.members, newMember] };
+        setNetworkingGroups(prevGroups => {
+            return prevGroups.map(group => {
+                if (group.title === groupTitle) {
+                    const isMember = group.members.some(member => member.id === profileData.handle);
+                    if (isMember) {
+                        // Leave group
+                        return { ...group, members: group.members.filter(m => m.id !== profileData.handle) };
+                    } else {
+                        // Join group
+                        const newMember: Member = {
+                            id: profileData.handle,
+                            name: profileData.name,
+                            avatar: profileData.avatar,
+                            role: 'member'
+                        };
+                        return { ...group, members: [...group.members, newMember] };
+                    }
                 }
-            }
-            return g;
+                return group;
+            });
         });
-        
-        setNetworkingGroups(updatedGroups);
-
-        if (!isMember) {
-            // If user just joined, check if a conversation exists, if not create one.
-            const conversationExists = conversations.some(c => c.name === groupTitle);
-            if (!conversationExists) {
-                const newConversation = {
-                    name: groupTitle,
-                    avatar: "https://placehold.co/100x100.png",
-                    aiHint: "university logo",
-                    lastMessage: "You joined the group.",
-                    time: "Now",
-                    unread: 0,
-                    isGroup: true,
-                };
-                setConversations(prev => [newConversation, ...prev]);
-            }
-        } else if (selectedConversation?.name === groupTitle) {
-            // If user just left the group they were viewing, deselect it
-            setSelectedConversation(null);
-        }
-    };
+    }, [profileData]);
 
     const updateMemberRole = (groupTitle: string, memberId: string, role: 'admin' | 'member') => {
         setNetworkingGroups(prevGroups => prevGroups.map(g => {
@@ -271,10 +238,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const value = {
         networkingGroups,
+        myGroups,
+        exploreGroups,
         addNetworkingGroup,
         addMemberToGroup,
         removeMemberFromGroup,
-        joinedGroups,
         toggleGroupMembership,
         updateMemberRole,
         conversations,
