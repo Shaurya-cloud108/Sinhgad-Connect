@@ -139,6 +139,7 @@ export type StoryViewer = {
   avatar: string;
 };
 
+// This type is kept for backwards compatibility but is no longer the primary type for new stories.
 export type StoryMedia = {
   type: 'image' | 'video';
   url: string;
@@ -149,11 +150,12 @@ export type Story = {
   id: number;
   name: string;
   avatar: string;
-  media: StoryMedia[];
+  images: string[];
   isOwn?: boolean;
   aiHint: string;
   viewers?: StoryViewer[];
 };
+
 
 export type SuccessStory = {
     id: string;
@@ -569,7 +571,7 @@ export const stories: Story[] = [
       id: 1, 
       name: "Your Story", 
       avatar: "https://placehold.co/100x100.png", 
-      media: [], 
+      images: [], 
       isOwn: true, 
       aiHint: "add icon", 
       viewers: []
@@ -578,16 +580,16 @@ export const stories: Story[] = [
       id: 2, 
       name: "Rohan Verma", 
       avatar: "https://placehold.co/100x100.png", 
-      media: [{ type: 'image', url: "https://placehold.co/400x700.png", timestamp: Date.now() - (12 * 60 * 60 * 1000) }], // 12 hours ago
+      images: ["https://placehold.co/400x700.png"],
       aiHint: "professional man",
       viewers: [
         { name: "Priya Sharma", avatar: "https://placehold.co/100x100.png" },
         { name: "Anjali Mehta", avatar: "https://placehold.co/100x100.png" },
       ]
     },
-    { id: 3, name: "Anjali Mehta", avatar: "https://placehold.co/100x100.png", media: [{ type: 'image', url: "https://placehold.co/400x700.png", timestamp: Date.now() - (2 * 60 * 60 * 1000) }], aiHint: "corporate woman", viewers: [] }, // 2 hours ago
-    { id: 4, name: "Vikram Singh", avatar: "https://placehold.co/100x100.png", media: [], aiHint: "corporate man", viewers: [] },
-    { id: 5, name: "Sneha Reddy", avatar: "https://placehold.co/100x100.png", media: [{ type: 'image', url: "https://placehold.co/400x700.png", timestamp: Date.now() - (30 * 60 * 60 * 1000) }], aiHint: "young professional", viewers: [] }, // 30 hours ago (will be expired)
+    { id: 3, name: "Anjali Mehta", avatar: "https://placehold.co/100x100.png", images: ["https://placehold.co/400x700.png"], aiHint: "corporate woman", viewers: [] },
+    { id: 4, name: "Vikram Singh", avatar: "https://placehold.co/100x100.png", images: [], aiHint: "corporate man", viewers: [] },
+    { id: 5, name: "Sneha Reddy", avatar: "https://placehold.co/100x100.png", images: [], aiHint: "young professional", viewers: [] },
 ];
 
 export const conversationsData: Conversation[] = [
@@ -679,3 +681,5 @@ export const notifications: Notification[] = [
         aiHint: "briefcase icon"
     },
 ];
+
+    
