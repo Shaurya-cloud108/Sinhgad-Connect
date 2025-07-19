@@ -1,8 +1,10 @@
+
 "use client";
 
 import Link from "next/link";
-import { GraduationCap, Send, Heart } from "lucide-react";
+import { GraduationCap, Send, User, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const navLinks = [
   { href: "/search", label: "Search" },
@@ -10,7 +12,6 @@ const navLinks = [
   { href: "/events", label: "Events" },
   { href: "/success-stories", label: "Stories" },
   { href: "/networking", label: "Networking" },
-  { href: "/messages", label: "Messages" },
 ];
 
 export function AppHeader() {
@@ -26,9 +27,6 @@ export function AppHeader() {
                 </span>
             </Link>
              <div className="flex items-center space-x-1">
-                <Button variant="ghost" size="icon">
-                    <Heart className="h-6 w-6" />
-                </Button>
                  <Button variant="ghost" size="icon" asChild>
                     <Link href="/messages">
                       <Send className="h-6 w-6" />
@@ -45,24 +43,34 @@ export function AppHeader() {
                 Sinhgad Alumni Connect
                 </span>
             </Link>
-            <nav className="flex items-center space-x-6 text-sm font-medium">
+            <nav className="flex items-center space-x-4 text-sm font-medium">
             {navLinks.map((link) => (
                 <Link
                 key={link.href}
                 href={link.href}
-                className="transition-colors hover:text-primary text-muted-foreground"
+                className="transition-colors hover:text-primary text-muted-foreground px-2 py-1"
                 >
                 {link.label}
                 </Link>
             ))}
             </nav>
             <div className="flex flex-1 items-center justify-end space-x-4">
-                <Button asChild>
-                    <Link href="/register">Join Now</Link>
+                <Button variant="ghost" size="icon" asChild>
+                  <Link href="/messages">
+                    <Send />
+                  </Link>
                 </Button>
-                 <Button variant="outline" asChild>
-                    <Link href="/login">Sign In</Link>
+                <Button variant="ghost" size="icon" asChild>
+                  <Link href="/notifications">
+                    <Bell />
+                  </Link>
                 </Button>
+                <Link href="/profile">
+                  <Avatar className="h-9 w-9 cursor-pointer">
+                    <AvatarImage src="https://placehold.co/100x100.png" data-ai-hint="professional woman" />
+                    <AvatarFallback>PS</AvatarFallback>
+                  </Avatar>
+                </Link>
             </div>
         </div>
 
