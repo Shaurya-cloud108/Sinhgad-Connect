@@ -117,6 +117,10 @@ export function ShareDialog({ contentType, contentId, children }: ShareDialogPro
             newShareMessage.sharedProfileId = contentId as string;
             lastMessageText = "Shared a profile.";
             break;
+        case 'group':
+            newShareMessage.sharedGroupId = contentId as string;
+            lastMessageText = "Shared a group.";
+            break;
         default:
             toast({ variant: "destructive", title: "Share failed", description: "Unknown content type." });
             return;

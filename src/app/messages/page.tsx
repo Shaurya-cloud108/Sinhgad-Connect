@@ -46,6 +46,7 @@ import { SharedJobCard } from "@/components/shared-job-card";
 import { SharedEventCard } from "@/components/shared-event-card";
 import { SharedStoryCard } from "@/components/shared-story-card";
 import { SharedProfileCard } from "@/components/shared-profile-card";
+import { SharedGroupCard } from "@/components/shared-group-card";
 import Link from "next/link";
 
 function AddMemberDialog({ group, onOpenChange }: { group: NetworkingGroup, onOpenChange: (open: boolean) => void }) {
@@ -421,6 +422,7 @@ export default function MessagesPage() {
                           {msg.sharedEventId && <SharedEventCard eventId={msg.sharedEventId} />}
                           {msg.sharedStoryId && <SharedStoryCard storyId={msg.sharedStoryId} />}
                           {msg.sharedProfileId && <SharedProfileCard profileId={msg.sharedProfileId} />}
+                          {msg.sharedGroupId && <SharedGroupCard groupId={msg.sharedGroupId} />}
                         </div>
                     </div>
                   </div>

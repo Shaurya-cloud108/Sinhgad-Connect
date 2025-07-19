@@ -9,9 +9,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Code, Briefcase, Rocket, Building, Globe, PlusCircle, MessageSquare } from "lucide-react";
+import { ArrowRight, Code, Briefcase, Rocket, Building, Globe, PlusCircle, MessageSquare, Send } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -28,6 +29,7 @@ import { AppContext, NetworkingGroup } from "@/context/AppContext";
 import { useRouter } from "next/navigation";
 import { ProfileContext } from "@/context/ProfileContext";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ShareDialog } from "@/components/share-dialog";
 
 function CreateGroupDialog({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
   const { addNetworkingGroup } = useContext(AppContext);
@@ -123,6 +125,8 @@ function NetworkingPageContent() {
   const handleJoinGroup = (group: NetworkingGroup) => {
     if(!profileData) return;
     toggleGroupMembership(group.title, profileData.handle);
+    setSelectedConversationByName(group.title);
+    router.push("/messages");
   }
 
   const myGroups = useMemo(() => {
@@ -173,11 +177,16 @@ function NetworkingPageContent() {
                           <CardContent className="flex-grow">
                               <p className="text-sm text-muted-foreground">{group.description}</p>
                           </CardContent>
-                          <CardContent>
+                          <CardFooter className="gap-2">
                             <Button className="w-full" onClick={() => handleGroupClick(group)}>
                                 <MessageSquare className="mr-2 h-4 w-4" /> Go to Chat
                             </Button>
-                          </CardContent>
+                            <ShareDialog contentType="group" contentId={group.title}>
+                                <Button variant="outline" size="icon">
+                                    <Send className="h-4 w-4" />
+                                </Button>
+                            </ShareDialog>
+                          </CardFooter>
                       </Card>
                   ))}
               </div>
@@ -208,16 +217,20 @@ function NetworkingPageContent() {
               <CardContent className="flex-grow">
                 <p className="text-sm text-muted-foreground">{group.description}</p>
               </CardContent>
-              <CardContent>
+              <CardFooter className="gap-2">
                 <Button 
-                  variant="outline" 
                   className="w-full"
                   onClick={() => handleJoinGroup(group)}
                 >
                   Join Group
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
-              </CardContent>
+                 <ShareDialog contentType="group" contentId={group.title}>
+                    <Button variant="outline" size="icon">
+                        <Send className="h-4 w-4" />
+                    </Button>
+                </ShareDialog>
+              </CardFooter>
             </Card>
             ))}
         </div>
