@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { GraduationCap, Send, User, Bell, Home, Search, Users, Briefcase } from "lucide-react";
+import { GraduationCap, Send, User, Bell, Home, Search, Users, Briefcase, Award, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useContext } from "react";
@@ -11,12 +11,12 @@ import { ProfileContext } from "@/context/ProfileContext";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
-  { href: "/", label: "Home", icon: Home },
-  { href: "/search", label: "Search", icon: Search },
-  { href: "/jobs", label: "Jobs", icon: Briefcase },
-  { href: "/events", label: "Events", icon: Bell },
-  { href: "/success-stories", label: "Stories", icon: Bell },
-  { href: "/networking", label: "Networking", icon: Users },
+  { href: "/", label: "Home" },
+  { href: "/search", label: "Search" },
+  { href: "/jobs", label: "Jobs" },
+  { href: "/events", label: "Events" },
+  { href: "/success-stories", label: "Stories" },
+  { href: "/networking", label: "Networking" },
 ];
 
 export function AppHeader() {
@@ -65,13 +65,13 @@ export function AppHeader() {
               </>
             ) : (
               <>
-                <Button variant="ghost" size="icon" asChild className="hidden md:inline-flex">
+                <Button variant="ghost" size="icon" asChild>
                   <Link href="/messages">
                     <Send />
                     <span className="sr-only">Messages</span>
                   </Link>
                 </Button>
-                <Button variant="ghost" size="icon" asChild className="hidden md:inline-flex">
+                <Button variant="ghost" size="icon" asChild>
                   <Link href="/notifications">
                     <Bell />
                      <span className="sr-only">Notifications</span>
