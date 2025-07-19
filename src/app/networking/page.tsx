@@ -123,8 +123,6 @@ function NetworkingPageContent() {
   
   const handleJoinGroup = (group: NetworkingGroup) => {
     toggleGroupMembership(group.title);
-    setSelectedConversationByName(group.title);
-    router.push("/messages");
   }
 
   const myGroups = useMemo(() => {
