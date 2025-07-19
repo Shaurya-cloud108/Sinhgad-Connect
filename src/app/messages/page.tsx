@@ -48,7 +48,6 @@ import { SharedStoryCard } from "@/components/shared-story-card";
 import { SharedProfileCard } from "@/components/shared-profile-card";
 import { SharedGroupCard } from "@/components/shared-group-card";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 
 
@@ -102,7 +101,7 @@ function AddMemberDialog({ group, onOpenChange }: { group: NetworkingGroup, onOp
                                     <AvatarFallback>{alumnus.name.substring(0, 2)}</AvatarFallback>
                                 </Avatar>
                                 <div>
-                                    <p className="font-semibold text-sm">{alumnus.name} {getStatusEmoji(alumnus.graduationYear, alumnus.graduationMonth)}</p>
+                                    <p className="font-semibold text-sm">{alumnus.name} {getStatusEmoji(alumnus.education.graduationYear, alumnus.education.graduationMonth)}</p>
                                     <p className="text-xs text-muted-foreground">@{alumnus.handle}</p>
                                 </div>
                             </div>
@@ -253,7 +252,7 @@ function MessagesPageContent() {
     return selectedConversation?.isGroup ? networkingGroups.find(g => g.title === selectedConversation.name) : null;
   }, [selectedConversation, networkingGroups]);
 
-  const isUserMember = currentGroup ? myGroups.some(g => g.title === currentGroup.title) : true;
+  const isUserMember = currentGroup && profileData ? currentGroup.members.some(m => m.id === profileData.handle) : true;
   
   const members: Member[] = currentGroup?.members || [];
   const currentUserRole = profileData ? members.find(m => m.id === profileData.handle)?.role : undefined;

@@ -2,7 +2,6 @@
 "use client";
 
 import { useState, useContext, useEffect, useMemo } from "react";
-import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -12,7 +11,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Code, Briefcase, Rocket, Building, Globe, PlusCircle, MessageSquare, Send } from "lucide-react";
+import { Code, Briefcase, Rocket, Building, Globe, PlusCircle, MessageSquare, Send } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -222,7 +221,7 @@ function NetworkingPageContent() {
                   </CardContent>
                   <CardFooter className="gap-2">
                     <Button className="w-full" onClick={() => handleJoinToggle(group.title)}>
-                      Join Group <ArrowRight className="ml-2 h-4 w-4" />
+                      Join Group
                     </Button>
                     <ShareDialog contentType="group" contentId={group.title}>
                         <Button variant="outline" size="icon">
