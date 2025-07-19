@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, Send, Plus, Image as ImageIcon, Video, Briefcase, Award, X } from "lucide-react";
+import { Heart, MessageCircle, Send, Plus, Image as ImageIcon, Award, Briefcase, X, MoreHorizontal, Trash2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +20,24 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
@@ -54,6 +72,7 @@ function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean,
     }
     
     const newPost: FeedItem = {
+        id: Date.now(), // Simple unique ID
         author: {
             name: "Priya Sharma",
             avatar: "https://placehold.co/100x100.png",
@@ -163,12 +182,19 @@ export default function Home() {
   
   const handleStoryClick = (story: Story) => {
     if (story.isOwn) {
+      // This is a placeholder for creating a story, we'll open the post dialog for now
       setIsPostDialogOpen(true);
     } else {
       setSelectedStory(story);
       setIsStoryViewerOpen(true);
     }
   };
+
+  const handleDeletePost = (postId: number) => {
+    setFeedItems(prev => prev.filter(item => item.id !== postId));
+  };
+
+  const currentUserHandle = "priya-sharma-09";
 
   return (
     <div className="w-full max-w-2xl mx-auto">
@@ -233,9 +259,9 @@ export default function Home() {
 
       {/* Feed */}
       <div className="space-y-4 py-4">
-        {feedItems.map((item, index) => (
-          <Card key={index} className="rounded-none md:rounded-lg shadow-none md:shadow-sm border-l-0 border-r-0 md:border">
-            <CardHeader className="p-4">
+        {feedItems.map((item) => (
+          <Card key={item.id} className="rounded-none md:rounded-lg shadow-none md:shadow-sm border-l-0 border-r-0 md:border">
+            <CardHeader className="p-4 flex flex-row items-center justify-between">
               <div className="flex items-center space-x-3">
                 <Avatar className="w-10 h-10">
                   <AvatarImage src={item.author.avatar} data-ai-hint={item.author.aiHint} />
@@ -243,9 +269,42 @@ export default function Home() {
                 </Avatar>
                 <div>
                   <p className="font-semibold text-sm">{item.author.name}</p>
-                  <p className="text-xs text-muted-foreground">{item.author.handle}</p>
+                  <p className="text-xs text-muted-foreground">@{item.author.handle}</p>
                 </div>
               </div>
+              {item.author.handle === currentUserHandle && (
+                <AlertDialog>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                       <AlertDialogTrigger asChild>
+                          <DropdownMenuItem className="text-destructive">
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                       </AlertDialogTrigger>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                   <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently delete your post.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDeletePost(item.id)}>
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+              )}
             </CardHeader>
             <CardContent className="p-0">
               <p className="px-4 pb-3 text-sm">{item.content}</p>

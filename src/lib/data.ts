@@ -85,6 +85,7 @@ export const stories: Story[] = [
 ];
 
 export type FeedItem = {
+    id: number;
     author: {
       name: string;
       avatar: string;
@@ -100,6 +101,7 @@ export type FeedItem = {
 
 export const feedItems: FeedItem[] = [
   {
+    id: 1,
     author: {
       name: "Annual Alumni Meet",
       avatar: "https://placehold.co/100x100.png",
@@ -113,6 +115,7 @@ export const feedItems: FeedItem[] = [
     comments: 32,
   },
   {
+    id: 2,
     author: {
       name: "Sunita Narayan '09",
       avatar: "https://placehold.co/100x100.png",
@@ -126,6 +129,7 @@ export const feedItems: FeedItem[] = [
     comments: 15,
   },
   {
+    id: 3,
     author: {
       name: "Alumni Network Job Board",
       avatar: "https://placehold.co/100x100.png",
@@ -139,6 +143,7 @@ export const feedItems: FeedItem[] = [
     comments: 7,
   },
   {
+    id: 4,
     author: {
       name: "Priya Sharma",
       avatar: "https://placehold.co/100x100.png",
@@ -152,6 +157,7 @@ export const feedItems: FeedItem[] = [
     comments: 18,
   },
   {
+    id: 5,
     author: {
       name: "Priya Sharma",
       avatar: "https://placehold.co/100x100.png",

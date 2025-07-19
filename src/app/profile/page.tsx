@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Briefcase, Calendar, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut } from "lucide-react";
+import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2 } from "lucide-react";
 import { profileData as initialProfileData, feedItems as initialFeedItems, ProfileData, FeedItem } from "@/lib/data";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -20,6 +20,24 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
 import {
   Form,
   FormControl,
@@ -145,6 +163,9 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
 
 export default function ProfilePage() {
     const [profileData, setProfileData] = useState<ProfileData>(initialProfileData);
+    const [userPosts, setUserPosts] = useState<FeedItem[]>(
+        initialFeedItems.filter(item => item.author.handle === initialProfileData.handle)
+    );
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const router = useRouter();
     
@@ -153,8 +174,13 @@ export default function ProfilePage() {
     };
 
     const handleLogout = () => {
+        // In a real app, you'd clear auth tokens here
         router.push("/register");
     }
+
+    const handleDeletePost = (postId: number) => {
+        setUserPosts(prev => prev.filter(item => item.id !== postId));
+    };
 
   return (
     <div className="bg-secondary/40">
@@ -190,7 +216,7 @@ export default function ProfilePage() {
                     </p>
                     <div className="flex items-center gap-4 mt-2 text-sm">
                         <span className="font-semibold">{profileData.connections}</span><span className="text-muted-foreground">Connections</span>
-                        <span className="font-semibold">{profileData.posts}</span><span className="text-muted-foreground">Posts</span>
+                        <span className="font-semibold">{userPosts.length}</span><span className="text-muted-foreground">Posts</span>
                     </div>
                 </div>
             </div>
@@ -202,9 +228,9 @@ export default function ProfilePage() {
                 <TabsTrigger value="about">About</TabsTrigger>
               </TabsList>
               <TabsContent value="posts" className="mt-6 space-y-6">
-                 {initialFeedItems.filter(item => item.author.handle === profileData.handle).map((item, index) => (
-                  <Card key={index}>
-                    <CardHeader className="p-4">
+                 {userPosts.map((item) => (
+                  <Card key={item.id}>
+                    <CardHeader className="p-4 flex flex-row items-center justify-between">
                       <div className="flex items-center space-x-3">
                         <Avatar className="w-10 h-10">
                           <AvatarImage src={item.author.avatar} data-ai-hint={item.author.aiHint} />
@@ -215,6 +241,37 @@ export default function ProfilePage() {
                           <p className="text-xs text-muted-foreground">@{item.author.handle}</p>
                         </div>
                       </div>
+                      <AlertDialog>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                            <AlertDialogTrigger asChild>
+                                <DropdownMenuItem className="text-destructive">
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Delete
+                                </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete your post.
+                            </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDeletePost(item.id)}>
+                                Delete
+                            </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </CardHeader>
                     <CardContent className="p-0">
                       <p className="px-4 pb-3 text-sm">{item.content}</p>
@@ -271,7 +328,7 @@ export default function ProfilePage() {
                  <Card className="mt-6">
                   <CardHeader>
                     <CardTitle className="font-headline text-xl">Education</CardTitle>
-                  </CardHeader>
+                  </Header>
                   <CardContent className="space-y-4">
                      <div className="flex gap-4">
                         <GraduationCap className="h-8 w-8 text-muted-foreground mt-1"/>
