@@ -1,19 +1,40 @@
 
 "use client";
 
-import { useState, useContext, useEffect, useMemo } from "react";
+import { useState, useContext, useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Send, ArrowLeft, MessageSquare, Shield, Users, Crown, PlusCircle, Trash2 } from "lucide-react";
+import { Search, Send, ArrowLeft, MessageSquare, PlusCircle, Trash2, Crown, Info, LogOut, UserPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { AppContext, Conversation, Message, Member } from "@/context/AppContext";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose } from "@/components/ui/dialog";
+import { AppContext, Conversation, Message, Member, NetworkingGroup } from "@/context/AppContext";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogDescription,
+  DialogClose,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
 import { Badge } from "@/components/ui/badge";
 import { ProfileContext } from "@/context/ProfileContext";
 import { alumniData } from "@/lib/data";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 
 function AddMemberDialog({ group, onOpenChange }: { group: NetworkingGroup, onOpenChange: (open: boolean) => void }) {
     const { addMemberToGroup } = useContext(AppContext);
@@ -54,16 +75,121 @@ function AddMemberDialog({ group, onOpenChange }: { group: NetworkingGroup, onOp
                             <Button size="sm" onClick={() => handleAddMember(alumnus)}>Add</Button>
                         </div>
                     ))}
+                    {potentialMembers.length === 0 && (
+                        <p className="text-sm text-center text-muted-foreground pt-4">All alumni are already in this group.</p>
+                    )}
                 </div>
             </ScrollArea>
         </DialogContent>
     );
 }
 
+function GroupInfoDialog({ group, currentUserRole, onOpenChange }: { group: NetworkingGroup, currentUserRole: 'admin' | 'member' | undefined, onOpenChange: (open: boolean) => void }) {
+    const { profileData } = useContext(ProfileContext);
+    const { updateMemberRole, removeMemberFromGroup, toggleGroupMembership, setSelectedConversation } = useContext(AppContext);
+    const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
+
+    const handleLeaveGroup = () => {
+        toggleGroupMembership(group);
+        setSelectedConversation(null);
+        onOpenChange(false);
+    }
+
+    return (
+        <DialogContent className="max-w-md">
+            <DialogHeader>
+                <DialogTitle className="font-headline text-2xl">{group.title}</DialogTitle>
+                <DialogDescription>{group.description}</DialogDescription>
+            </DialogHeader>
+            
+            <div className="flex items-center justify-between my-4">
+                <h3 className="text-lg font-semibold">Members ({group.members.length})</h3>
+                {currentUserRole === 'admin' && (
+                    <Dialog open={isAddMemberOpen} onOpenChange={setIsAddMemberOpen}>
+                        <DialogTrigger asChild>
+                            <Button size="sm" variant="outline"><UserPlus className="mr-2 h-4 w-4"/> Add</Button>
+                        </DialogTrigger>
+                        <AddMemberDialog group={group} onOpenChange={setIsAddMemberOpen} />
+                    </Dialog>
+                )}
+            </div>
+
+            <ScrollArea className="h-64 pr-4 -mr-4">
+                <div className="space-y-4">
+                    {group.members.map(member => (
+                        <div key={member.id} className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <Avatar className="h-9 w-9">
+                                    <AvatarImage src={member.avatar} />
+                                    <AvatarFallback>{member.name.substring(0,2)}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <p className="font-semibold text-sm">{member.name}</p>
+                                    <p className="text-xs text-muted-foreground">{member.role}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                {currentUserRole === 'admin' && member.id !== profileData.handle && (
+                                    <>
+                                        <Button 
+                                            size="icon" 
+                                            variant={member.role === 'admin' ? "secondary" : "ghost"}
+                                            className="h-8 w-8"
+                                            onClick={() => updateMemberRole(group.title, member.id, member.role === 'admin' ? 'member' : 'admin')}
+                                        >
+                                            <Crown className="h-4 w-4" />
+                                            <span className="sr-only">{member.role === 'admin' ? "Revoke Admin" : "Make Admin"}</span>
+                                        </Button>
+                                        <Button
+                                            size="icon"
+                                            variant="ghost"
+                                            className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                            onClick={() => removeMemberFromGroup(group.title, member.id)}
+                                        >
+                                           <Trash2 className="h-4 w-4" />
+                                            <span className="sr-only">Remove Member</span>
+                                        </Button>
+                                    </>
+                                )}
+                                {member.id === profileData.handle && <Badge variant="secondary">You</Badge>}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </ScrollArea>
+            <Separator />
+             <DialogFooter className="!justify-center">
+                 <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button variant="destructive">
+                            <LogOut className="mr-2 h-4 w-4" />
+                            Leave Group
+                        </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Are you sure you want to leave?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                You will be removed from '{group.title}' and will no longer receive messages. You can rejoin later.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleLeaveGroup}>Leave</AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            </DialogFooter>
+        </DialogContent>
+    );
+}
+
+
 export default function MessagesPage() {
-  const { conversations, setConversations, messagesData, setMessagesData, selectedConversation, setSelectedConversation, networkingGroups, updateMemberRole, removeMemberFromGroup } = useContext(AppContext);
+  const { conversations, setConversations, messagesData, setMessagesData, selectedConversation, setSelectedConversation, networkingGroups } = useContext(AppContext);
   const { profileData } = useContext(ProfileContext);
   const [newMessage, setNewMessage] = useState("");
+  const [isGroupInfoOpen, setIsGroupInfoOpen] = useState(false);
 
   const currentGroup = useMemo(() => {
     return selectedConversation ? networkingGroups.find(g => g.title === selectedConversation.name) : null;
@@ -90,7 +216,6 @@ export default function MessagesPage() {
     
     setNewMessage("");
 
-    // Also update the last message in the conversation list
     setConversations(prev => prev.map(convo => 
         convo.name === selectedConversation.name 
         ? {...convo, lastMessage: newMessage, time: "Now"} 
@@ -119,7 +244,7 @@ export default function MessagesPage() {
             <Input placeholder="Search messages..." className="pl-10" />
           </div>
         </div>
-        <div className="flex-grow overflow-y-auto">
+        <ScrollArea className="flex-grow">
           {conversations.map((convo) => (
             <div
               key={convo.name}
@@ -147,7 +272,7 @@ export default function MessagesPage() {
               </div>
             </div>
           ))}
-        </div>
+        </ScrollArea>
       </div>
       <div className={cn(
         "w-full md:w-2/3 lg:w-3/4 flex-col",
@@ -174,70 +299,14 @@ export default function MessagesPage() {
                 </div>
               </div>
               {currentGroup && (
-                 <Sheet>
-                  <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <Users />
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent>
-                    <SheetHeader>
-                      <SheetTitle>Group Members</SheetTitle>
-                       {currentUserRole === 'admin' && (
-                         <Dialog>
-                            <DialogTrigger asChild>
-                                <Button variant="outline" className="mt-4">
-                                    <PlusCircle className="mr-2 h-4 w-4" />
-                                    Add Member
-                                </Button>
-                            </DialogTrigger>
-                             <AddMemberDialog group={currentGroup} onOpenChange={() => {}} />
-                         </Dialog>
-                        )}
-                    </SheetHeader>
-                    <ScrollArea className="h-[calc(100%-8rem)]">
-                        <div className="py-4 space-y-4 pr-4">
-                        {members.map(member => (
-                            <div key={member.id} className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <Avatar className="h-9 w-9">
-                                <AvatarImage src={member.avatar} />
-                                <AvatarFallback>{member.name.substring(0,2)}</AvatarFallback>
-                                </Avatar>
-                                <div>
-                                    <p className="font-semibold text-sm">{member.name}</p>
-                                    <p className="text-xs text-muted-foreground">{member.role}</p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                {currentUserRole === 'admin' && member.id !== profileData.handle && (
-                                    <>
-                                        <Button 
-                                            size="sm" 
-                                            variant={member.role === 'admin' ? "secondary" : "outline"}
-                                            onClick={() => updateMemberRole(currentGroup.title, member.id, member.role === 'admin' ? 'member' : 'admin')}
-                                        >
-                                            <Crown className="h-4 w-4" />
-                                            <span className="sr-only">{member.role === 'admin' ? "Revoke Admin" : "Make Admin"}</span>
-                                        </Button>
-                                        <Button
-                                            size="sm"
-                                            variant="destructive"
-                                            onClick={() => removeMemberFromGroup(currentGroup.title, member.id)}
-                                        >
-                                           <Trash2 className="h-4 w-4" />
-                                            <span className="sr-only">Remove Member</span>
-                                        </Button>
-                                    </>
-                                )}
-                                {member.id === profileData.handle && <Badge variant="secondary">You</Badge>}
-                                </div>
-                            </div>
-                        ))}
-                        </div>
-                    </ScrollArea>
-                  </SheetContent>
-                </Sheet>
+                 <Dialog open={isGroupInfoOpen} onOpenChange={setIsGroupInfoOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <Info />
+                      </Button>
+                    </DialogTrigger>
+                    <GroupInfoDialog group={currentGroup} currentUserRole={currentUserRole} onOpenChange={setIsGroupInfoOpen} />
+                 </Dialog>
               )}
             </div>
             <div className="flex-grow p-4 overflow-y-auto bg-secondary/30">
@@ -285,3 +354,5 @@ export default function MessagesPage() {
     </div>
   );
 }
+
+    
