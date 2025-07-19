@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { createContext, useState, ReactNode, useContext } from 'react';
+import React, { createContext, useState, ReactNode, useContext, useEffect } from 'react';
 import { networkingGroups as initialNetworkingGroups, conversationsData as initialConversations, messagesData as initialMessagesData, alumniData } from '@/lib/data';
 import { ProfileContext } from './ProfileContext';
 import { ProfileData } from '@/lib/data';
@@ -86,6 +86,32 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [messagesData, setMessagesData] = useState<MessagesData>(initialMessagesData);
     const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
 
+    useEffect(() => {
+        // Initialize joined groups based on initial data and current user
+        const userGroups = new Set<string>();
+        initialNetworkingGroups.forEach(group => {
+            if (group.members.some(member => member.id === profileData.handle)) {
+                userGroups.add(group.title);
+            }
+        });
+        
+        const groupConversations = initialNetworkingGroups.map(group => ({
+            name: group.title,
+            avatar: "https://placehold.co/100x100.png",
+            aiHint: "university logo",
+            lastMessage: messagesData[group.title]?.[messagesData[group.title].length - 1]?.text || "No messages yet.",
+            time: "Yesterday",
+            unread: 0,
+        }));
+        
+        const allConversations = [...initialConversations, ...groupConversations.filter(gc => !initialConversations.some(ic => ic.name === gc.name))];
+        
+        setConversations(allConversations);
+        setJoinedGroups(userGroups);
+
+    }, [profileData.handle]);
+
+
     const addNetworkingGroup = (group: NetworkingGroup) => {
         setNetworkingGroups(prev => [group, ...prev]);
         setJoinedGroups(prev => new Set(prev).add(group.title));
@@ -149,18 +175,21 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
         if (alreadyMember) {
             newJoinedGroups.delete(group.title);
-            setConversations(prev => prev.filter(c => c.name !== group.title));
         } else {
             newJoinedGroups.add(group.title);
-            const newConversation: Conversation = {
-                name: group.title,
-                avatar: "https://placehold.co/100x100.png",
-                aiHint: "university logo",
-                lastMessage: "You joined the group.",
-                time: "Now",
-                unread: 0,
-            };
-            setConversations(prev => [newConversation, ...prev]);
+            
+            const groupExistsInConvos = conversations.some(c => c.name === group.title);
+            if (!groupExistsInConvos) {
+                const newConversation: Conversation = {
+                    name: group.title,
+                    avatar: "https://placehold.co/100x100.png",
+                    aiHint: "university logo",
+                    lastMessage: "You joined the group.",
+                    time: "Now",
+                    unread: 0,
+                };
+                setConversations(prev => [newConversation, ...prev]);
+            }
 
             if (!messagesData[group.title]) {
                  setMessagesData(prev => ({

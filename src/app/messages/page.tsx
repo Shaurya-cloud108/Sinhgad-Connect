@@ -92,12 +92,11 @@ function AddMemberDialog({ group, onOpenChange }: { group: NetworkingGroup, onOp
 
 function GroupInfoDialog({ group, currentUserRole, onOpenChange }: { group: NetworkingGroup, currentUserRole: 'admin' | 'member' | undefined, onOpenChange: (open: boolean) => void }) {
     const { profileData } = useContext(ProfileContext);
-    const { updateMemberRole, removeMemberFromGroup, toggleGroupMembership, setSelectedConversation } = useContext(AppContext);
+    const { updateMemberRole, removeMemberFromGroup, toggleGroupMembership } = useContext(AppContext);
     const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
 
     const handleLeaveGroup = () => {
         toggleGroupMembership(group);
-        setSelectedConversation(null);
         onOpenChange(false);
     }
 
@@ -208,7 +207,7 @@ function GroupInfoDialog({ group, currentUserRole, onOpenChange }: { group: Netw
 
 
 export default function MessagesPage() {
-  const { conversations, setConversations, messagesData, setMessagesData, selectedConversation, setSelectedConversation, networkingGroups } = useContext(AppContext);
+  const { conversations, setConversations, messagesData, setMessagesData, selectedConversation, setSelectedConversation, networkingGroups, joinedGroups, toggleGroupMembership } = useContext(AppContext);
   const { profileData } = useContext(ProfileContext);
   const [newMessage, setNewMessage] = useState("");
   const [isGroupInfoOpen, setIsGroupInfoOpen] = useState(false);
@@ -216,6 +215,8 @@ export default function MessagesPage() {
   const currentGroup = useMemo(() => {
     return selectedConversation ? networkingGroups.find(g => g.title === selectedConversation.name) : null;
   }, [selectedConversation, networkingGroups]);
+
+  const isUserMember = currentGroup ? joinedGroups.has(currentGroup.title) : false;
 
   const members: Member[] = currentGroup?.members || [];
   const currentUserRole = members.find(m => m.id === profileData.handle)?.role;
@@ -248,6 +249,12 @@ export default function MessagesPage() {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleSendMessage();
+    }
+  }
+
+  const handleRejoinGroup = () => {
+    if (currentGroup) {
+        toggleGroupMembership(currentGroup);
     }
   }
 
@@ -320,7 +327,7 @@ export default function MessagesPage() {
                   )}
                 </div>
               </div>
-              {currentGroup && (
+              {currentGroup && isUserMember && (
                  <Dialog open={isGroupInfoOpen} onOpenChange={setIsGroupInfoOpen}>
                     <DialogTrigger asChild>
                       <Button variant="ghost" size="icon">
@@ -331,8 +338,8 @@ export default function MessagesPage() {
                  </Dialog>
               )}
             </div>
-            <div className="flex-grow p-4 overflow-y-auto bg-secondary/30">
-              <div className="space-y-4">
+            <div className="flex-grow p-4 overflow-y-auto bg-secondary/30 relative">
+              <div className={cn("space-y-4", !isUserMember && currentGroup && "blur-sm")}>
                 {messages.map((msg, index) => (
                   <div key={index} className={cn("flex", msg.senderId === profileData.handle ? 'justify-end' : 'justify-start')}>
                      <div className={cn("flex items-start gap-2 max-w-xs lg:max-w-md", msg.senderId === profileData.handle && 'flex-row-reverse')}>
@@ -349,17 +356,24 @@ export default function MessagesPage() {
                   </div>
                 ))}
               </div>
+              {!isUserMember && currentGroup && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/70">
+                    <p className="text-lg font-semibold mb-2">You have left this group.</p>
+                    <Button onClick={handleRejoinGroup}>Rejoin Group</Button>
+                </div>
+              )}
             </div>
             <div className="p-4 border-t bg-background">
               <div className="relative">
                 <Input 
-                    placeholder="Type a message..." 
+                    placeholder={!isUserMember && currentGroup ? "You must join to send messages" : "Type a message..."}
                     className="pr-12"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyDown={handleKeyDown}
+                    disabled={!isUserMember && !!currentGroup}
                 />
-                <Button size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-10" onClick={handleSendMessage}>
+                <Button size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-10" onClick={handleSendMessage} disabled={!isUserMember && !!currentGroup}>
                   <Send className="h-5 w-5" />
                 </Button>
               </div>
