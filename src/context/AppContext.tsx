@@ -2,7 +2,7 @@
 "use client";
 
 import React, { createContext, useState, ReactNode, useContext } from 'react';
-import { networkingGroups as initialNetworkingGroups, conversationsData as initialConversations, messagesData as initialMessagesData } from '@/lib/data';
+import { networkingGroups as initialNetworkingGroups, conversationsData as initialConversations, messagesData as initialMessagesData, alumniData } from '@/lib/data';
 import { ProfileContext } from './ProfileContext';
 import { ProfileData } from '@/lib/data';
 
@@ -45,6 +45,8 @@ export type MessagesData = {
 type AppContextType = {
     networkingGroups: NetworkingGroup[];
     addNetworkingGroup: (group: NetworkingGroup) => void;
+    addMemberToGroup: (groupTitle: string, member: Member) => void;
+    removeMemberFromGroup: (groupTitle: string, memberId: string) => void;
     joinedGroups: Set<string>;
     toggleGroupMembership: (group: NetworkingGroup) => void;
     updateMemberRole: (groupTitle: string, memberId: string, role: 'admin' | 'member') => void;
@@ -61,6 +63,8 @@ type AppContextType = {
 export const AppContext = createContext<AppContextType>({
     networkingGroups: [],
     addNetworkingGroup: () => {},
+    addMemberToGroup: () => {},
+    removeMemberFromGroup: () => {},
     joinedGroups: new Set(),
     toggleGroupMembership: () => {},
     updateMemberRole: () => {},
@@ -99,6 +103,26 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setMessagesData(prev => ({
             ...prev,
             [group.title]: [{ senderId: 'system', senderName: 'System', text: 'Welcome to the group! You are the admin.' }]
+        }));
+    };
+    
+    const addMemberToGroup = (groupTitle: string, member: Member) => {
+        setNetworkingGroups(prevGroups => prevGroups.map(g => {
+            if (g.title === groupTitle) {
+                // Avoid adding duplicate members
+                if (g.members.some(m => m.id === member.id)) return g;
+                return { ...g, members: [...g.members, member] };
+            }
+            return g;
+        }));
+    };
+    
+    const removeMemberFromGroup = (groupTitle: string, memberId: string) => {
+        setNetworkingGroups(prevGroups => prevGroups.map(g => {
+            if (g.title === groupTitle) {
+                return { ...g, members: g.members.filter(m => m.id !== memberId) };
+            }
+            return g;
         }));
     };
 
@@ -171,6 +195,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const value = {
         networkingGroups,
         addNetworkingGroup,
+        addMemberToGroup,
+        removeMemberFromGroup,
         joinedGroups,
         toggleGroupMembership,
         updateMemberRole,

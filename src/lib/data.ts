@@ -239,7 +239,8 @@ export const alumniData = [
     industry: "Technology",
     company: "Google",
     location: "San Francisco, CA",
-    aiHint: "professional woman"
+    aiHint: "professional woman",
+    handle: "priya-sharma-09",
   },
   {
     name: "Rohan Verma",
@@ -250,7 +251,8 @@ export const alumniData = [
     industry: "Automotive",
     company: "Tesla",
     location: "Austin, TX",
-    aiHint: "professional man"
+    aiHint: "professional man",
+    handle: "rohan-verma",
   },
   {
     name: "Anjali Mehta",
@@ -261,7 +263,8 @@ export const alumniData = [
     industry: "Telecommunications",
     company: "Verizon",
     location: "New York, NY",
-    aiHint: "corporate woman"
+    aiHint: "corporate woman",
+    handle: "anjali-mehta",
   },
   {
     name: "Vikram Singh",
@@ -272,7 +275,8 @@ export const alumniData = [
     industry: "Finance",
     company: "Goldman Sachs",
     location: "London, UK",
-    aiHint: "corporate man"
+    aiHint: "corporate man",
+    handle: "vikram-singh",
   },
   {
     name: "Sneha Reddy",
@@ -283,7 +287,8 @@ export const alumniData = [
     industry: "E-commerce",
     company: "Amazon",
     location: "Seattle, WA",
-    aiHint: "young professional"
+    aiHint: "young professional",
+    handle: "sneha-reddy",
   },
   {
     name: "Amit Patel",
@@ -294,8 +299,21 @@ export const alumniData = [
     industry: "Construction",
     company: "L&T Construction",
     location: "Mumbai, India",
-    aiHint: "engineer man"
+    aiHint: "engineer man",
+    handle: "amit-patel",
   },
+  {
+    name: "Sunita Narayan '09",
+    avatar: "https://placehold.co/100x100.png",
+    fallback: "SN",
+    graduationYear: 2009,
+    field: "Computer Engineering",
+    industry: "Technology",
+    company: "Innovate Inc.",
+    location: "Remote",
+    aiHint: "professional woman portrait",
+    handle: "sunita-narayan",
+  }
 ];
 
 
@@ -378,19 +396,19 @@ export const conversationsData = [
 
 export const messagesData = {
   "Priya Sharma": [
-    { senderId: "other-user", senderName: "Priya Sharma", text: "Hey! I'm a final year student and I saw your profile. Your work at Google is really inspiring!" },
+    { senderId: "priya-sharma-09", senderName: "Priya Sharma", text: "Hey! I'm a final year student and I saw your profile. Your work at Google is really inspiring!" },
     { senderId: profileData.handle, senderName: profileData.name, text: "Hi! Thanks for reaching out. Happy to help if you have any questions." },
-    { senderId: "other-user", senderName: "Priya Sharma", text: "That would be amazing. I'm preparing for interviews and would love to get your advice on my resume." },
+    { senderId: "priya-sharma-09", senderName: "Priya Sharma", text: "That would be amazing. I'm preparing for interviews and would love to get your advice on my resume." },
     { senderId: profileData.handle, senderName: profileData.name, text: "Sure, I can help with that. Let's connect tomorrow." },
   ],
   "Rohan Verma": [
-    { senderId: "other-user", senderName: "Rohan Verma", text: "Thanks for the resume tips!" },
+    { senderId: "rohan-verma", senderName: "Rohan Verma", text: "Thanks for the resume tips!" },
   ],
   "Software & Tech Innovators": [
     { senderId: 'priya-sharma-09', senderName: 'Priya Sharma', text: "Welcome to the group everyone! Let's talk about the latest in AI." },
     { senderId: 'rohan-verma', senderName: 'Rohan Verma', text: "Great idea! I've been experimenting with some new frameworks." }
   ],
   "Vikram Singh": [
-     { senderId: "other-user", senderName: "Vikram Singh", text: "It was great meeting you at the reunion." }
+     { senderId: "vikram-singh", senderName: "Vikram Singh", text: "It was great meeting you at the reunion." }
   ]
 };
