@@ -92,6 +92,15 @@ export const stories: Story[] = [
 ];
 
 
+export type Comment = {
+  author: {
+    name: string;
+    avatar: string;
+    handle: string;
+  };
+  text: string;
+};
+
 export type FeedItem = {
     id: number;
     author: {
@@ -105,7 +114,7 @@ export type FeedItem = {
     aiHint: string;
     likes: number;
     liked?: boolean;
-    comments: number;
+    comments: Comment[];
 }
 
 export const feedItems: FeedItem[] = [
@@ -121,7 +130,7 @@ export const feedItems: FeedItem[] = [
     image: "https://placehold.co/600x400.png",
     aiHint: "people networking",
     likes: 256,
-    comments: 32,
+    comments: [],
     liked: false,
   },
   {
@@ -136,7 +145,12 @@ export const feedItems: FeedItem[] = [
     image: null,
     aiHint: "",
     likes: 189,
-    comments: 15,
+    comments: [
+        {
+            author: { name: "Rohan Verma", avatar: "https://placehold.co/100x100.png", handle: "rohan-verma" },
+            text: "Congratulations, Sunita! This is huge."
+        }
+    ],
     liked: true,
   },
   {
@@ -151,7 +165,7 @@ export const feedItems: FeedItem[] = [
     image: "https://placehold.co/600x400.png",
     aiHint: "modern office",
     likes: 98,
-    comments: 7,
+    comments: [],
     liked: false,
   },
   {
@@ -166,7 +180,7 @@ export const feedItems: FeedItem[] = [
     image: null,
     aiHint: "",
     likes: 152,
-    comments: 18,
+    comments: [],
     liked: true,
   },
   {
@@ -181,7 +195,7 @@ export const feedItems: FeedItem[] = [
     image: "https://placehold.co/600x400.png",
     aiHint: "mentoring session",
     likes: 98,
-    comments: 7,
+    comments: [],
     liked: false,
   }
 ];
@@ -486,3 +500,5 @@ export const getContentDetails = (contentType: string, contentId: string | numbe
             return null;
     }
 }
+
+    

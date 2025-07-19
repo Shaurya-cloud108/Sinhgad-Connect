@@ -42,11 +42,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useState, useContext, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { stories as initialStories, feedItems as initialFeedItems, FeedItem, Story } from "@/lib/data";
+import { stories as initialStories, feedItems as initialFeedItems, FeedItem, Story, Comment } from "@/lib/data";
 import Image from "next/image";
 import { ProfileContext } from "@/context/ProfileContext";
 import { ShareDialog } from "@/components/share-dialog";
 import { cn } from "@/lib/utils";
+import { CommentSheet } from "@/components/comment-sheet";
 
 function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean, onOpenChange: (open: boolean) => void, onPostSubmit: (post: FeedItem) => void }) {
   const { toast } = useToast();
@@ -91,7 +92,7 @@ function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean,
         aiHint: "user uploaded",
         likes: 0,
         liked: false,
-        comments: 0
+        comments: []
     };
 
     onPostSubmit(newPost);
@@ -282,6 +283,7 @@ export default function Home() {
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
   const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
   const { profileData } = useContext(ProfileContext);
+  const [activeCommentPostId, setActiveCommentPostId] = useState<number | null>(null);
 
   if (!profileData) {
       return <div>Loading profile...</div>;
@@ -323,6 +325,25 @@ export default function Home() {
         : item
     ));
   };
+
+  const handleAddComment = (postId: number, commentText: string) => {
+    if (!profileData) return;
+    const newComment: Comment = {
+      author: {
+        name: profileData.name,
+        avatar: profileData.avatar,
+        handle: profileData.handle
+      },
+      text: commentText,
+    };
+    setFeedItems(prev => prev.map(item =>
+      item.id === postId
+        ? { ...item, comments: [...item.comments, newComment] }
+        : item
+    ));
+  };
+
+  const activePostForComments = feedItems.find(item => item.id === activeCommentPostId);
 
   return (
     <div className="w-full max-w-2xl mx-auto">
@@ -385,6 +406,15 @@ export default function Home() {
       <CreatePostDialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen} onPostSubmit={handlePostSubmit} />
       <CreateStoryDialog open={isCreateStoryDialogOpen} onOpenChange={setIsCreateStoryDialogOpen} onStorySubmit={handleStorySubmit} />
       <StoryViewerDialog story={selectedStory} open={isStoryViewerOpen} onOpenChange={setIsStoryViewerOpen} />
+      <CommentSheet
+        open={!!activeCommentPostId}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) setActiveCommentPostId(null);
+        }}
+        post={activePostForComments}
+        onCommentSubmit={handleAddComment}
+        currentUserAvatar={profileData.avatar}
+      />
 
       {/* Feed */}
       <div className="space-y-4 py-4">
@@ -449,9 +479,9 @@ export default function Home() {
                     <Heart className={cn("w-5 h-5", item.liked && "fill-current")} />
                     <span className="text-sm font-medium">{item.likes}</span>
                   </Button>
-                  <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                  <Button variant="ghost" size="sm" className="flex items-center gap-2" onClick={() => setActiveCommentPostId(item.id)}>
                     <MessageCircle className="w-5 h-5" />
-                     <span className="text-sm font-medium">{item.comments}</span>
+                     <span className="text-sm font-medium">{item.comments.length}</span>
                   </Button>
                   <ShareDialog contentType="post" contentId={item.id}>
                     <Button variant="ghost" size="sm">
@@ -466,3 +496,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
