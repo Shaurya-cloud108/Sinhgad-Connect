@@ -7,7 +7,7 @@ import { BottomNav } from '@/components/layout/bottom-nav';
 
 export const metadata: Metadata = {
   title: 'Sinhgad Alumni Connect',
-  description: 'Fostering lifelong connections between graduates and their alma mater.',
+  description: 'Connecting students and alumni for mentorship, guidance, and lifelong learning.',
 };
 
 export default function RootLayout({

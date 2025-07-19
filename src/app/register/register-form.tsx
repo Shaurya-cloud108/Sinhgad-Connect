@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,21 +22,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
+  role: z.enum(["student", "alumni"], { required_error: "Please select your role." }),
   fullName: z.string().min(2, "Full name must be at least 2 characters."),
   email: z.string().email("Please enter a valid email address."),
-  graduationYear: z.string().min(4, "Please select a graduation year."),
-  degree: z.string().min(1, "Please select your degree."),
+  graduationYear: z.string().min(4, "Please select a year."),
+  degree: z.string().min(1, "Please select your degree/branch."),
   password: z.string().min(8, "Password must be at least 8 characters."),
 });
 
 export function RegisterForm() {
   const { toast } = useToast();
+  const [role, setRole] = useState("student");
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      role: "student",
       fullName: "",
       email: "",
       graduationYear: "",
@@ -55,7 +61,40 @@ export function RegisterForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="role"
+          render={({ field }) => (
+            <FormItem className="space-y-3">
+              <FormLabel>I am a...</FormLabel>
+              <FormControl>
+                <RadioGroup
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    setRole(value);
+                  }}
+                  defaultValue={field.value}
+                  className="flex space-x-4"
+                >
+                  <FormItem className="flex items-center space-x-2 space-y-0">
+                    <FormControl>
+                      <RadioGroupItem value="student" />
+                    </FormControl>
+                    <FormLabel className="font-normal">Current Student</FormLabel>
+                  </FormItem>
+                  <FormItem className="flex items-center space-x-2 space-y-0">
+                    <FormControl>
+                      <RadioGroupItem value="alumni" />
+                    </FormControl>
+                    <FormLabel className="font-normal">Alumni</FormLabel>
+                  </FormItem>
+                </RadioGroup>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="fullName"
@@ -88,18 +127,18 @@ export function RegisterForm() {
             name="graduationYear"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Graduation Year</FormLabel>
+                <FormLabel>{role === 'student' ? 'Expected Grad Year' : 'Graduation Year'}</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a year" />
+                      <SelectValue placeholder="Select Year" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {Array.from({ length: 30 }, (_, i) => new Date().getFullYear() - i).map((year) => (
+                    {Array.from({ length: 40 }, (_, i) => new Date().getFullYear() + 5 - i).map((year) => (
                         <SelectItem key={year} value={String(year)}>
                           {year}
                         </SelectItem>
@@ -115,7 +154,7 @@ export function RegisterForm() {
             name="degree"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Degree</FormLabel>
+                <FormLabel>Branch</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
@@ -151,7 +190,7 @@ export function RegisterForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full !mt-6">
           Create Account
         </Button>
       </form>
