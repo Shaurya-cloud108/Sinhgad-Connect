@@ -10,6 +10,7 @@ const navLinks = [
   { href: "/events", label: "Events" },
   { href: "/success-stories", label: "Stories" },
   { href: "/networking", label: "Networking" },
+  { href: "/messages", label: "Messages" },
 ];
 
 export function AppHeader() {
@@ -28,8 +29,10 @@ export function AppHeader() {
                 <Button variant="ghost" size="icon">
                     <Heart className="h-6 w-6" />
                 </Button>
-                 <Button variant="ghost" size="icon">
-                    <Send className="h-6 w-6" />
+                 <Button variant="ghost" size="icon" asChild>
+                    <Link href="/messages">
+                      <Send className="h-6 w-6" />
+                    </Link>
                 </Button>
             </div>
         </div>

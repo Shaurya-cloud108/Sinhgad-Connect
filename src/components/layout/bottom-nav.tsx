@@ -10,7 +10,7 @@ const navLinks = [
   { href: "/", label: "Home", icon: Home },
   { href: "/search", label: "Search", icon: Search },
   { href: "/jobs", label: "Jobs", icon: Briefcase },
-  { href: "/events", label: "Notifications", icon: Bell },
+  { href: "/notifications", label: "Notifications", icon: Bell },
   { href: "/register", label: "Profile", icon: User },
 ];
 
