@@ -34,10 +34,10 @@ export function AppHeader() {
         <Link href="/" className="flex items-center space-x-2 mr-6">
           <GraduationCap className="h-6 w-6 text-primary" />
           <span className="hidden sm:inline-block font-bold font-headline">
-            Sinhgad Alumni Connect
+            Sinhgad Connect
           </span>
           <span className="sm:hidden font-bold font-headline text-xl">
-            Alumni
+            Connect
           </span>
         </Link>
         

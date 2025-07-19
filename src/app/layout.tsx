@@ -23,7 +23,7 @@ const ptSans = PT_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Sinhgad Alumni Connect',
+  title: 'Sinhgad Connect',
   description: 'Connecting students and alumni for mentorship, guidance, and lifelong learning.',
 };
 

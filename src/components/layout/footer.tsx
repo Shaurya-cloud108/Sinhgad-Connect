@@ -8,7 +8,7 @@ export function AppFooter() {
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center space-x-2 mb-4 md:mb-0">
             <GraduationCap className="h-6 w-6 text-primary" />
-            <span className="font-bold font-headline">Sinhgad Alumni Connect</span>
+            <span className="font-bold font-headline">Sinhgad Connect</span>
           </div>
           <nav className="flex items-center space-x-6 text-sm font-medium mb-4 md:mb-0">
             <Link href="#" className="text-muted-foreground transition-colors hover:text-primary">
@@ -34,7 +34,7 @@ export function AppFooter() {
           </div>
         </div>
         <div className="mt-8 text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Sinhgad College of Engineering Alumni Association. All Rights Reserved.
+          © {new Date().getFullYear()} Sinhgad Connect. All Rights Reserved.
         </div>
       </div>
     </footer>
