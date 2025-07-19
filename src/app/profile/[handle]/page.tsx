@@ -240,8 +240,7 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
 }
 
 
-export default function ProfilePage({ params }: { params: { handle: string } }) {
-    const { handle } = params;
+export default function ProfilePage({ params: { handle } }: { params: { handle: string } }) {
     const { profileData: ownProfileData, setProfileData } = useContext(ProfileContext);
     const { networkingGroups, setSelectedConversationByName } = useContext(AppContext);
     
@@ -571,3 +570,5 @@ export default function ProfilePage({ params }: { params: { handle: string } }) 
     </div>
   );
 }
+
+    
