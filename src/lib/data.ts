@@ -1,5 +1,4 @@
 
-
 export type JobListing = {
   title: string;
   company: string;
@@ -76,12 +75,13 @@ export type Story = {
 }
 
 export const stories: Story[] = [
-  { name: "Your Story", avatar: "https://placehold.co/100x100.png", image: "", isOwn: true, aiHint: "add icon" },
-  { name: "Rohan V.", avatar: "https://placehold.co/100x100.png", image: "https://placehold.co/400x700.png", aiHint: "professional man" },
-  { name: "Anjali M.", avatar: "https://placehold.co/100x100.png", image: "https://placehold.co/400x700.png", aiHint: "corporate woman" },
-  { name: "Vikram S.", avatar: "https://placehold.co/100x100.png", image: "https://placehold.co/400x700.png", aiHint: "corporate man" },
-  { name: "Sneha R.", avatar: "https://placehold.co/100x100.png", image: "https://placehold.co/400x700.png", aiHint: "young professional" },
+    { name: "Your Story", avatar: "https://placehold.co/100x100.png", image: "", isOwn: true, aiHint: "add icon" },
+    { name: "Rohan V.", avatar: "https://placehold.co/100x100.png", image: "https://placehold.co/400x700.png", aiHint: "professional man" },
+    { name: "Anjali M.", avatar: "https://placehold.co/100x100.png", image: "https://placehold.co/400x700.png", aiHint: "corporate woman" },
+    { name: "Vikram S.", avatar: "https://placehold.co/100x100.png", image: "https://placehold.co/400x700.png", aiHint: "corporate man" },
+    { name: "Sneha R.", avatar: "https://placehold.co/100x100.png", image: "https://placehold.co/400x700.png", aiHint: "young professional" },
 ];
+
 
 export type FeedItem = {
     id: number;
@@ -295,3 +295,89 @@ export const alumniData = [
     aiHint: "engineer man"
   },
 ];
+
+
+export const networkingGroups = [
+  {
+    title: "Software & Tech Innovators",
+    description: "Connect with alumni in the tech industry. Share insights on coding, product development, and emerging technologies.",
+    iconName: "code",
+    members: "12,500+ Members",
+  },
+  {
+    title: "Entrepreneurship Hub",
+    description: "A group for founders, aspiring entrepreneurs, and investors. Discuss startup ideas, funding, and growth strategies.",
+    iconName: "rocket",
+    members: "3,200+ Members",
+  },
+  {
+    title: "Core Engineering Circle",
+    description: "For alumni in Mechanical, Civil, and Electrical fields. Collaborate on projects and discuss industry trends.",
+    iconName: "building",
+    members: "8,750+ Members",
+  },
+  {
+    title: "Management & Consulting",
+    description: "Network with alumni in business management, finance, and consulting roles across various industries.",
+    iconName: "briefcase",
+    members: "6,100+ Members",
+  },
+  {
+    title: "Bay Area Alumni Chapter",
+    description: "Connect with fellow graduates living and working in the San Francisco Bay Area for local meetups and networking.",
+    iconName: "globe",
+    members: "1,800+ Members",
+  },
+   {
+    title: "Higher Education & Academia",
+    description: "A forum for alumni pursuing or working in research, teaching, and higher education.",
+    iconName: "globe",
+    members: "2,400+ Members",
+  },
+];
+
+
+export const conversationsData = [
+  {
+    name: "Priya Sharma",
+    avatar: "https://placehold.co/100x100.png",
+    aiHint: "professional woman",
+    lastMessage: "Sure, I can help with that. Let's connect tomorrow.",
+    time: "10:42 AM",
+    unread: 2,
+  },
+  {
+    name: "Rohan Verma",
+    avatar: "https://placehold.co/100x100.png",
+    aiHint: "professional man",
+    lastMessage: "Thanks for the resume tips!",
+    time: "9:15 AM",
+    unread: 0,
+  },
+  {
+    name: "Vikram Singh",
+    avatar: "https://placehold.co/100x100.png",
+    aiHint: "corporate man",
+    lastMessage: "It was great meeting you at the reunion.",
+    time: "3d ago",
+    unread: 0,
+  },
+];
+
+export const messagesData = {
+  "Priya Sharma": [
+    { sender: "other", text: "Hey! I'm a final year student and I saw your profile. Your work at Google is really inspiring!" },
+    { sender: "me", text: "Hi! Thanks for reaching out. Happy to help if you have any questions." },
+    { sender: "other", text: "That would be amazing. I'm preparing for interviews and would love to get your advice on my resume." },
+    { sender: "me", text: "Sure, I can help with that. Let's connect tomorrow." },
+  ],
+  "Rohan Verma": [
+    { sender: "other", text: "Thanks for the resume tips!" },
+  ],
+  "Alumni Events Group": [
+    { sender: "other", text: "Don't forget the upcoming Tech Talk on AI." }
+  ],
+  "Vikram Singh": [
+     { sender: "other", text: "It was great meeting you at the reunion." }
+  ]
+};

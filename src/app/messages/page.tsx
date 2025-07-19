@@ -1,73 +1,17 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Send, ArrowLeft, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const conversationsData = [
-  {
-    name: "Priya Sharma",
-    avatar: "https://placehold.co/100x100.png",
-    aiHint: "professional woman",
-    lastMessage: "Sure, I can help with that. Let's connect tomorrow.",
-    time: "10:42 AM",
-    unread: 2,
-  },
-  {
-    name: "Rohan Verma",
-    avatar: "https://placehold.co/100x100.png",
-    aiHint: "professional man",
-    lastMessage: "Thanks for the resume tips!",
-    time: "9:15 AM",
-    unread: 0,
-  },
-  {
-    name: "Alumni Events Group",
-    avatar: "https://placehold.co/100x100.png",
-    aiHint: "university logo",
-    lastMessage: "Don't forget the upcoming Tech Talk on AI.",
-    time: "Yesterday",
-    unread: 1,
-  },
-  {
-    name: "Vikram Singh",
-    avatar: "https://placehold.co/100x100.png",
-    aiHint: "corporate man",
-    lastMessage: "It was great meeting you at the reunion.",
-    time: "3d ago",
-    unread: 0,
-  },
-];
-
-const initialMessagesData = {
-  "Priya Sharma": [
-    { sender: "other", text: "Hey! I'm a final year student and I saw your profile. Your work at Google is really inspiring!" },
-    { sender: "me", text: "Hi! Thanks for reaching out. Happy to help if you have any questions." },
-    { sender: "other", text: "That would be amazing. I'm preparing for interviews and would love to get your advice on my resume." },
-    { sender: "me", text: "Sure, I can help with that. Let's connect tomorrow." },
-  ],
-  "Rohan Verma": [
-    { sender: "other", text: "Thanks for the resume tips!" },
-  ],
-  "Alumni Events Group": [
-    { sender: "other", text: "Don't forget the upcoming Tech Talk on AI." }
-  ],
-  "Vikram Singh": [
-     { sender: "other", text: "It was great meeting you at the reunion." }
-  ]
-};
-
-type Conversation = typeof conversationsData[0];
-type Message = { sender: 'me' | 'other'; text: string };
+import { AppContext, Conversation, Message } from "@/context/AppContext";
 
 export default function MessagesPage() {
-  const [conversations, setConversations] = useState(conversationsData);
+  const { conversations, setConversations, messagesData, setMessagesData } = useContext(AppContext);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
-  const [messagesData, setMessagesData] = useState(initialMessagesData);
   const [newMessage, setNewMessage] = useState("");
 
   const handleSendMessage = () => {
@@ -198,7 +142,7 @@ export default function MessagesPage() {
            <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
             <MessageSquare className="h-20 w-20 mb-4" />
             <h2 className="text-xl font-semibold">Select a conversation</h2>
-            <p>Start chatting with your connections.</p>
+            <p>Start chatting with your connections or join a group.</p>
           </div>
         )}
       </div>
