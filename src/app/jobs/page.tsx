@@ -61,6 +61,11 @@ function JobsPageContent() {
   const [selectedJob, setSelectedJob] = useState<JobListing | null>(null);
   const { toast } = useToast();
   const [jobListings, setJobListings] = useState<JobListing[]>(initialJoblistings);
+  const [filteredJobListings, setFilteredJobListings] = useState<JobListing[]>(initialJoblistings);
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [jobType, setJobType] = useState<string>('');
+  const [location, setLocation] = useState<string>('');
 
 
   const form = useForm<z.infer<typeof postJobSchema>>({
@@ -73,6 +78,25 @@ function JobsPageContent() {
       description: "",
     },
   });
+
+  useEffect(() => {
+    let results = jobListings;
+
+    if (searchQuery) {
+        results = results.filter(job => 
+            job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            job.company.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    }
+    if (jobType && jobType !== 'all') {
+        results = results.filter(job => job.type === jobType);
+    }
+    if (location && location !== 'all') {
+        results = results.filter(job => job.location.toLowerCase().includes(location.toLowerCase()));
+    }
+    setFilteredJobListings(results);
+  }, [searchQuery, jobType, location, jobListings]);
+
 
   function onSubmit(values: z.infer<typeof postJobSchema>) {
     const newJob: JobListing = {
@@ -211,22 +235,24 @@ function JobsPageContent() {
               <CardTitle className="font-headline text-lg">Filters</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Input placeholder="Search jobs or companies..." />
-               <Select>
+              <Input placeholder="Search jobs or companies..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+               <Select onValueChange={(value) => setJobType(value === 'all' ? '' : value)} defaultValue="all">
                 <SelectTrigger>
                   <SelectValue placeholder="Job Type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="full-time">Full-time</SelectItem>
-                  <SelectItem value="contract">Contract</SelectItem>
-                  <SelectItem value="internship">Internship</SelectItem>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="Full-time">Full-time</SelectItem>
+                  <SelectItem value="Contract">Contract</SelectItem>
+                  <SelectItem value="Internship">Internship</SelectItem>
                 </SelectContent>
               </Select>
-               <Select>
+               <Select onValueChange={(value) => setLocation(value === 'all' ? '' : value)} defaultValue="all">
                 <SelectTrigger>
                   <SelectValue placeholder="Location" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="all">All Locations</SelectItem>
                   <SelectItem value="remote">Remote</SelectItem>
                   <SelectItem value="pune">Pune</SelectItem>
                   <SelectItem value="bangalore">Bangalore</SelectItem>
@@ -234,13 +260,13 @@ function JobsPageContent() {
                    <SelectItem value="mumbai">Mumbai</SelectItem>
                 </SelectContent>
               </Select>
-              <Button className="w-full">Apply Filters</Button>
             </CardContent>
           </Card>
         </div>
 
         <div className="md:col-span-3 space-y-6">
-          {jobListings.map((job, index) => (
+          {filteredJobListings.length > 0 ? (
+            filteredJobListings.map((job, index) => (
             <Card key={`${job.title}-${index}`} className="hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="flex justify-between items-start">
@@ -266,7 +292,14 @@ function JobsPageContent() {
                 <Button onClick={() => handleViewDetails(job)}>View Details</Button>
               </CardFooter>
             </Card>
-          ))}
+          ))
+          ) : (
+            <Card>
+              <CardContent className="p-6">
+                <p className="text-center text-muted-foreground">No jobs found matching your criteria.</p>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
       

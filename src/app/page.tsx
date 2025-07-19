@@ -138,7 +138,7 @@ export default function Home() {
       <div className="py-4 border-b">
         <div className="px-4 flex items-center space-x-4 overflow-x-auto">
           {initialStories.map((story) => (
-            <div key={story.name} className="flex-shrink-0 text-center">
+            <div key={story.name} className="flex-shrink-0 text-center cursor-pointer" onClick={() => story.isOwn && setIsPostDialogOpen(true)}>
               <div className={`relative rounded-full p-0.5 border-2 ${story.isOwn ? 'border-dashed' : 'border-primary'}`}>
                 <Avatar className="w-16 h-16">
                   <AvatarImage src={story.avatar} data-ai-hint={story.aiHint} />

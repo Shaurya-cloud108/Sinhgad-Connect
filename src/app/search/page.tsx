@@ -88,8 +88,8 @@ export default function SearchPage() {
                 </div>
               </CardContent>
               <CardFooter className="justify-center">
-                <Button variant="outline" onClick={(e) => { e.preventDefault(); /* Logic to connect or view profile */ }}>
-                  <Linkedin className="mr-2 h-4 w-4" /> Connect
+                <Button variant="outline" asChild>
+                  <Link href="/profile">View Profile</Link>
                 </Button>
               </CardFooter>
             </Card>
