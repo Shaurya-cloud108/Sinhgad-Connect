@@ -11,7 +11,7 @@ const navLinks = [
   { href: "/search", label: "Search", icon: Search },
   { href: "/jobs", label: "Jobs", icon: Briefcase },
   { href: "/notifications", label: "Notifications", icon: Bell },
-  { href: "/register", label: "Profile", icon: User },
+  { href: "/profile", label: "Profile", icon: User },
 ];
 
 export function BottomNav() {
