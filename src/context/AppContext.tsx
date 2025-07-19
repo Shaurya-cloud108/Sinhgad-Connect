@@ -132,7 +132,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             isGroup: true,
         };
         setConversations(prev => [newConversation, ...prev]);
-        setSelectedConversation(newConversation);
     };
     
     const addMemberToGroup = (groupTitle: string, member: Member) => {
