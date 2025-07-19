@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Card,
@@ -15,16 +15,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { communityMembers } from "@/lib/data.tsx";
+import { communityMembers, CommunityMember } from "@/lib/data.tsx";
 import { getStatusEmoji } from "@/lib/utils";
 
 export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredMembers, setFilteredMembers] = useState(communityMembers);
+  const [filteredMembers, setFilteredMembers] = useState<CommunityMember[]>(communityMembers);
 
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    const lowercasedQuery = query.toLowerCase();
+  useEffect(() => {
+    const lowercasedQuery = searchQuery.toLowerCase();
     if (!lowercasedQuery) {
       setFilteredMembers(communityMembers);
       return;
@@ -36,13 +35,8 @@ export default function SearchPage() {
       member.company.toLowerCase().includes(lowercasedQuery)
     );
     setFilteredMembers(results);
-  };
+  }, [searchQuery]);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleSearch(e.target.value);
-    }
-  }
 
   return (
     <div className="container py-8 md:py-12">
@@ -55,16 +49,12 @@ export default function SearchPage() {
 
       <Card className="mb-8">
         <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4 items-center">
-            <Input
-              placeholder="Search by name, company, industry..."
-              className="flex-grow"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={handleKeyDown}
-            />
-            <Button onClick={() => handleSearch(searchQuery)} className="w-full md:w-auto">Search</Button>
-          </div>
+          <Input
+            placeholder="Search by name, company, industry..."
+            className="flex-grow"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </CardContent>
       </Card>
 
@@ -90,7 +80,7 @@ export default function SearchPage() {
               </CardContent>
               <CardFooter className="justify-center">
                 <Button variant="outline" asChild>
-                  <Link href="/profile">View Profile</Link>
+                  <Link href={`/profile/${member.handle}`}>View Profile</Link>
                 </Button>
               </CardFooter>
             </Card>
