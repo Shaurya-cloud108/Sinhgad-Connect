@@ -241,8 +241,7 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
 }
 
 
-export default function ProfilePage({ params }: { params: { handle: string } }) {
-    const { handle } = params;
+function ProfilePageContent({ handle }: { handle: string }) {
     const { profileData: ownProfileData, setProfileData } = useContext(ProfileContext);
     const { networkingGroups, setSelectedConversationByName } = useContext(AppContext);
     
@@ -250,7 +249,6 @@ export default function ProfilePage({ params }: { params: { handle: string } }) 
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [userPosts, setUserPosts] = useState<FeedItem[]>([]);
     
-    // Determine which profile to show
     const isOwnProfile = !handle || handle === ownProfileData?.handle;
     const [profileData, setProfileDataState] = useState<ProfileData | null | undefined>(undefined);
 
@@ -259,7 +257,6 @@ export default function ProfilePage({ params }: { params: { handle: string } }) 
         if (isOwnProfile) {
             targetProfile = ownProfileData || undefined;
         } else {
-            // Find the community member and construct a ProfileData object
             const member = communityMembers.find(m => m.handle === handle);
             if (member) {
                  targetProfile = {
@@ -573,4 +570,7 @@ export default function ProfilePage({ params }: { params: { handle: string } }) 
   );
 }
 
-    
+export default function ProfilePage({ params }: { params: { handle: string } }) {
+  const { handle } = params;
+  return <ProfilePageContent handle={handle} />;
+}
