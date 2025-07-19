@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, Send, Plus, Image as ImageIcon, Video, Briefcase, Award } from "lucide-react";
+import { Heart, MessageCircle, Send, Plus, Image as ImageIcon, Video, Briefcase, Award, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -24,7 +24,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { stories as initialStories, feedItems as initialFeedItems, FeedItem } from "@/lib/data";
+import { stories as initialStories, feedItems as initialFeedItems, FeedItem, Story } from "@/lib/data";
+import Image from "next/image";
 
 function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean, onOpenChange: (open: boolean) => void, onPostSubmit: (post: FeedItem) => void }) {
   const { toast } = useToast();
@@ -123,13 +124,50 @@ function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean,
   );
 }
 
+function StoryViewerDialog({ story, open, onOpenChange }: { story: Story | null; open: boolean; onOpenChange: (open: boolean) => void; }) {
+  if (!story) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="p-0 border-0 max-w-md w-full h-[80vh] bg-black">
+        <div className="relative w-full h-full rounded-lg overflow-hidden">
+          <Image src={story.image} alt={`Story from ${story.name}`} layout="fill" objectFit="cover" data-ai-hint={story.aiHint} />
+          <div className="absolute top-0 left-0 p-4 flex items-center gap-3 bg-gradient-to-b from-black/50 to-transparent w-full">
+            <Avatar>
+              <AvatarImage src={story.avatar} />
+              <AvatarFallback>{story.name.substring(0, 2)}</AvatarFallback>
+            </Avatar>
+            <span className="font-semibold text-white">{story.name}</span>
+          </div>
+          <DialogClose className="absolute right-2 top-2 text-white">
+            <X />
+            <span className="sr-only">Close</span>
+          </DialogClose>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 
 export default function Home() {
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
   const [feedItems, setFeedItems] = useState<FeedItem[]>(initialFeedItems);
+  const [stories, setStories] = useState<Story[]>(initialStories);
+  const [selectedStory, setSelectedStory] = useState<Story | null>(null);
+  const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
 
   const handlePostSubmit = (newPost: FeedItem) => {
     setFeedItems(prev => [newPost, ...prev]);
+  };
+  
+  const handleStoryClick = (story: Story) => {
+    if (story.isOwn) {
+      setIsPostDialogOpen(true);
+    } else {
+      setSelectedStory(story);
+      setIsStoryViewerOpen(true);
+    }
   };
 
   return (
@@ -137,8 +175,8 @@ export default function Home() {
       {/* Stories */}
       <div className="py-4 border-b">
         <div className="px-4 flex items-center space-x-4 overflow-x-auto">
-          {initialStories.map((story) => (
-            <div key={story.name} className="flex-shrink-0 text-center cursor-pointer" onClick={() => story.isOwn && setIsPostDialogOpen(true)}>
+          {stories.map((story) => (
+            <div key={story.name} className="flex-shrink-0 text-center cursor-pointer" onClick={() => handleStoryClick(story)}>
               <div className={`relative rounded-full p-0.5 border-2 ${story.isOwn ? 'border-dashed' : 'border-primary'}`}>
                 <Avatar className="w-16 h-16">
                   <AvatarImage src={story.avatar} data-ai-hint={story.aiHint} />
@@ -191,6 +229,7 @@ export default function Home() {
       </div>
 
       <CreatePostDialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen} onPostSubmit={handlePostSubmit} />
+      <StoryViewerDialog story={selectedStory} open={isStoryViewerOpen} onOpenChange={setIsStoryViewerOpen} />
 
       {/* Feed */}
       <div className="space-y-4 py-4">

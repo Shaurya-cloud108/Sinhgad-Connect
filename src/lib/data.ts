@@ -1,4 +1,5 @@
 
+
 export type JobListing = {
   title: string;
   company: string;
@@ -66,13 +67,21 @@ export const jobListings: JobListing[] = [
   },
 ];
 
-export const stories = [
-  { name: "Your Story", avatar: "https://placehold.co/100x100.png", isOwn: true, aiHint: "plus icon" },
-  { name: "Priya S.", avatar: "https://placehold.co/100x100.png", aiHint: "professional woman" },
-  { name: "Rohan V.", avatar: "https://placehold.co/100x100.png", aiHint: "professional man" },
-  { name: "Anjali M.", avatar: "https://placehold.co/100x100.png", aiHint: "corporate woman" },
-  { name: "Vikram S.", avatar: "https://placehold.co/100x100.png", aiHint: "corporate man" },
-  { name: "Sneha R.", avatar: "https://placehold.co/100x100.png", aiHint: "young professional" },
+export type Story = {
+  name: string;
+  avatar: string;
+  image: string;
+  isOwn?: boolean;
+  aiHint: string;
+}
+
+export const stories: Story[] = [
+  { name: "Your Story", avatar: "https://placehold.co/100x100.png", image: "", isOwn: true, aiHint: "plus icon" },
+  { name: "Priya S.", avatar: "https://placehold.co/100x100.png", image: "https://placehold.co/400x700.png", aiHint: "professional woman" },
+  { name: "Rohan V.", avatar: "https://placehold.co/100x100.png", image: "https://placehold.co/400x700.png", aiHint: "professional man" },
+  { name: "Anjali M.", avatar: "https://placehold.co/100x100.png", image: "https://placehold.co/400x700.png", aiHint: "corporate woman" },
+  { name: "Vikram S.", avatar: "https://placehold.co/100x100.png", image: "https://placehold.co/400x700.png", aiHint: "corporate man" },
+  { name: "Sneha R.", avatar: "https://placehold.co/100x100.png", image: "https://placehold.co/400x700.png", aiHint: "young professional" },
 ];
 
 export type FeedItem = {
