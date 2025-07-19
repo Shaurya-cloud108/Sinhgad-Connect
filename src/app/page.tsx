@@ -185,6 +185,7 @@ function CreateStoryDialog({ open, onOpenChange, onStorySubmit }: { open: boolea
         if (!profileData) return;
 
         const newStory: Story = {
+            id: Date.now(),
             name: profileData.name,
             avatar: profileData.avatar,
             image: imagePreview,
@@ -295,13 +296,10 @@ export default function Home() {
   
   const handleStorySubmit = (newStory: Story) => {
     setStories(prev => {
-        const yourStory = prev.find(s => s.isOwn);
-        const otherStories = prev.filter(s => !s.isOwn);
-        // Place new story after "Your Story"
-        if (yourStory) {
-             return [yourStory, newStory, ...otherStories];
-        }
-        return [newStory, ...prev];
+        const yourStoryIndex = prev.findIndex(s => s.isOwn);
+        const newStories = [...prev];
+        newStories.splice(yourStoryIndex + 1, 0, newStory);
+        return newStories;
     });
   }
 
@@ -359,8 +357,8 @@ export default function Home() {
       {/* Stories */}
       <div className="py-4 border-b">
         <div className="px-4 flex items-center space-x-4 overflow-x-auto">
-          {stories.map((story, index) => (
-            <div key={story.name + index} className="flex-shrink-0 text-center cursor-pointer" onClick={() => handleStoryClick(story)}>
+          {stories.map((story) => (
+            <div key={story.id} className="flex-shrink-0 text-center cursor-pointer" onClick={() => handleStoryClick(story)}>
               <div className={`relative rounded-full p-0.5 border-2 ${story.isOwn ? 'border-dashed' : 'border-primary'}`}>
                 <Avatar className="w-16 h-16">
                   <AvatarImage src={story.isOwn ? profileData.avatar : story.avatar} data-ai-hint={story.aiHint} />
