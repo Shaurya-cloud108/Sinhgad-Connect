@@ -32,7 +32,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { ProfileContext } from "@/context/ProfileContext";
-import { alumniData } from "@/lib/data";
+import { communityMembers } from "@/lib/data";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -46,9 +46,9 @@ function AddMemberDialog({ group, onOpenChange }: { group: NetworkingGroup, onOp
     const { addMemberToGroup } = useContext(AppContext);
     
     const memberIds = new Set(group.members.map(m => m.id));
-    const potentialMembers = alumniData.filter(alumnus => !memberIds.has(alumnus.handle));
+    const potentialMembers = communityMembers.filter(alumnus => !memberIds.has(alumnus.handle));
 
-    const handleAddMember = (alumnus: typeof alumniData[0]) => {
+    const handleAddMember = (alumnus: typeof communityMembers[0]) => {
         const newMember: Member = {
             id: alumnus.handle,
             name: alumnus.name,
@@ -82,7 +82,7 @@ function AddMemberDialog({ group, onOpenChange }: { group: NetworkingGroup, onOp
                         </div>
                     ))}
                     {potentialMembers.length === 0 && (
-                        <p className="text-sm text-center text-muted-foreground pt-4">All alumni are already in this group.</p>
+                        <p className="text-sm text-center text-muted-foreground pt-4">All users are already in this group.</p>
                     )}
                 </div>
             </ScrollArea>
@@ -191,7 +191,7 @@ function GroupInfoDialog({ group, currentUserRole, onOpenChange }: { group: Netw
                         <AlertDialogHeader>
                             <AlertDialogTitle>Are you sure you want to leave?</AlertDialogTitle>
                             <AlertDialogDescription>
-                                You will be removed from '{group.title}' and will no longer receive messages. You can rejoin later.
+                                You will be removed from '{group.title}' and will no longer receive messages. You can rejoin later if you wish.
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>

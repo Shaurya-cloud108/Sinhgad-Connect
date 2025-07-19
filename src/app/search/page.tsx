@@ -15,26 +15,26 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { alumniData } from "@/lib/data";
+import { communityMembers } from "@/lib/data";
 
 export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredAlumni, setFilteredAlumni] = useState(alumniData);
+  const [filteredMembers, setFilteredMembers] = useState(communityMembers);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     const lowercasedQuery = query.toLowerCase();
     if (!lowercasedQuery) {
-      setFilteredAlumni(alumniData);
+      setFilteredMembers(communityMembers);
       return;
     }
-    const results = alumniData.filter((alumni) =>
-      alumni.name.toLowerCase().includes(lowercasedQuery) ||
-      alumni.field.toLowerCase().includes(lowercasedQuery) ||
-      alumni.industry.toLowerCase().includes(lowercasedQuery) ||
-      alumni.company.toLowerCase().includes(lowercasedQuery)
+    const results = communityMembers.filter((member) =>
+      member.name.toLowerCase().includes(lowercasedQuery) ||
+      member.field.toLowerCase().includes(lowercasedQuery) ||
+      member.industry.toLowerCase().includes(lowercasedQuery) ||
+      member.company.toLowerCase().includes(lowercasedQuery)
     );
-    setFilteredAlumni(results);
+    setFilteredMembers(results);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -68,23 +68,23 @@ export default function SearchPage() {
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {filteredAlumni.map((alumni) => (
-          <Card key={alumni.name} className="flex flex-col h-full hover:shadow-xl transition-shadow duration-300">
+        {filteredMembers.map((member) => (
+          <Card key={member.name} className="flex flex-col h-full hover:shadow-xl transition-shadow duration-300">
               <CardHeader className="items-center text-center">
                 <Avatar className="w-24 h-24 mb-4">
-                  <AvatarImage src={alumni.avatar} data-ai-hint={alumni.aiHint} />
-                  <AvatarFallback>{alumni.fallback}</AvatarFallback>
+                  <AvatarImage src={member.avatar} data-ai-hint={member.aiHint} />
+                  <AvatarFallback>{member.fallback}</AvatarFallback>
                 </Avatar>
-                <CardTitle className="font-headline">{alumni.name}</CardTitle>
+                <CardTitle className="font-headline">{member.name}</CardTitle>
                 <CardDescription>
-                  {alumni.field}, Class of {alumni.graduationYear}
+                  {member.field}, Class of {member.graduationYear}
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex-grow text-center">
-                <p className="font-semibold">{alumni.company}</p>
-                <p className="text-sm text-muted-foreground">{alumni.location}</p>
+                <p className="font-semibold">{member.company}</p>
+                <p className="text-sm text-muted-foreground">{member.location}</p>
                 <div className="mt-4">
-                  <Badge>{alumni.industry}</Badge>
+                  <Badge>{member.industry}</Badge>
                 </div>
               </CardContent>
               <CardFooter className="justify-center">
@@ -94,6 +94,9 @@ export default function SearchPage() {
               </CardFooter>
             </Card>
         ))}
+         {filteredMembers.length === 0 && (
+          <p className="text-center text-muted-foreground md:col-span-3">No members found matching your search.</p>
+        )}
       </div>
     </div>
   );

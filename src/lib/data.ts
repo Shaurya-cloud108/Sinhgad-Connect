@@ -229,7 +229,7 @@ export const profileData: ProfileData = {
   },
 };
 
-export const alumniData = [
+export const communityMembers = [
   {
     name: "Priya Sharma",
     avatar: "https://placehold.co/100x100.png",
@@ -267,6 +267,18 @@ export const alumniData = [
     handle: "anjali-mehta",
   },
   {
+    name: "Kavya Iyer (Student)",
+    avatar: "https://placehold.co/100x100.png",
+    fallback: "KI",
+    graduationYear: 2025,
+    field: "Information Technology",
+    industry: "Student",
+    company: "Sinhgad College of Engineering",
+    location: "Pune, India",
+    aiHint: "female student",
+    handle: "kavya-iyer",
+  },
+  {
     name: "Vikram Singh",
     avatar: "https://placehold.co/100x100.png",
     fallback: "VS",
@@ -289,6 +301,18 @@ export const alumniData = [
     location: "Seattle, WA",
     aiHint: "young professional",
     handle: "sneha-reddy",
+  },
+  {
+    name: "Arjun Desai (Student)",
+    avatar: "https://placehold.co/100x100.png",
+    fallback: "AD",
+    graduationYear: 2026,
+    field: "Computer Engineering",
+    industry: "Student",
+    company: "Sinhgad College of Engineering",
+    location: "Pune, India",
+    aiHint: "male student",
+    handle: "arjun-desai",
   },
   {
     name: "Amit Patel",
@@ -321,17 +345,18 @@ const groupMembers: { [key: string]: Member[] } = {
   "Software & Tech Innovators": [
     { id: 'priya-sharma-09', name: 'Priya Sharma', avatar: 'https://placehold.co/100x100.png', role: 'admin' },
     { id: 'rohan-verma', name: 'Rohan Verma', avatar: 'https://placehold.co/100x100.png', role: 'member' },
+    { id: 'kavya-iyer', name: 'Kavya Iyer (Student)', avatar: 'https://placehold.co/100x100.png', role: 'member' },
   ],
   "Entrepreneurship Hub": [
      { id: 'priya-sharma-09', name: 'Priya Sharma', avatar: 'https://placehold.co/100x100.png', role: 'admin' },
-     { id: 'sunita-narayan', name: 'Sunita Narayan', avatar: 'https://placehold.co/100x100.png', role: 'admin' },
+     { id: 'sunita-narayan', name: "Sunita Narayan '09", avatar: 'https://placehold.co/100x100.png', role: 'admin' },
   ]
 };
 
 export const networkingGroups: NetworkingGroup[] = [
   {
     title: "Software & Tech Innovators",
-    description: "Connect with alumni in the tech industry. Share insights on coding, product development, and emerging technologies.",
+    description: "Connect with alumni and students in the tech industry. Share insights on coding, product development, and emerging technologies.",
     iconName: "code",
     members: groupMembers["Software & Tech Innovators"],
   },
@@ -343,25 +368,25 @@ export const networkingGroups: NetworkingGroup[] = [
   },
   {
     title: "Core Engineering Circle",
-    description: "For alumni in Mechanical, Civil, and Electrical fields. Collaborate on projects and discuss industry trends.",
+    description: "For alumni and students in Mechanical, Civil, and Electrical fields. Collaborate on projects and discuss industry trends.",
     iconName: "building",
     members: [],
   },
   {
     title: "Management & Consulting",
-    description: "Network with alumni in business management, finance, and consulting roles across various industries.",
+    description: "Network with alumni and students interested in business management, finance, and consulting roles.",
     iconName: "briefcase",
     members: [],
   },
   {
-    title: "Bay Area Alumni Chapter",
-    description: "Connect with fellow graduates living and working in the San Francisco Bay Area for local meetups and networking.",
+    title: "Bay Area Alumni & Students",
+    description: "Connect with fellow graduates and current students in the San Francisco Bay Area for local meetups and networking.",
     iconName: "globe",
     members: [],
   },
    {
     title: "Higher Education & Academia",
-    description: "A forum for alumni pursuing or working in research, teaching, and higher education.",
+    description: "A forum for alumni and students pursuing or working in research, teaching, and higher education.",
     iconName: "globe",
     members: [],
   },
@@ -385,26 +410,34 @@ export const conversationsData = [
     time: "3d ago",
     unread: 0,
   },
+  {
+    name: "Kavya Iyer (Student)",
+    avatar: "https://placehold.co/100x100.png",
+    aiHint: "female student",
+    lastMessage: "Thank you for the mentorship!",
+    time: "Yesterday",
+    unread: 1,
+  },
 ];
 
 export const messagesData = {
-  "Priya Sharma": [
-    { senderId: "priya-sharma-09", senderName: "Priya Sharma", text: "Hey! I'm a final year student and I saw your profile. Your work at Google is really inspiring!" },
-    { senderId: profileData.handle, senderName: profileData.name, text: "Hi! Thanks for reaching out. Happy to help if you have any questions." },
-    { senderId: "priya-sharma-09", senderName: "Priya Sharma", text: "That would be amazing. I'm preparing for interviews and would love to get your advice on my resume." },
-    { senderId: profileData.handle, senderName: profileData.name, text: "Sure, I can help with that. Let's connect tomorrow." },
-  ],
   "Rohan Verma": [
     { senderId: "rohan-verma", senderName: "Rohan Verma", text: "Thanks for the resume tips!" },
   ],
   "Software & Tech Innovators": [
     { senderId: 'priya-sharma-09', senderName: 'Priya Sharma', text: "Welcome to the group everyone! Let's talk about the latest in AI." },
-    { senderId: 'rohan-verma', senderName: 'Rohan Verma', text: "Great idea! I've been experimenting with some new frameworks." }
+    { senderId: 'rohan-verma', senderName: 'Rohan Verma', text: "Great idea! I've been experimenting with some new frameworks." },
+    { senderId: 'kavya-iyer', senderName: 'Kavya Iyer (Student)', text: "Hi everyone! As a student, I'm really excited to learn from you all." },
   ],
   "Vikram Singh": [
      { senderId: "vikram-singh", senderName: "Vikram Singh", text: "It was great meeting you at the reunion." }
   ],
   "Entrepreneurship Hub": [
     { senderId: 'sunita-narayan', senderName: 'Sunita Narayan', text: "Welcome! Let's build the future together." },
+  ],
+  "Kavya Iyer (Student)": [
+      { senderId: 'kavya-iyer', senderName: 'Kavya Iyer (Student)', text: "Hi Priya! I had a question about my project." },
+      { senderId: profileData.handle, senderName: profileData.name, text: "Of course, ask away!" },
+      { senderId: 'kavya-iyer', senderName: 'Kavya Iyer (Student)', text: "Thank you for the mentorship!" },
   ]
 };
