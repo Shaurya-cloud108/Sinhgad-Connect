@@ -100,21 +100,44 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             }
         });
 
-        const directMessages = initialConversations.filter(c => !c.isGroup);
+        // Regenerate conversations from messages data and groups
+        const conversationMap = new Map<string, Conversation>();
 
-        const groupConversations = networkingGroups
+        // Add 1-on-1 conversations from messages
+        Object.keys(messagesData).forEach(convoName => {
+            const isGroup = networkingGroups.some(g => g.title === convoName);
+            if (!isGroup) {
+                const otherUser = communityMembers.find(m => m.name === convoName);
+                if (otherUser) {
+                    conversationMap.set(convoName, {
+                        name: convoName,
+                        avatar: otherUser.avatar,
+                        aiHint: "user avatar",
+                        lastMessage: messagesData[convoName]?.[messagesData[convoName].length - 1]?.text || "No messages yet.",
+                        time: "Yesterday",
+                        unread: initialConversations.find(c=> c.name === convoName)?.unread || 0,
+                        isGroup: false,
+                    });
+                }
+            }
+        });
+        
+        // Add group conversations for joined groups
+        networkingGroups
             .filter(group => userGroupTitles.has(group.title))
-            .map(group => ({
-                name: group.title,
-                avatar: "https://placehold.co/100x100.png",
-                aiHint: "university logo",
-                lastMessage: messagesData[group.title]?.[messagesData[group.title].length - 1]?.text || "No messages yet.",
-                time: "Yesterday",
-                unread: 0,
-                isGroup: true,
-            }));
+            .forEach(group => {
+                conversationMap.set(group.title, {
+                    name: group.title,
+                    avatar: "https://placehold.co/100x100.png",
+                    aiHint: "university logo",
+                    lastMessage: messagesData[group.title]?.[messagesData[group.title].length - 1]?.text || "No messages yet.",
+                    time: "Yesterday",
+                    unread: 0,
+                    isGroup: true,
+                });
+            });
 
-        const allConversations = [...directMessages, ...groupConversations];
+        const allConversations = Array.from(conversationMap.values());
         
         setConversations(allConversations);
         setJoinedGroups(userGroupTitles);
@@ -187,7 +210,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         if (conversation) {
             setSelectedConversation(conversation);
         } else {
-            const group = networkingGroups.find(g => g.name === name);
+            const group = networkingGroups.find(g => g.title === name);
             if (group) {
                 const newConversation: Conversation = {
                     name: group.title,
