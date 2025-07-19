@@ -149,36 +149,6 @@ export type Story = {
   viewers?: StoryViewer[];
 };
 
-
-export const stories: Story[] = [
-    { 
-      id: 1, 
-      name: "Your Story", 
-      avatar: "https://placehold.co/100x100.png", 
-      images: [], 
-      isOwn: true, 
-      aiHint: "add icon", 
-      viewers: [
-        { name: "Sunita Narayan", avatar: "https://placehold.co/100x100.png" },
-        { name: "Kavya Iyer", avatar: "https://placehold.co/100x100.png" },
-      ] 
-    },
-    { 
-      id: 2, 
-      name: "Rohan Verma", 
-      avatar: "https://placehold.co/100x100.png", 
-      images: ["https://placehold.co/400x700.png"], 
-      aiHint: "professional man",
-      viewers: [
-        { name: "Priya Sharma", avatar: "https://placehold.co/100x100.png" },
-        { name: "Anjali Mehta", avatar: "https://placehold.co/100x100.png" },
-      ]
-    },
-    { id: 3, name: "Anjali Mehta", avatar: "https://placehold.co/100x100.png", images: ["https://placehold.co/400x700.png"], aiHint: "corporate woman", viewers: [] },
-    { id: 4, name: "Vikram Singh", avatar: "https://placehold.co/100x100.png", images: ["https://placehold.co/400x700.png"], aiHint: "corporate man", viewers: [] },
-    { id: 5, name: "Sneha Reddy", avatar: "https://placehold.co/100x100.png", images: ["https://placehold.co/400x700.png"], aiHint: "young professional", viewers: [] },
-];
-
 export type SuccessStory = {
     id: string;
     name: string;
@@ -259,90 +229,6 @@ export type FeedItem = {
     comments: Comment[];
 }
 
-export const feedItems: FeedItem[] = [
-  {
-    id: 1,
-    author: {
-      name: "Alumni Events Committee",
-      avatar: "https://placehold.co/100x100.png",
-      handle: "alumni-events",
-      aiHint: "university logo"
-    },
-    content: "The flagship event of the year is just around the corner! Reconnect with old friends, network with peers, and relive your college days. Don't miss out on the Annual Alumni Grand Meet 2024. Register now!",
-    image: "https://placehold.co/600x400.png",
-    aiHint: "people networking",
-    likes: 256,
-    comments: [],
-    liked: false,
-  },
-  {
-    id: 2,
-    author: {
-      name: "Sunita Narayan",
-      avatar: "https://placehold.co/100x100.png",
-      handle: "sunita-narayan",
-      aiHint: "professional woman portrait"
-    },
-    content: "Thrilled to share that Innovate Inc. just launched a new line of sustainable tech products! A huge thanks to the team and the foundation I got from Sinhgad. Looking to hire fellow alumni for a Senior Frontend role - check the jobs board!",
-    image: null,
-    aiHint: "",
-    likes: 189,
-    comments: [
-        {
-            id: 101,
-            author: { name: "Rohan Verma", avatar: "https://placehold.co/100x100.png", handle: "rohan-verma" },
-            text: "Congratulations, Sunita! This is huge."
-        }
-    ],
-    liked: true,
-  },
-  {
-    id: 3,
-    author: {
-      name: "Alumni Network Job Board",
-      avatar: "https://placehold.co/100x100.png",
-      handle: "alumni-network",
-      aiHint: "briefcase icon"
-    },
-    content: "New Opportunity! DataDriven Co. is hiring a Data Scientist in Pune. This role was posted by Rohan Verma '12. Apply now and take the next step in your career.",
-    image: "https://placehold.co/600x400.png",
-    aiHint: "modern office",
-    likes: 98,
-    comments: [],
-    liked: false,
-  },
-  {
-    id: 4,
-    author: {
-      name: "Priya Sharma",
-      avatar: "https://placehold.co/150x150.png",
-      handle: "priya-sharma-09",
-      aiHint: "professional woman"
-    },
-    content: "Just hit my 5-year anniversary at Google! So grateful for the journey and the amazing people I've worked with. The lessons I learned at Sinhgad continue to be my foundation.",
-    image: null,
-    aiHint: "",
-    likes: 152,
-    comments: [],
-    liked: true,
-  },
-  {
-    id: 5,
-    author: {
-      name: "Priya Sharma",
-      avatar: "https://placehold.co/150x150.png",
-      handle: "priya-sharma-09",
-      aiHint: "professional woman"
-    },
-    content: "Mentoring a final year student on their capstone project has been such a rewarding experience. It's amazing to see the talent coming out of our college!",
-    image: "https://placehold.co/600x400.png",
-    aiHint: "mentoring session",
-    likes: 98,
-    comments: [],
-    liked: false,
-  }
-];
-
 export type ProfileData = {
   name: string;
   avatar: string;
@@ -376,7 +262,7 @@ export const profileData: ProfileData = {
   aiHint: "professional woman",
   banner: "https://placehold.co/1000x300.png",
   bannerAiHint: "university campus",
-  handle: "priya-sharma-09",
+  handle: "priya-sharma",
   headline: "Senior Software Engineer at Google | Mentor",
   location: "San Francisco Bay Area",
   connections: 500,
@@ -429,7 +315,7 @@ export const communityMembers: CommunityMember[] = [
     company: "Google",
     location: "San Francisco, CA",
     aiHint: "professional woman",
-    handle: "priya-sharma-09",
+    handle: "priya-sharma",
   },
   {
     name: "Rohan Verma",
@@ -534,11 +420,150 @@ export const communityMembers: CommunityMember[] = [
     location: "Remote",
     aiHint: "professional woman portrait",
     handle: "sunita-narayan",
+  },
+  {
+    name: "Alumni Events Committee",
+    avatar: "https://placehold.co/100x100.png",
+    fallback: "A",
+    graduationYear: 0,
+    graduationMonth: 0,
+    field: "Organization",
+    industry: "Alumni Relations",
+    company: "Sinhgad Connect",
+    location: "Pune, India",
+    aiHint: "university logo",
+    handle: "alumni-events",
+  },
+  {
+    name: "Alumni Network Job Board",
+    avatar: "https://placehold.co/100x100.png",
+    fallback: "J",
+    graduationYear: 0,
+    graduationMonth: 0,
+    field: "Organization",
+    industry: "Alumni Relations",
+    company: "Sinhgad Connect",
+    location: "Pune, India",
+    aiHint: "briefcase icon",
+    handle: "alumni-network",
+  },
+];
+
+export const feedItems: FeedItem[] = [
+  {
+    id: 1,
+    author: {
+      name: "Alumni Events Committee",
+      avatar: "https://placehold.co/100x100.png",
+      handle: "alumni-events",
+      aiHint: "university logo"
+    },
+    content: "The flagship event of the year is just around the corner! Reconnect with old friends, network with peers, and relive your college days. Don't miss out on the Annual Alumni Grand Meet 2024. Register now!",
+    image: "https://placehold.co/600x400.png",
+    aiHint: "people networking",
+    likes: 256,
+    comments: [],
+    liked: false,
+  },
+  {
+    id: 2,
+    author: {
+      name: "Sunita Narayan",
+      avatar: "https://placehold.co/100x100.png",
+      handle: "sunita-narayan",
+      aiHint: "professional woman portrait"
+    },
+    content: "Thrilled to share that Innovate Inc. just launched a new line of sustainable tech products! A huge thanks to the team and the foundation I got from Sinhgad. Looking to hire fellow alumni for a Senior Frontend role - check the jobs board!",
+    image: null,
+    aiHint: "",
+    likes: 189,
+    comments: [
+        {
+            id: 101,
+            author: { name: "Rohan Verma", avatar: "https://placehold.co/100x100.png", handle: "rohan-verma" },
+            text: "Congratulations, Sunita! This is huge."
+        }
+    ],
+    liked: true,
+  },
+  {
+    id: 3,
+    author: {
+      name: "Alumni Network Job Board",
+      avatar: "https://placehold.co/100x100.png",
+      handle: "alumni-network",
+      aiHint: "briefcase icon"
+    },
+    content: "New Opportunity! DataDriven Co. is hiring a Data Scientist in Pune. This role was posted by Rohan Verma '12. Apply now and take the next step in your career.",
+    image: "https://placehold.co/600x400.png",
+    aiHint: "modern office",
+    likes: 98,
+    comments: [],
+    liked: false,
+  },
+  {
+    id: 4,
+    author: {
+      name: "Priya Sharma",
+      avatar: "https://placehold.co/150x150.png",
+      handle: "priya-sharma",
+      aiHint: "professional woman"
+    },
+    content: "Just hit my 5-year anniversary at Google! So grateful for the journey and the amazing people I've worked with. The lessons I learned at Sinhgad continue to be my foundation.",
+    image: null,
+    aiHint: "",
+    likes: 152,
+    comments: [],
+    liked: true,
+  },
+  {
+    id: 5,
+    author: {
+      name: "Priya Sharma",
+      avatar: "https://placehold.co/150x150.png",
+      handle: "priya-sharma",
+      aiHint: "professional woman"
+    },
+    content: "Mentoring a final year student on their capstone project has been such a rewarding experience. It's amazing to see the talent coming out of our college!",
+    image: "https://placehold.co/600x400.png",
+    aiHint: "mentoring session",
+    likes: 98,
+    comments: [],
+    liked: false,
   }
 ];
 
-const allMembers = [
-    { id: 'priya-sharma-09', name: 'Priya Sharma', avatar: 'https://placehold.co/100x100.png', role: 'admin' },
+export const stories: Story[] = [
+    { 
+      id: 1, 
+      name: "Your Story", 
+      avatar: "https://placehold.co/100x100.png", 
+      images: [], 
+      isOwn: true, 
+      aiHint: "add icon", 
+      viewers: [
+        { name: "Sunita Narayan", avatar: "https://placehold.co/100x100.png" },
+        { name: "Kavya Iyer", avatar: "https://placehold.co/100x100.png" },
+      ] 
+    },
+    { 
+      id: 2, 
+      name: "Rohan Verma", 
+      avatar: "https://placehold.co/100x100.png", 
+      images: ["https://placehold.co/400x700.png"], 
+      aiHint: "professional man",
+      viewers: [
+        { name: "Priya Sharma", avatar: "https://placehold.co/100x100.png" },
+        { name: "Anjali Mehta", avatar: "https://placehold.co/100x100.png" },
+      ]
+    },
+    { id: 3, name: "Anjali Mehta", avatar: "https://placehold.co/100x100.png", images: ["https://placehold.co/400x700.png"], aiHint: "corporate woman", viewers: [] },
+    { id: 4, name: "Vikram Singh", avatar: "https://placehold.co/100x100.png", images: ["https://placehold.co/400x700.png"], aiHint: "corporate man", viewers: [] },
+    { id: 5, name: "Sneha Reddy", avatar: "https://placehold.co/100x100.png", images: ["https://placehold.co/400x700.png"], aiHint: "young professional", viewers: [] },
+];
+
+const allMembersForGroups: Member[] = [
+    { id: 'priya-sharma', name: 'Priya Sharma', avatar: 'https://placehold.co/100x100.png', role: 'admin' },
     { id: 'sunita-narayan', name: 'Sunita Narayan', avatar: 'https://placehold.co/100x100.png', role: 'admin' },
     { id: 'rohan-verma', name: 'Rohan Verma', avatar: 'https://placehold.co/100x100.png', role: 'member' },
     { id: 'kavya-iyer', name: 'Kavya Iyer', avatar: 'https://placehold.co/100x100.png', role: 'member' },
@@ -547,11 +572,11 @@ const allMembers = [
 ];
 
 const groupMembers: { [key: string]: Member[] } = {
-  "Software & Tech Innovators": allMembers.filter(m => ['priya-sharma-09', 'sunita-narayan', 'rohan-verma', 'kavya-iyer'].includes(m.id)),
-  "Entrepreneurship Hub": allMembers.filter(m => ['priya-sharma-09', 'sunita-narayan'].includes(m.id)),
-  "Core Engineering Circle": allMembers.filter(m => ['rohan-verma', 'amit-patel'].includes(m.id)),
-  "Management & Consulting": allMembers.filter(m => ['vikram-singh'].includes(m.id)),
-  "Bay Area Alumni & Students": allMembers.filter(m => ['priya-sharma-09'].includes(m.id)),
+  "Software & Tech Innovators": allMembersForGroups.filter(m => ['priya-sharma', 'sunita-narayan', 'rohan-verma', 'kavya-iyer', 'sneha-reddy'].includes(m.id)),
+  "Entrepreneurship Hub": allMembersForGroups.filter(m => ['sunita-narayan', 'karan-malhotra'].includes(m.id)),
+  "Core Engineering Circle": allMembersForGroups.filter(m => ['rohan-verma', 'amit-patel'].includes(m.id)),
+  "Management & Consulting": allMembersForGroups.filter(m => ['vikram-singh', 'anjali-mehta'].includes(m.id)),
+  "Bay Area Alumni & Students": allMembersForGroups.filter(m => ['priya-sharma'].includes(m.id)),
   "Higher Education & Academia": [],
 };
 
@@ -595,32 +620,12 @@ export const networkingGroups: NetworkingGroup[] = [
 ];
 
 
-export const conversationsData: Conversation[] = communityMembers
-  .filter(m => m.handle !== profileData.handle) // Don't create a conversation with oneself
-  .map(member => ({
-    name: member.name,
-    avatar: member.avatar,
-    aiHint: member.aiHint,
-    lastMessage: `Say hi to ${member.name}!`,
-    time: "3d",
-    unread: Math.random() > 0.8 ? 1 : 0, // Randomly mark some as unread
-    isGroup: false,
-  }))
-  .concat(
-    networkingGroups
-      .filter(g => g.members.some(m => m.id === profileData.handle)) // Only show groups the user is in
-      .map(group => ({
-        name: group.title,
-        avatar: "https://placehold.co/100x100.png", // Generic group avatar
-        aiHint: "university logo",
-        lastMessage: `${group.members.length} members`,
-        time: "1w",
-        unread: Math.random() > 0.5 ? Math.floor(Math.random() * 3) + 1 : 0,
-        isGroup: true,
-      }))
-  )
-  .sort((a,b) => (a.unread > 0 ? -1 : 1) - (b.unread > 0 ? -1 : 1)); // Bring unread to top
-
+export const conversationsData: Conversation[] = [
+    { name: 'Rohan Verma', avatar: 'https://placehold.co/100x100.png', aiHint: 'professional man', lastMessage: 'You\'re welcome! Let me know if you need more help.', time: '2h', unread: 0, isGroup: false },
+    { name: 'Kavya Iyer', avatar: 'https://placehold.co/100x100.png', aiHint: 'female student', lastMessage: 'Thank you for the mentorship!', time: '1d', unread: 2, isGroup: false },
+    { name: 'Software & Tech Innovators', avatar: 'https://placehold.co/100x100.png', aiHint: 'university logo', lastMessage: 'Priya: I have! It’s incredibly fast...', time: '5h', unread: 1, isGroup: true },
+    { name: 'Entrepreneurship Hub', avatar: 'https://placehold.co/100x100.png', aiHint: 'university logo', lastMessage: 'Sunita: Seed funding secured!', time: '3d', unread: 0, isGroup: true },
+];
 
 export const messagesData: MessagesData = {
   "Rohan Verma": [
@@ -640,26 +645,6 @@ export const messagesData: MessagesData = {
       { senderId: 'sunita-narayan', senderName: 'Sunita Narayan', text: 'Seed funding secured! Big things coming soon.' },
   ]
 };
-
-// Helper function to get content details for sharing
-export const getContentDetails = (contentType: string, contentId: string | number) => {
-    switch (contentType) {
-        case 'post':
-            const post = feedItems.find(item => item.id === contentId);
-            return post ? { title: `A post by ${post.author.name}`, url: `/` } : null;
-        case 'job':
-            const job = jobListings.find(item => item.id === contentId);
-            return job ? { title: `Job: ${job.title} at ${job.company}`, url: `/jobs` } : null;
-        case 'event':
-            const event = eventsData.find(e => e.id === contentId);
-            return event ? { title: `Event: ${event.title}`, url: `/events` } : null;
-        case 'story':
-            const story = successStories.find(s => s.id === contentId);
-            return story ? { title: `Success Story: ${story.name}`, url: `/success-stories/${story.id}` } : null;
-        default:
-            return null;
-    }
-}
 
 export type Notification = {
     type: 'connection' | 'message' | 'event' | 'job' | 'like' | 'comment';

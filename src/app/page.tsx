@@ -380,11 +380,25 @@ function HomePageContent() {
   }
   
   const handleStorySubmit = (image: string) => {
+    if (!profileData) return;
+
     setStories(prevStories => {
         const newStories = [...prevStories];
         const myStoryIndex = newStories.findIndex(s => s.isOwn);
+
         if (myStoryIndex !== -1) {
-            newStories[myStoryIndex].images.push(image);
+            const myStory = newStories[myStoryIndex];
+            if (myStory.images.length === 0) {
+                 // If it's the first image, replace the placeholder
+                 newStories[myStoryIndex] = {
+                    ...myStory,
+                    images: [image],
+                    avatar: profileData.avatar,
+                 };
+            } else {
+                // Otherwise, just add the image
+                myStory.images.push(image);
+            }
         }
         return newStories;
     });
