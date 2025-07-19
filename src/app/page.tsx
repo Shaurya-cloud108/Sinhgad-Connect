@@ -324,7 +324,7 @@ function StoryViewerDialog({ story, open, onOpenChange, onDeleteStoryItem, curre
     setProgress(0); // Reset progress when item changes
     const currentItem = activeItems[currentItemIndex];
 
-    if (!currentItem) return;
+    if (!currentItem || !open) return;
 
     if (currentItem.type === 'image') {
         const timer = setTimeout(handleNext, 15000); // 15-second timer for images
@@ -340,23 +340,29 @@ function StoryViewerDialog({ story, open, onOpenChange, onDeleteStoryItem, curre
         const videoElement = videoRef.current;
         
         const updateProgress = () => {
-            if (videoElement.duration) {
+            if (videoElement.duration > 0) {
                 setProgress((videoElement.currentTime / videoElement.duration) * 100);
             }
         };
 
         const onVideoEnd = () => handleNext();
         
+        const onLoadedData = () => {
+          videoElement.play().catch(e => console.error("Video autoplay failed:", e));
+        };
+        
         videoElement.addEventListener('timeupdate', updateProgress);
         videoElement.addEventListener('ended', onVideoEnd);
-        videoElement.play().catch(e => console.error("Video autoplay failed:", e));
+        videoElement.addEventListener('loadeddata', onLoadedData);
+
 
         return () => {
             videoElement.removeEventListener('timeupdate', updateProgress);
             videoElement.removeEventListener('ended', onVideoEnd);
+            videoElement.removeEventListener('loadeddata', onLoadedData);
         };
     }
-}, [currentItemIndex, activeItems]);
+}, [currentItemIndex, activeItems, open]);
 
 
   if (!story || activeItems.length === 0) return null;
@@ -382,7 +388,7 @@ function StoryViewerDialog({ story, open, onOpenChange, onDeleteStoryItem, curre
             {/* Story Content */}
             <div className="w-full h-full relative">
                 {currentItem.type === 'image' && <Image src={currentItem.url} alt={`Story from ${story.author.name}`} layout="fill" objectFit="contain" data-ai-hint={story.author.aiHint} />}
-                {currentItem.type === 'video' && <video ref={videoRef} src={currentItem.url} controls={false} muted className="w-full h-full object-contain" />}
+                {currentItem.type === 'video' && <video ref={videoRef} src={currentItem.url} controls={false} muted autoPlay className="w-full h-full object-contain" />}
             </div>
 
             {/* Progress bars */}
@@ -390,7 +396,7 @@ function StoryViewerDialog({ story, open, onOpenChange, onDeleteStoryItem, curre
                 {activeItems.map((_, index) => (
                     <div key={index} className="h-1 flex-1 bg-white/30 rounded-full overflow-hidden">
                         <div 
-                            className="h-full bg-white transition-all" 
+                            className="h-full bg-white transition-all duration-50" 
                             style={{ width: `${index < currentItemIndex ? 100 : (index === currentItemIndex ? progress : 0)}%` }}
                         />
                     </div>
@@ -528,14 +534,12 @@ function HomePageContent() {
         };
 
         if (userStoryIndex !== -1) {
-            // User already has a story object, add to it
             const updatedStory = {
                 ...newStories[userStoryIndex],
                 items: [...newStories[userStoryIndex].items, newStoryItem]
             };
             newStories[userStoryIndex] = updatedStory;
         } else {
-            // New user story object
             const newStory: Story = {
                 id: Date.now(),
                 author: { name: profileData.name, avatar: profileData.avatar, handle: profileData.handle, aiHint: profileData.aiHint },
@@ -556,7 +560,6 @@ function HomePageContent() {
       setSelectedStory(story);
       setIsStoryViewerOpen(true);
     } else if (isOwnStory) {
-      // If user has no active stories, open create dialog
       setIsCreateStoryDialogOpen(true);
     }
   };
@@ -809,7 +812,3 @@ export default function Home() {
         </React.Suspense>
     )
 }
-
-    
-
-    
