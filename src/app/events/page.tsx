@@ -11,67 +11,56 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Users, Send } from "lucide-react";
+import { Calendar, MapPin, Users, Send, PlusCircle } from "lucide-react";
 import { ShareDialog } from "@/components/share-dialog";
-
-const eventsData = [
-  {
-    id: "annual-meet-2024",
-    title: "Annual Alumni Grand Meet 2024",
-    date: "October 25, 2024",
-    location: "College Auditorium, Pune",
-    description: "The flagship event of the year! Reconnect with old friends, network with peers, and relive your college days.",
-    image: "https://placehold.co/600x400.png",
-    aiHint: "people networking"
-  },
-  {
-    id: "tech-talk-ai",
-    title: "Tech Talk: AI & The Future",
-    date: "November 12, 2024",
-    location: "Virtual Event (Zoom)",
-    description: "Join us for an insightful session with industry experts on the future of Artificial Intelligence.",
-    image: "https://placehold.co/600x400.png",
-    aiHint: "technology conference"
-  },
-  {
-    id: "reunion-2014",
-    title: "Batch of 2014: 10-Year Reunion",
-    date: "December 7, 2024",
-    location: "The Westin, Pune",
-    description: "A special evening for the class of 2014 to celebrate a decade of memories and achievements.",
-    image: "https://placehold.co/600x400.png",
-    aiHint: "formal dinner"
-  },
-  {
-    id: "sports-day-2025",
-    title: "Alumni Sports Day",
-    date: "January 18, 2025",
-    location: "College Sports Complex",
-    description: "Get ready for some friendly competition in cricket, football, and more. Fun for the whole family!",
-    image: "https://placehold.co/600x400.png",
-    aiHint: "outdoor sports"
-  },
-];
+import { useState } from "react";
+import { PostEventDialog, EventFormData } from "@/components/post-event-dialog";
+import type { Event } from "@/lib/data.tsx";
+import { eventsData as initialEventsData } from "@/lib/data.tsx";
+import { format } from "date-fns";
 
 export default function EventsPage() {
+  const [events, setEvents] = useState<Event[]>(initialEventsData);
+  const [isPostEventOpen, setIsPostEventOpen] = useState(false);
+
+  const handleEventSubmit = (data: EventFormData) => {
+    const newEvent: Event = {
+      id: `event-${Date.now()}`,
+      title: data.title,
+      date: format(data.date, "MMMM d, yyyy"),
+      location: data.location,
+      description: data.description,
+      image: data.image || "https://placehold.co/600x400.png",
+      aiHint: "community event"
+    };
+    setEvents(prev => [newEvent, ...prev]);
+  };
+
   return (
     <div className="container py-8 md:py-12">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-headline font-bold">Events & Reunions</h1>
-        <p className="mt-2 text-lg text-muted-foreground">
-          Join us for exciting events, workshops, and get-togethers.
-        </p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
+        <div className="text-left mb-4 md:mb-0">
+          <h1 className="text-4xl font-headline font-bold">Events & Reunions</h1>
+          <p className="mt-2 text-lg text-muted-foreground">
+            Join us for exciting events, workshops, and get-togethers.
+          </p>
+        </div>
+        <Button className="mt-4 md:mt-0" onClick={() => setIsPostEventOpen(true)}>
+          <PlusCircle className="mr-2 h-4 w-4" /> Host an Event
+        </Button>
       </div>
 
+      <PostEventDialog open={isPostEventOpen} onOpenChange={setIsPostEventOpen} onEventSubmit={handleEventSubmit} />
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-        {eventsData.map((event) => (
-          <Card key={event.title} className="overflow-hidden flex flex-col hover:shadow-xl transition-shadow duration-300">
+        {events.map((event) => (
+          <Card key={event.id} className="overflow-hidden flex flex-col hover:shadow-xl transition-shadow duration-300">
             <div className="relative h-60 w-full">
               <Image
                 src={event.image}
                 alt={event.title}
-                layout="fill"
-                objectFit="cover"
+                fill
+                className="object-cover"
                 data-ai-hint={event.aiHint}
               />
             </div>
