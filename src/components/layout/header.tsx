@@ -10,7 +10,6 @@ const navLinks = [
   { href: "/events", label: "Events" },
   { href: "/success-stories", label: "Stories" },
   { href: "/networking", label: "Networking" },
-  { href: "/donate", label: "Donate" },
 ];
 
 export function AppHeader() {
