@@ -29,10 +29,9 @@ import { useRouter } from "next/navigation";
 import { ProfileContext } from "@/context/ProfileContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShareDialog } from "@/components/share-dialog";
-import { Separator } from "@/components/ui/separator";
 
 function CreateGroupDialog({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
-  const { addNetworkingGroup } = useContext(AppContext);
+  const { addNetworkingGroup, setSelectedConversationByName } = useContext(AppContext);
   const { profileData } = useContext(ProfileContext);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -51,10 +50,11 @@ function CreateGroupDialog({ open, onOpenChange }: { open: boolean, onOpenChange
           role: 'admin'
         }],
       });
+      setSelectedConversationByName(title);
+      router.push('/messages');
       onOpenChange(false);
       setTitle("");
       setDescription("");
-      router.push('/messages');
     }
   };
 
@@ -110,7 +110,7 @@ function GroupIcon({ iconName }: { iconName: string }) {
 
 
 function NetworkingPageContent() {
-  const { myGroups, exploreGroups, toggleGroupMembership, setSelectedConversationByName } = useContext(AppContext);
+  const { networkingGroups, myGroups, toggleGroupMembership, setSelectedConversationByName } = useContext(AppContext);
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
@@ -119,28 +119,15 @@ function NetworkingPageContent() {
       setSelectedConversationByName(group.title);
       router.push("/messages");
   }
-  
-  const handleJoinToggle = (groupTitle: string) => {
-    toggleGroupMembership(groupTitle);
-  }
 
-  const filteredMyGroups = useMemo(() => {
+  const filteredGroups = useMemo(() => {
     const lowercasedQuery = searchQuery.toLowerCase();
-    if (!searchQuery) return myGroups;
-    return myGroups.filter(g => 
+    if (!searchQuery) return networkingGroups;
+    return networkingGroups.filter(g => 
         g.title.toLowerCase().includes(lowercasedQuery) || 
         g.description.toLowerCase().includes(lowercasedQuery)
     );
-  }, [myGroups, searchQuery]);
-
-  const filteredExploreGroups = useMemo(() => {
-    const lowercasedQuery = searchQuery.toLowerCase();
-     if (!searchQuery) return exploreGroups;
-    return exploreGroups.filter(g => 
-        g.title.toLowerCase().includes(lowercasedQuery) || 
-        g.description.toLowerCase().includes(lowercasedQuery)
-    );
-  }, [exploreGroups, searchQuery]);
+  }, [networkingGroups, searchQuery]);
 
   return (
     <div className="container py-8 md:py-12">
@@ -167,79 +154,47 @@ function NetworkingPageContent() {
         />
       </div>
 
-      {/* My Groups Section */}
-      {filteredMyGroups.length > 0 && (
-        <div className="mb-12">
-            <h2 className="text-2xl font-headline font-bold mb-4">My Groups</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {filteredMyGroups.map(group => (
-                    <Card key={group.title} className="flex flex-col hover:shadow-lg transition-shadow duration-300">
-                      <CardHeader className="flex-row items-center gap-4">
-                        <GroupIcon iconName={group.iconName} />
-                        <div className="flex-1">
-                          <CardTitle className="font-headline text-xl">{group.title}</CardTitle>
-                          <CardDescription>{group.members.length} Members</CardDescription>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="flex-grow">
-                        <p className="text-sm text-muted-foreground line-clamp-2">{group.description}</p>
-                      </CardContent>
-                      <CardFooter className="gap-2">
+      <div>
+        <h2 className="text-2xl font-headline font-bold mb-4">All Groups</h2>
+        {filteredGroups.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredGroups.map((group) => {
+                const isMember = myGroups.some(myGroup => myGroup.title === group.title);
+                return (
+                  <Card key={group.title} className="flex flex-col hover:shadow-lg transition-shadow duration-300">
+                    <CardHeader className="flex-row items-center gap-4">
+                      <GroupIcon iconName={group.iconName} />
+                      <div className="flex-1">
+                        <CardTitle className="font-headline text-xl">{group.title}</CardTitle>
+                        <CardDescription>{group.members.length} Members</CardDescription>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="flex-grow">
+                      <p className="text-sm text-muted-foreground line-clamp-2">{group.description}</p>
+                    </CardContent>
+                    <CardFooter className="gap-2">
+                       {isMember ? (
                         <Button className="w-full" onClick={() => handleGoToChat(group)}>
                             <MessageSquare className="mr-2 h-4 w-4" /> Go to Chat
                         </Button>
-                        <ShareDialog contentType="group" contentId={group.title}>
-                            <Button variant="outline" size="icon">
-                                <Send className="h-4 w-4" />
-                            </Button>
-                        </ShareDialog>
-                      </CardFooter>
-                    </Card>
-                ))}
-            </div>
-        </div>
-      )}
-      
-      {filteredMyGroups.length > 0 && filteredExploreGroups.length > 0 && <Separator className="my-12"/>}
-
-      {/* Explore Groups Section */}
-      <div>
-        <h2 className="text-2xl font-headline font-bold mb-4">Explore Groups</h2>
-        {filteredExploreGroups.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredExploreGroups.map((group) => (
-                <Card key={group.title} className="flex flex-col hover:shadow-lg transition-shadow duration-300">
-                  <CardHeader className="flex-row items-center gap-4">
-                    <GroupIcon iconName={group.iconName} />
-                    <div className="flex-1">
-                      <CardTitle className="font-headline text-xl">{group.title}</CardTitle>
-                      <CardDescription>{group.members.length} Members</CardDescription>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="flex-grow">
-                    <p className="text-sm text-muted-foreground line-clamp-2">{group.description}</p>
-                  </CardContent>
-                  <CardFooter className="gap-2">
-                    <Button className="w-full" onClick={() => handleJoinToggle(group.title)}>
-                      Join Group
-                    </Button>
-                    <ShareDialog contentType="group" contentId={group.title}>
-                        <Button variant="outline" size="icon">
-                            <Send className="h-4 w-4" />
+                      ) : (
+                        <Button className="w-full" onClick={() => toggleGroupMembership(group.title)}>
+                          Join Group
                         </Button>
-                    </ShareDialog>
-                  </CardFooter>
-                </Card>
-              ))}
+                      )}
+                      <ShareDialog contentType="group" contentId={group.title}>
+                          <Button variant="outline" size="icon">
+                              <Send className="h-4 w-4" />
+                          </Button>
+                      </ShareDialog>
+                    </CardFooter>
+                  </Card>
+              )})}
           </div>
         ) : (
              <Card>
               <CardContent className="p-6 text-center text-muted-foreground">
-                {searchQuery ? (
-                  <p>No groups found matching "{searchQuery}". Try a different search.</p>
-                ) : (
-                  myGroups.length > 0 ? <p>There are no more groups to join. Why not create a new one?</p> : <p>No groups found. Why not create a new one?</p>
-                )}
+                <p>No groups found matching "{searchQuery}". Try a different search.</p>
               </CardContent>
             </Card>
         )}
