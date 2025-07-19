@@ -193,7 +193,8 @@ export type ProfileData = {
   education: {
     degree: string;
     college: string;
-    duration: string;
+    yearRange: string;
+    graduationYear: number;
   };
 };
 
@@ -225,7 +226,8 @@ export const profileData: ProfileData = {
   education: {
     degree: "B.E. Computer Engineering",
     college: "Sinhgad College of Engineering",
-    duration: "2005 - 2009",
+    yearRange: "2005 - 2009",
+    graduationYear: 2009,
   },
 };
 
@@ -267,7 +269,7 @@ export const communityMembers = [
     handle: "anjali-mehta",
   },
   {
-    name: "Kavya Iyer (Student)",
+    name: "Kavya Iyer",
     avatar: "https://placehold.co/100x100.png",
     fallback: "KI",
     graduationYear: 2025,
@@ -303,7 +305,7 @@ export const communityMembers = [
     handle: "sneha-reddy",
   },
   {
-    name: "Arjun Desai (Student)",
+    name: "Arjun Desai",
     avatar: "https://placehold.co/100x100.png",
     fallback: "AD",
     graduationYear: 2026,
@@ -327,7 +329,7 @@ export const communityMembers = [
     handle: "amit-patel",
   },
   {
-    name: "Sunita Narayan '09",
+    name: "Sunita Narayan",
     avatar: "https://placehold.co/100x100.png",
     fallback: "SN",
     graduationYear: 2009,
@@ -345,11 +347,11 @@ const groupMembers: { [key: string]: Member[] } = {
   "Software & Tech Innovators": [
     { id: 'priya-sharma-09', name: 'Priya Sharma', avatar: 'https://placehold.co/100x100.png', role: 'admin' },
     { id: 'rohan-verma', name: 'Rohan Verma', avatar: 'https://placehold.co/100x100.png', role: 'member' },
-    { id: 'kavya-iyer', name: 'Kavya Iyer (Student)', avatar: 'https://placehold.co/100x100.png', role: 'member' },
+    { id: 'kavya-iyer', name: 'Kavya Iyer', avatar: 'https://placehold.co/100x100.png', role: 'member' },
   ],
   "Entrepreneurship Hub": [
      { id: 'priya-sharma-09', name: 'Priya Sharma', avatar: 'https://placehold.co/100x100.png', role: 'admin' },
-     { id: 'sunita-narayan', name: "Sunita Narayan '09", avatar: 'https://placehold.co/100x100.png', role: 'admin' },
+     { id: 'sunita-narayan', name: "Sunita Narayan", avatar: 'https://placehold.co/100x100.png', role: 'admin' },
   ]
 };
 
@@ -411,7 +413,7 @@ export const conversationsData = [
     unread: 0,
   },
   {
-    name: "Kavya Iyer (Student)",
+    name: "Kavya Iyer",
     avatar: "https://placehold.co/100x100.png",
     aiHint: "female student",
     lastMessage: "Thank you for the mentorship!",
@@ -427,7 +429,7 @@ export const messagesData = {
   "Software & Tech Innovators": [
     { senderId: 'priya-sharma-09', senderName: 'Priya Sharma', text: "Welcome to the group everyone! Let's talk about the latest in AI." },
     { senderId: 'rohan-verma', senderName: 'Rohan Verma', text: "Great idea! I've been experimenting with some new frameworks." },
-    { senderId: 'kavya-iyer', senderName: 'Kavya Iyer (Student)', text: "Hi everyone! As a student, I'm really excited to learn from you all." },
+    { senderId: 'kavya-iyer', senderName: 'Kavya Iyer', text: "Hi everyone! As a student, I'm really excited to learn from you all." },
   ],
   "Vikram Singh": [
      { senderId: "vikram-singh", senderName: "Vikram Singh", text: "It was great meeting you at the reunion." }
@@ -435,9 +437,9 @@ export const messagesData = {
   "Entrepreneurship Hub": [
     { senderId: 'sunita-narayan', senderName: 'Sunita Narayan', text: "Welcome! Let's build the future together." },
   ],
-  "Kavya Iyer (Student)": [
-      { senderId: 'kavya-iyer', senderName: 'Kavya Iyer (Student)', text: "Hi Priya! I had a question about my project." },
+  "Kavya Iyer": [
+      { senderId: 'kavya-iyer', senderName: 'Kavya Iyer', text: "Hi Priya! I had a question about my project." },
       { senderId: profileData.handle, senderName: profileData.name, text: "Of course, ask away!" },
-      { senderId: 'kavya-iyer', senderName: 'Kavya Iyer (Student)', text: "Thank you for the mentorship!" },
+      { senderId: 'kavya-iyer', senderName: 'Kavya Iyer', text: "Thank you for the mentorship!" },
   ]
 };

@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Send, ArrowLeft, MessageSquare, PlusCircle, Trash2, Crown, Info, LogOut, UserPlus } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, getStatusEmoji } from "@/lib/utils";
 import { AppContext, Conversation, Message, Member, NetworkingGroup } from "@/context/AppContext";
 import {
   Dialog,
@@ -86,7 +86,7 @@ function AddMemberDialog({ group, onOpenChange }: { group: NetworkingGroup, onOp
                                     <AvatarFallback>{alumnus.name.substring(0, 2)}</AvatarFallback>
                                 </Avatar>
                                 <div>
-                                    <p className="font-semibold text-sm">{alumnus.name}</p>
+                                    <p className="font-semibold text-sm">{alumnus.name} {getStatusEmoji(alumnus.graduationYear)}</p>
                                     <p className="text-xs text-muted-foreground">@{alumnus.handle}</p>
                                 </div>
                             </div>
@@ -134,7 +134,10 @@ function GroupInfoDialog({ group, currentUserRole, onOpenChange }: { group: Netw
             <ScrollArea className="h-64 pr-4 -mr-4">
               <TooltipProvider>
                 <div className="space-y-4">
-                    {group.members.map(member => (
+                    {group.members.map(member => {
+                        const memberDetails = communityMembers.find(m => m.handle === member.id);
+                        const gradYear = memberDetails?.graduationYear || 0;
+                        return (
                         <div key={member.id} className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <Avatar className="h-9 w-9">
@@ -142,7 +145,7 @@ function GroupInfoDialog({ group, currentUserRole, onOpenChange }: { group: Netw
                                     <AvatarFallback>{member.name.substring(0,2)}</AvatarFallback>
                                 </Avatar>
                                 <div>
-                                    <p className="font-semibold text-sm">{member.name}</p>
+                                    <p className="font-semibold text-sm">{member.name} {getStatusEmoji(gradYear)}</p>
                                     <p className="text-xs text-muted-foreground">{member.role}</p>
                                 </div>
                             </div>
@@ -186,7 +189,7 @@ function GroupInfoDialog({ group, currentUserRole, onOpenChange }: { group: Netw
                                 {member.id === profileData.handle && <Badge variant="secondary">You</Badge>}
                             </div>
                         </div>
-                    ))}
+                    )})}
                 </div>
               </TooltipProvider>
             </ScrollArea>
@@ -335,7 +338,7 @@ export default function MessagesPage() {
                   {currentGroup ? (
                     <p className="text-sm text-muted-foreground">{members.length} Members</p>
                   ) : (
-                    <p className="text-sm text-muted-foreground">Online</p>
+                     <p className="text-sm text-muted-foreground">Online</p>
                   )}
                 </div>
               </div>

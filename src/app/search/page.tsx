@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { communityMembers } from "@/lib/data";
+import { getStatusEmoji } from "@/lib/utils";
 
 export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -69,13 +70,13 @@ export default function SearchPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredMembers.map((member) => (
-          <Card key={member.name} className="flex flex-col h-full hover:shadow-xl transition-shadow duration-300">
+          <Card key={member.handle} className="flex flex-col h-full hover:shadow-xl transition-shadow duration-300">
               <CardHeader className="items-center text-center">
                 <Avatar className="w-24 h-24 mb-4">
                   <AvatarImage src={member.avatar} data-ai-hint={member.aiHint} />
                   <AvatarFallback>{member.fallback}</AvatarFallback>
                 </Avatar>
-                <CardTitle className="font-headline">{member.name}</CardTitle>
+                <CardTitle className="font-headline">{member.name} {getStatusEmoji(member.graduationYear)}</CardTitle>
                 <CardDescription>
                   {member.field}, Class of {member.graduationYear}
                 </CardDescription>

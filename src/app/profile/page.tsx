@@ -56,6 +56,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ProfileContext } from "@/context/ProfileContext";
 import { AppContext } from "@/context/AppContext";
+import { getStatusEmoji } from "@/lib/utils";
 
 
 const profileFormSchema = z.object({
@@ -302,7 +303,7 @@ export default function ProfilePage() {
                     <Button variant="outline" onClick={handleLogout}><LogOut className="mr-2 h-4 w-4" /> Logout</Button>
                 </div>
                 <div className="pt-10">
-                    <CardTitle className="text-2xl font-bold font-headline">{profileData.name}</CardTitle>
+                    <CardTitle className="text-2xl font-bold font-headline">{profileData.name} {getStatusEmoji(profileData.education.graduationYear)}</CardTitle>
                     <p className="text-sm text-muted-foreground">@{profileData.handle}</p>
                     <p className="mt-1 text-md">{profileData.headline}</p>
                     <p className="mt-1 text-sm text-muted-foreground flex items-center gap-2">
@@ -429,7 +430,7 @@ export default function ProfilePage() {
                         <div>
                             <p className="font-semibold">{profileData.education.college}</p>
                             <p className="text-sm text-muted-foreground">{profileData.education.degree}</p>
-                            <p className="text-xs text-muted-foreground">{profileData.education.duration}</p>
+                            <p className="text-xs text-muted-foreground">{profileData.education.yearRange}</p>
                         </div>
                     </div>
                   </CardContent>
@@ -469,5 +470,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-    
