@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -36,6 +37,7 @@ const formSchema = z.object({
 
 export function RegisterForm() {
   const { toast } = useToast();
+  const router = useRouter();
   const [role, setRole] = useState("student");
   
   const form = useForm<z.infer<typeof formSchema>>({
@@ -56,7 +58,10 @@ export function RegisterForm() {
       title: "Registration Successful!",
       description: `Welcome to the community, ${values.fullName}!`,
     });
-    form.reset();
+    // Redirect to home page after a short delay to allow toast to be seen
+    setTimeout(() => {
+        router.push("/");
+    }, 1000);
   }
 
   return (
