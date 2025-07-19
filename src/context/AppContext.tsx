@@ -2,9 +2,9 @@
 "use client";
 
 import React, { createContext, useState, ReactNode, useContext, useEffect } from 'react';
-import { networkingGroups as initialNetworkingGroups, conversationsData as initialConversations, messagesData as initialMessagesData, communityMembers } from '@/lib/data';
+import { networkingGroups as initialNetworkingGroups, conversationsData as initialConversations, messagesData as initialMessagesData, communityMembers } from '@/lib/data.tsx';
 import { ProfileContext } from './ProfileContext';
-import { ProfileData } from '@/lib/data';
+import { ProfileData } from '@/lib/data.tsx';
 
 // Types
 export type Member = {

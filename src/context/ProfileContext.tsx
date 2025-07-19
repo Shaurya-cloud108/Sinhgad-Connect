@@ -2,7 +2,7 @@
 "use client";
 
 import React, { createContext, useState, ReactNode, useEffect } from 'react';
-import { profileData as initialProfileData, ProfileData } from '@/lib/data';
+import { profileData as initialProfileData, ProfileData } from '@/lib/data.tsx';
 import { usePathname } from 'next/navigation';
 
 type ProfileContextType = {

@@ -42,7 +42,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useState, useContext, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { stories as initialStories, feedItems as initialFeedItems, FeedItem, Story, Comment } from "@/lib/data";
+import { stories as initialStories, feedItems as initialFeedItems, FeedItem, Story, Comment } from "@/lib/data.tsx";
 import Image from "next/image";
 import { ProfileContext } from "@/context/ProfileContext";
 import { ShareDialog } from "@/components/share-dialog";
@@ -496,5 +496,3 @@ export default function Home() {
     </div>
   );
 }
-
-    

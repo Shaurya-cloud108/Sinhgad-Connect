@@ -1,4 +1,7 @@
 
+"use client";
+
+import React from 'react';
 import { Member, NetworkingGroup } from "@/context/AppContext";
 
 export type JobListing = {
@@ -466,7 +469,7 @@ export const conversationsData = [
   },
 ];
 
-export const messagesData = {
+export const messagesData: { [key: string]: { senderId: string; senderName: string; text: string }[] } = {
   "Rohan Verma": [
     { senderId: "rohan-verma", senderName: "Rohan Verma", text: "Thanks for the resume tips!" },
   ],
@@ -475,10 +478,6 @@ export const messagesData = {
       { senderId: profileData.handle, senderName: profileData.name, text: "Of course, ask away!" },
       { senderId: 'kavya-iyer', senderName: 'Kavya Iyer', text: "Thank you for the mentorship!" },
   ],
-  "Software & Tech Innovators": [
-      { senderId: 'kavya-iyer', senderName: 'Kavya Iyer', text: "Hey everyone, has anyone used the new Bun 1.0 release?" },
-      { senderId: profileData.handle, senderName: profileData.name, text: "I have! It's incredibly fast. The built-in package manager is a game changer." },
-  ]
 };
 
 // Helper function to get content details for sharing
@@ -501,4 +500,68 @@ export const getContentDetails = (contentType: string, contentId: string | numbe
     }
 }
 
-    
+export type Notification = {
+    type: 'connection' | 'message' | 'event' | 'job' | 'like' | 'comment';
+    text: React.ReactNode;
+    time: string;
+    actions?: { label: string; href: string }[];
+    avatar: string;
+    aiHint: string;
+    contentPreview?: string;
+};
+
+export const notifications: Notification[] = [
+    {
+        type: 'like',
+        text: <p><b>Rohan Verma</b> liked your post.</p>,
+        contentPreview: "Mentoring a final year student on their capstone project...",
+        time: "15 minutes ago",
+        avatar: "https://placehold.co/100x100.png",
+        aiHint: "professional man",
+        actions: [{ label: 'View Post', href: '/' }]
+    },
+    {
+        type: 'comment',
+        text: <p><b>Anjali Mehta</b> commented: "This is so inspiring! Congratulations!"</p>,
+        contentPreview: "Just hit my 5-year anniversary at Google! So grateful...",
+        time: "1 hour ago",
+        avatar: "https://placehold.co/100x100.png",
+        aiHint: "corporate woman",
+        actions: [{ label: 'Reply', href: '/' }]
+    },
+    {
+        type: "connection",
+        text: <p><b>Vikram Singh</b> sent you a connection request.</p>,
+        time: "2 hours ago",
+        actions: [
+            { label: 'Accept', href: '/profile' },
+            { label: 'Ignore', href: '#' }
+        ],
+        avatar: "https://placehold.co/100x100.png",
+        aiHint: "corporate man"
+    },
+    {
+        type: "message",
+        text: <p><b>Kavya Iyer</b> sent you a new message.</p>,
+        time: "5 hours ago",
+        actions: [{ label: 'Reply', href: '/messages' }],
+        avatar: "https://placehold.co/100x100.png",
+        aiHint: "female student"
+    },
+    {
+        type: "event",
+        text: <p>Reminder: <b>Annual Alumni Grand Meet 2024</b> is tomorrow.</p>,
+        time: "1 day ago",
+        actions: [{ label: 'View Event', href: '/events' }],
+        avatar: "https://placehold.co/100x100.png",
+        aiHint: "university logo"
+    },
+    {
+        type: "job",
+        text: <p>A new job matching your profile was posted: <b>Senior Frontend Engineer</b> at Innovate Inc.</p>,
+        time: "2 days ago",
+        actions: [{ label: 'View Job', href: '/jobs' }],
+        avatar: "https://placehold.co/100x100.png",
+        aiHint: "briefcase icon"
+    },
+];

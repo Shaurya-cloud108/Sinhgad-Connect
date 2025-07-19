@@ -32,7 +32,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { ProfileContext } from "@/context/ProfileContext";
-import { communityMembers, CommunityMember } from "@/lib/data";
+import { communityMembers, CommunityMember } from "@/lib/data.tsx";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {

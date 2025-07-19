@@ -45,7 +45,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-import { jobListings as initialJoblistings, JobListing } from "@/lib/data";
+import { jobListings as initialJoblistings, JobListing } from "@/lib/data.tsx";
 import { ShareDialog } from "@/components/share-dialog";
 
 const postJobSchema = z.object({

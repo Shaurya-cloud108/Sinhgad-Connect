@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users } from "lucide-react";
-import { feedItems as initialFeedItems, ProfileData, FeedItem } from "@/lib/data";
+import { feedItems as initialFeedItems, ProfileData, FeedItem } from "@/lib/data.tsx";
 import { useState, useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -386,7 +386,7 @@ export default function ProfilePage() {
                           </Button>
                           <Button variant="ghost" size="sm" className="flex items-center gap-2">
                             <MessageCircle className="w-5 h-5" />
-                             <span className="text-sm font-medium">{item.comments}</span>
+                             <span className="text-sm font-medium">{item.comments.length}</span>
                           </Button>
                           <Button variant="ghost" size="sm">
                             <Send className="w-5 h-5" />

@@ -20,7 +20,7 @@ import { AppContext, Conversation, Message } from "@/context/AppContext";
 import { ProfileContext } from "@/context/ProfileContext";
 import { Check, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { getContentDetails } from '@/lib/data';
+import { getContentDetails } from '@/lib/data.tsx';
 
 type ShareDialogProps = {
   contentType: 'post' | 'job' | 'event' | 'story' | 'group';
