@@ -29,7 +29,6 @@ import { useRouter } from "next/navigation";
 import { ProfileContext } from "@/context/ProfileContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShareDialog } from "@/components/share-dialog";
-import { Separator } from "@/components/ui/separator";
 
 function CreateGroupDialog({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
   const { addNetworkingGroup, setSelectedConversationByName } = useContext(AppContext);
@@ -114,9 +113,13 @@ function GroupCard({ group, isMember }: { group: NetworkingGroup, isMember: bool
     const { toggleGroupMembership, setSelectedConversationByName } = useContext(AppContext);
     const router = useRouter();
 
-    const handleGoToChat = (group: NetworkingGroup) => {
+    const handleGoToChat = () => {
         setSelectedConversationByName(group.title);
         router.push("/messages");
+    }
+
+    const handleJoinGroup = () => {
+        toggleGroupMembership(group.title);
     }
 
     return (
@@ -133,11 +136,11 @@ function GroupCard({ group, isMember }: { group: NetworkingGroup, isMember: bool
             </CardContent>
             <CardFooter className="gap-2">
                 {isMember ? (
-                <Button className="w-full" onClick={() => handleGoToChat(group)}>
+                <Button className="w-full" onClick={handleGoToChat}>
                     <MessageSquare className="mr-2 h-4 w-4" /> Go to Chat
                 </Button>
                 ) : (
-                <Button className="w-full" onClick={() => toggleGroupMembership(group.title)}>
+                <Button className="w-full" onClick={handleJoinGroup}>
                     Join Group
                 </Button>
                 )}
@@ -152,7 +155,7 @@ function GroupCard({ group, isMember }: { group: NetworkingGroup, isMember: bool
 }
 
 function NetworkingPageContent() {
-  const { myGroups, exploreGroups, toggleGroupMembership, setSelectedConversationByName } = useContext(AppContext);
+  const { myGroups, exploreGroups } = useContext(AppContext);
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   
@@ -233,11 +236,11 @@ export default function NetworkingPage() {
                 </div>
                 <Skeleton className="h-10 w-36" />
             </div>
-             <div className="mb-8">
-                <Skeleton className="h-10 w-full md:max-w-sm" />
-            </div>
-            <div>
-                <h2 className="text-2xl font-headline font-bold mb-4"><Skeleton className="h-8 w-48"/></h2>
+            <div className="mb-8 mt-12">
+                <div className="flex justify-between items-center mb-4">
+                    <Skeleton className="h-8 w-48" />
+                    <Skeleton className="h-10 w-64" />
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     <Skeleton className="h-56 w-full" />
                     <Skeleton className="h-56 w-full" />
@@ -250,3 +253,5 @@ export default function NetworkingPage() {
 
   return <NetworkingPageContent />;
 }
+
+    

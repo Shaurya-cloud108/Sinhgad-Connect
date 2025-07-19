@@ -101,7 +101,7 @@ function AddMemberDialog({ group, onOpenChange }: { group: NetworkingGroup, onOp
                                     <AvatarFallback>{alumnus.name.substring(0, 2)}</AvatarFallback>
                                 </Avatar>
                                 <div>
-                                    <p className="font-semibold text-sm">{alumnus.name} {getStatusEmoji(alumnus.education.graduationYear, alumnus.education.graduationMonth)}</p>
+                                    <p className="font-semibold text-sm">{alumnus.name} {getStatusEmoji(alumnus.graduationYear, alumnus.graduationMonth)}</p>
                                     <p className="text-xs text-muted-foreground">@{alumnus.handle}</p>
                                 </div>
                             </div>
@@ -155,8 +155,8 @@ function GroupInfoDialog({ group, currentUserRole, onOpenChange }: { group: Netw
                 <div className="space-y-4">
                     {group.members.map(member => {
                         const memberDetails = communityMembers.find(m => m.handle === member.id);
-                        const gradYear = memberDetails?.education.graduationYear || 0;
-                        const gradMonth = memberDetails?.education.graduationMonth || 0;
+                        const gradYear = memberDetails?.education?.graduationYear || 0;
+                        const gradMonth = memberDetails?.education?.graduationMonth || 0;
                         return (
                         <div key={member.id} className="flex items-center justify-between">
                             <Link href={`/profile/${member.id}`} className="flex items-center gap-3 group">
@@ -241,7 +241,7 @@ function GroupInfoDialog({ group, currentUserRole, onOpenChange }: { group: Netw
 }
 
 function MessagesPageContent() {
-  const { conversations, setConversations, messagesData, setMessagesData, selectedConversation, setSelectedConversation, networkingGroups, myGroups, toggleGroupMembership } = useContext(AppContext);
+  const { conversations, setConversations, messagesData, setMessagesData, selectedConversation, setSelectedConversation, networkingGroups, toggleGroupMembership } = useContext(AppContext);
   const { profileData } = useContext(ProfileContext);
   const [newMessage, setNewMessage] = useState("");
   const [isGroupInfoOpen, setIsGroupInfoOpen] = useState(false);
