@@ -155,10 +155,9 @@ function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean,
   );
 }
 
-function CreateStoryDialog({ open, onOpenChange, onStorySubmit }: { open: boolean, onOpenChange: (open: boolean) => void, onStorySubmit: (story: Story) => void }) {
+function CreateStoryDialog({ open, onOpenChange, onStorySubmit }: { open: boolean, onOpenChange: (open: boolean) => void, onStorySubmit: (image: string) => void }) {
     const { toast } = useToast();
     const [imagePreview, setImagePreview] = useState<string | null>(null);
-    const { profileData } = useContext(ProfileContext);
     const imageInputRef = useRef<HTMLInputElement>(null);
 
     const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -182,17 +181,7 @@ function CreateStoryDialog({ open, onOpenChange, onStorySubmit }: { open: boolea
             return;
         }
 
-        if (!profileData) return;
-
-        const newStory: Story = {
-            id: Date.now(),
-            name: profileData.name,
-            avatar: profileData.avatar,
-            image: imagePreview,
-            aiHint: "user uploaded story",
-        };
-
-        onStorySubmit(newStory);
+        onStorySubmit(imagePreview);
 
         toast({
             title: "Story Posted!",
@@ -249,13 +238,13 @@ function CreateStoryDialog({ open, onOpenChange, onStorySubmit }: { open: boolea
 }
 
 function StoryViewerDialog({ story, open, onOpenChange }: { story: Story | null; open: boolean; onOpenChange: (open: boolean) => void; }) {
-  if (!story) return null;
+  if (!story || story.images.length === 0) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="p-0 border-0 max-w-md w-full h-[80vh] bg-black">
         <div className="relative w-full h-full rounded-lg overflow-hidden">
-          <Image src={story.image} alt={`Story from ${story.name}`} layout="fill" objectFit="cover" data-ai-hint={story.aiHint} />
+          <Image src={story.images[story.images.length - 1]} alt={`Story from ${story.name}`} layout="fill" objectFit="cover" data-ai-hint={story.aiHint} />
           <div className="absolute top-0 left-0 p-4 flex items-center gap-3 bg-gradient-to-b from-black/50 to-transparent w-full">
             <Avatar>
               <AvatarImage src={story.avatar} />
@@ -294,18 +283,28 @@ export default function Home() {
     setFeedItems(prev => [newPost, ...prev]);
   };
   
-  const handleStorySubmit = (newStory: Story) => {
-    setStories(prev => {
-        const yourStoryIndex = prev.findIndex(s => s.isOwn);
-        const newStories = [...prev];
-        newStories.splice(yourStoryIndex + 1, 0, newStory);
-        return newStories;
-    });
+  const handleStorySubmit = (image: string) => {
+    setStories(prev => 
+      prev.map(story => {
+        if (story.isOwn) {
+          return {
+            ...story,
+            images: [...story.images, image],
+          }
+        }
+        return story;
+      })
+    );
   }
 
   const handleStoryClick = (story: Story) => {
     if (story.isOwn) {
-      setIsCreateStoryDialogOpen(true);
+      if (story.images.length > 0) {
+        setSelectedStory(story);
+        setIsStoryViewerOpen(true);
+      } else {
+        setIsCreateStoryDialogOpen(true);
+      }
     } else {
       setSelectedStory(story);
       setIsStoryViewerOpen(true);
@@ -359,11 +358,16 @@ export default function Home() {
         <div className="px-4 flex items-center space-x-4 overflow-x-auto">
           {stories.map((story) => (
             <div key={story.id} className="flex-shrink-0 text-center cursor-pointer" onClick={() => handleStoryClick(story)}>
-              <div className={`relative rounded-full p-0.5 border-2 ${story.isOwn ? 'border-dashed' : 'border-primary'}`}>
+              <div className={cn(
+                "relative rounded-full p-0.5 border-2",
+                story.isOwn && story.images.length === 0 && "border-dashed",
+                story.isOwn && story.images.length > 0 && "border-primary",
+                !story.isOwn && "border-primary"
+              )}>
                 <Avatar className="w-16 h-16">
                   <AvatarImage src={story.isOwn ? profileData.avatar : story.avatar} data-ai-hint={story.aiHint} />
                   <AvatarFallback>{story.name.substring(0,2)}</AvatarFallback>
-                  {story.isOwn && (
+                  {story.isOwn && story.images.length === 0 && (
                     <div className="absolute bottom-0 right-0 bg-primary rounded-full p-0.5 border-2 border-background">
                       <Plus className="w-4 h-4 text-primary-foreground" />
                     </div>

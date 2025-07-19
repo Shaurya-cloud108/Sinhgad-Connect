@@ -83,17 +83,17 @@ export type Story = {
   id: number;
   name: string;
   avatar: string;
-  image: string;
+  images: string[];
   isOwn?: boolean;
   aiHint: string;
 }
 
 export const stories: Story[] = [
-    { id: 1, name: "Your Story", avatar: "https://placehold.co/100x100.png", image: "", isOwn: true, aiHint: "add icon" },
-    { id: 2, name: "Rohan V.", avatar: "https://placehold.co/100x100.png", image: "https://placehold.co/400x700.png", aiHint: "professional man" },
-    { id: 3, name: "Anjali M.", avatar: "https://placehold.co/100x100.png", image: "https://placehold.co/400x700.png", aiHint: "corporate woman" },
-    { id: 4, name: "Vikram S.", avatar: "https://placehold.co/100x100.png", image: "https://placehold.co/400x700.png", aiHint: "corporate man" },
-    { id: 5, name: "Sneha R.", avatar: "https://placehold.co/100x100.png", image: "https://placehold.co/400x700.png", aiHint: "young professional" },
+    { id: 1, name: "Your Story", avatar: "https://placehold.co/100x100.png", images: [], isOwn: true, aiHint: "add icon" },
+    { id: 2, name: "Rohan V.", avatar: "https://placehold.co/100x100.png", images: ["https://placehold.co/400x700.png"], aiHint: "professional man" },
+    { id: 3, name: "Anjali M.", avatar: "https://placehold.co/100x100.png", images: ["https://placehold.co/400x700.png"], aiHint: "corporate woman" },
+    { id: 4, name: "Vikram S.", avatar: "https://placehold.co/100x100.png", images: ["https://placehold.co/400x700.png"], aiHint: "corporate man" },
+    { id: 5, name: "Sneha R.", avatar: "https://placehold.co/100x100.png", images: ["https://placehold.co/400x700.png"], aiHint: "young professional" },
 ];
 
 
