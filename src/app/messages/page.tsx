@@ -147,11 +147,11 @@ function GroupInfoDialog({ group, currentUserRole, onOpenChange }: { group: Netw
                                                     onClick={() => updateMemberRole(group.title, member.id, member.role === 'admin' ? 'member' : 'admin')}
                                                 >
                                                     <Crown className="h-4 w-4" />
-                                                    <span className="sr-only">{member.role === 'admin' ? "Revoke Admin" : "Make Admin"}</span>
+                                                    <span className="sr-only">{member.role === 'admin' ? "Make Member" : "Make Admin"}</span>
                                                 </Button>
                                             </TooltipTrigger>
                                             <TooltipContent>
-                                                <p>{member.role === 'admin' ? "Revoke Admin" : "Make Admin"}</p>
+                                                <p>{member.role === 'admin' ? "Make Member" : "Make Admin"}</p>
                                             </TooltipContent>
                                         </Tooltip>
                                         <Tooltip>
