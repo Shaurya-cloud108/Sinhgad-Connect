@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2 } from "lucide-react";
+import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload } from "lucide-react";
 import { profileData as initialProfileData, feedItems as initialFeedItems, ProfileData, FeedItem } from "@/lib/data";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -64,6 +64,9 @@ const profileFormSchema = z.object({
 
 function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { open: boolean, onOpenChange: (open: boolean) => void, profile: ProfileData, onProfileUpdate: (data: ProfileData) => void }) {
   const { toast } = useToast();
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(profile.avatar);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(profile.banner);
+  
   const form = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
@@ -74,8 +77,24 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
     },
   });
 
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>, setImagePreview: (url: string) => void) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const onSubmit = (values: z.infer<typeof profileFormSchema>) => {
-    const updatedProfile = { ...profile, ...values };
+    const updatedProfile: ProfileData = { 
+      ...profile, 
+      ...values,
+      avatar: avatarPreview || profile.avatar,
+      banner: bannerPreview || profile.banner,
+    };
     onProfileUpdate(updatedProfile);
     toast({
       title: "Profile Updated",
@@ -86,7 +105,7 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Edit Profile</DialogTitle>
           <DialogDescription>
@@ -95,6 +114,38 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+            
+             <div className="space-y-2">
+              <FormLabel>Profile Picture</FormLabel>
+              <div className="flex items-center gap-4">
+                <Avatar className="h-20 w-20">
+                  <AvatarImage src={avatarPreview || undefined} />
+                  <AvatarFallback>{profile.name.substring(0, 2)}</AvatarFallback>
+                </Avatar>
+                <Button asChild variant="outline">
+                   <label htmlFor="avatar-upload" className="cursor-pointer">
+                    <Upload className="mr-2 h-4 w-4"/>
+                    Upload Image
+                    <Input id="avatar-upload" type="file" className="sr-only" accept="image/*" onChange={(e) => handleImageUpload(e, setAvatarPreview)} />
+                  </label>
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <FormLabel>Banner Image</FormLabel>
+              <div className="aspect-video w-full relative bg-muted rounded-md overflow-hidden">
+                {bannerPreview && <Image src={bannerPreview} layout="fill" objectFit="cover" alt="Banner preview" />}
+                 <Button asChild variant="outline" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                   <label htmlFor="banner-upload" className="cursor-pointer">
+                    <Upload className="mr-2 h-4 w-4"/>
+                    Upload Banner
+                    <Input id="banner-upload" type="file" className="sr-only" accept="image/*" onChange={(e) => handleImageUpload(e, setBannerPreview)} />
+                  </label>
+                </Button>
+              </div>
+            </div>
+
             <FormField
               control={form.control}
               name="name"
@@ -349,5 +400,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-    
