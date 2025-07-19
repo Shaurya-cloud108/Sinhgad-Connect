@@ -59,6 +59,7 @@ import { AppContext } from "@/context/AppContext";
 import { getStatusEmoji, cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShareDialog } from "@/components/share-dialog";
+import Link from 'next/link';
 
 
 const profileFormSchema = z.object({
@@ -240,7 +241,8 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
 }
 
 
-export default function ProfilePage({ params: { handle } }: { params: { handle: string } }) {
+export default function ProfilePage({ params }: { params: { handle: string } }) {
+    const { handle } = params;
     const { profileData: ownProfileData, setProfileData } = useContext(ProfileContext);
     const { networkingGroups, setSelectedConversationByName } = useContext(AppContext);
     
