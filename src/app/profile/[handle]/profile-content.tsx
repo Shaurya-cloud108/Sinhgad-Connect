@@ -6,8 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2, PlusCircle, Linkedin, Github, Mail, Link as LinkIcon } from "lucide-react";
-import { ProfileData, FeedItem, communityMembers, EducationEntry, feedItems } from "@/lib/data.tsx";
+import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2, PlusCircle, Linkedin, Github, Mail, Link as LinkIcon, Camera } from "lucide-react";
+import { ProfileData, FeedItem, communityMembers, EducationEntry, feedItems, stories, Story } from "@/lib/data.tsx";
 import { useState, useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -143,7 +143,7 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
       };
-      reader.readDataURL(file);
+      reader.readAsDataURL(file);
     }
   };
 
@@ -352,6 +352,7 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
     const router = useRouter();
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [userPosts, setUserPosts] = useState<FeedItem[]>([]);
+    const [userStories, setUserStories] = useState<Story | null>(null);
     
     const isOwnProfile = !handle || handle === ownProfileData?.handle;
     const [profileData, setProfileDataState] = useState<ProfileData | null | undefined>(undefined);
@@ -398,8 +399,11 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
         
         if (targetProfile) {
             setUserPosts(feedItems.filter(item => item.author.handle === targetProfile!.handle));
+            const story = stories.find(s => (isOwnProfile && s.isOwn) || (!isOwnProfile && s.name === targetProfile!.name));
+            setUserStories(story || null);
         } else {
              setUserPosts([]);
+             setUserStories(null);
         }
 
     }, [handle, ownProfileData, isOwnProfile]);
@@ -524,8 +528,9 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="posts" className="w-full">
-              <TabsList className="w-full grid grid-cols-2">
+              <TabsList className="w-full grid grid-cols-3">
                 <TabsTrigger value="posts">Posts</TabsTrigger>
+                <TabsTrigger value="stories">Stories</TabsTrigger>
                 <TabsTrigger value="about">About</TabsTrigger>
               </TabsList>
               <TabsContent value="posts" className="mt-6 space-y-6">
@@ -607,6 +612,22 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
                     </CardContent>
                   </Card>
                 )) : <p className="text-center text-muted-foreground py-8">This user hasn't posted anything yet.</p>}
+              </TabsContent>
+              <TabsContent value="stories" className="mt-6">
+                {userStories && userStories.images.length > 0 ? (
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+                    {userStories.images.map((img, index) => (
+                        <div key={index} className="aspect-square relative rounded-md overflow-hidden">
+                        <Image src={img} alt={`Story image ${index + 1}`} layout="fill" objectFit="cover" />
+                        </div>
+                    ))}
+                    </div>
+                ) : (
+                    <div className="text-center text-muted-foreground py-8 flex flex-col items-center">
+                        <Camera className="h-12 w-12 mb-4" />
+                        <p>No stories posted yet.</p>
+                    </div>
+                )}
               </TabsContent>
               <TabsContent value="about" className="mt-6 space-y-6">
                 <Card>

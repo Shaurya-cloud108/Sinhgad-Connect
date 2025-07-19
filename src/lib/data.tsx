@@ -676,5 +676,3 @@ export const notifications: Notification[] = [
         aiHint: "briefcase icon"
     },
 ];
-
-    

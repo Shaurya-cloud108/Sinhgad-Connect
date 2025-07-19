@@ -78,7 +78,7 @@ function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean,
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
       };
-      reader.readDataURL(file);
+      reader.readAsDataURL(file);
     }
   };
   
@@ -406,12 +406,7 @@ function HomePageContent() {
 
   const handleStoryClick = (story: Story) => {
     if (story.isOwn) {
-      if (story.images.length > 0) {
-        setSelectedStory(story);
-        setIsStoryViewerOpen(true);
-      } else {
         setIsCreateStoryDialogOpen(true);
-      }
     } else {
       setSelectedStory(story);
       setIsStoryViewerOpen(true);
@@ -467,14 +462,13 @@ function HomePageContent() {
             <div key={story.id} className="flex-shrink-0 text-center cursor-pointer" onClick={() => handleStoryClick(story)}>
               <div className={cn(
                 "relative rounded-full p-0.5 border-2",
-                story.isOwn && story.images.length === 0 && "border-dashed",
-                story.isOwn && story.images.length > 0 && "border-primary",
+                story.isOwn && "border-dashed",
                 !story.isOwn && story.images.length > 0 && "border-primary"
               )}>
                 <Avatar className="w-16 h-16">
                   <AvatarImage src={story.isOwn ? profileData.avatar : story.avatar} data-ai-hint={story.aiHint} />
                   <AvatarFallback>{story.name.substring(0,2)}</AvatarFallback>
-                  {story.isOwn && story.images.length === 0 && (
+                  {story.isOwn && (
                     <div className="absolute bottom-0 right-0 bg-primary rounded-full p-0.5 border-2 border-background">
                       <Plus className="w-4 h-4 text-primary-foreground" />
                     </div>
