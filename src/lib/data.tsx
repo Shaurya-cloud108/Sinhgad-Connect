@@ -2,7 +2,7 @@
 "use client";
 
 import React from 'react';
-import { Member, NetworkingGroup, Conversation, MessagesData } from "@/context/AppContext";
+import { Conversation, MessagesData } from "@/context/AppContext";
 
 export type Event = {
   id: string;
@@ -562,60 +562,9 @@ export const stories: Story[] = [
     { id: 5, name: "Sneha Reddy", avatar: "https://placehold.co/100x100.png", images: ["https://placehold.co/400x700.png"], aiHint: "young professional", viewers: [] },
 ];
 
-const allMembersForGroups: Member[] = [
-    // This list can be populated with members who are not the main user by default
-    { id: 'sunita-narayan', name: 'Sunita Narayan', avatar: 'https://placehold.co/100x100.png', role: 'admin' },
-    { id: 'rohan-verma', name: 'Rohan Verma', avatar: 'https://placehold.co/100x100.png', role: 'member' },
-    { id: 'kavya-iyer', name: 'Kavya Iyer', avatar: 'https://placehold.co/100x100.png', role: 'member' },
-    { id: 'vikram-singh', name: 'Vikram Singh', avatar: 'https://placehold.co/100x100.png', role: 'member' },
-    { id: 'amit-patel', name: 'Amit Patel', avatar: 'https://placehold.co/100x100.png', role: 'member' },
-    { id: 'anjali-mehta', name: 'Anjali Mehta', avatar: 'https://placehold.co/100x100.png', role: 'member' },
-];
-
-export const networkingGroups: NetworkingGroup[] = [
-  {
-    title: "Software & Tech Innovators",
-    description: "Connect with alumni and students in the tech industry. Share insights on coding, product development, and emerging technologies.",
-    iconName: "code",
-    members: allMembersForGroups.filter(m => ['sunita-narayan', 'rohan-verma', 'kavya-iyer', 'sneha-reddy'].includes(m.id)),
-  },
-  {
-    title: "Entrepreneurship Hub",
-    description: "A group for founders, aspiring entrepreneurs, and investors. Discuss startup ideas, funding, and growth strategies.",
-    iconName: "rocket",
-    members: allMembersForGroups.filter(m => ['sunita-narayan', 'karan-malhotra'].includes(m.id)),
-  },
-  {
-    title: "Core Engineering Circle",
-    description: "For alumni and students in Mechanical, Civil, and Electrical fields. Collaborate on projects and discuss industry trends.",
-    iconName: "building",
-    members: allMembersForGroups.filter(m => ['rohan-verma', 'amit-patel'].includes(m.id)),
-  },
-  {
-    title: "Management & Consulting",
-    description: "Network with alumni and students interested in business management, finance, and consulting roles.",
-    iconName: "briefcase",
-    members: allMembersForGroups.filter(m => ['vikram-singh', 'anjali-mehta'].includes(m.id)),
-  },
-  {
-    title: "Bay Area Alumni & Students",
-    description: "Connect with fellow graduates and current students in the San Francisco Bay Area for local meetups and networking.",
-    iconName: "globe",
-    members: [], // Initially empty
-  },
-   {
-    title: "Higher Education & Academia",
-    description: "A forum for alumni and students pursuing or working in research, teaching, and higher education.",
-    iconName: "globe",
-    members: [], // Initially empty
-  },
-];
-
-
 export const conversationsData: Conversation[] = [
     { name: 'Rohan Verma', avatar: 'https://placehold.co/100x100.png', aiHint: 'professional man', lastMessage: 'You\'re welcome! Let me know if you need more help.', time: '2h', unread: 0, isGroup: false },
     { name: 'Kavya Iyer', avatar: 'https://placehold.co/100x100.png', aiHint: 'female student', lastMessage: 'Thank you for the mentorship!', time: '1d', unread: 2, isGroup: false },
-    // The user will no longer be in these groups by default, so they won't appear in initial conversations.
 ];
 
 export const messagesData: MessagesData = {
@@ -628,13 +577,6 @@ export const messagesData: MessagesData = {
       { senderId: profileData.handle, senderName: profileData.name, text: "Of course, ask away!" },
       { senderId: 'kavya-iyer', senderName: 'Kavya Iyer', text: "Thank you for the mentorship!" },
   ],
-  "Software & Tech Innovators": [
-      { senderId: 'rohan-verma', senderName: 'Rohan Verma', text: 'Has anyone worked with the new Bun APIs?' },
-      { senderId: 'sunita-narayan', senderName: 'Sunita Narayan', text: 'I have! It’s incredibly fast. What are you building?' },
-  ],
-  "Entrepreneurship Hub": [
-      { senderId: 'sunita-narayan', senderName: 'Sunita Narayan', text: 'Seed funding secured! Big things coming soon.' },
-  ]
 };
 
 export type Notification = {
