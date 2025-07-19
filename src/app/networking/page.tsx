@@ -12,7 +12,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Code, Briefcase, Rocket, Building, Globe, PlusCircle, MessageSquare, Send } from "lucide-react";
+import { ArrowRight, Code, Briefcase, Rocket, Building, Globe, PlusCircle, MessageSquare, Send, CheckCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -30,6 +30,7 @@ import { useRouter } from "next/navigation";
 import { ProfileContext } from "@/context/ProfileContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShareDialog } from "@/components/share-dialog";
+import { cn } from "@/lib/utils";
 
 function CreateGroupDialog({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
   const { addNetworkingGroup } = useContext(AppContext);
@@ -121,23 +122,18 @@ function NetworkingPageContent() {
       router.push("/messages");
   }
   
-  const handleJoinGroup = (group: NetworkingGroup) => {
+  const handleJoinToggle = (group: NetworkingGroup) => {
     toggleGroupMembership(group.title);
   }
 
-  const myGroups = useMemo(() => {
-    return networkingGroups.filter(g => joinedGroups.has(g.title));
-  }, [networkingGroups, joinedGroups]);
-
-  const otherGroups = useMemo(() => {
+  const filteredGroups = useMemo(() => {
     const lowercasedQuery = searchQuery.toLowerCase();
     return networkingGroups
-      .filter(g => !joinedGroups.has(g.title))
       .filter(g => 
         g.title.toLowerCase().includes(lowercasedQuery) || 
         g.description.toLowerCase().includes(lowercasedQuery)
       );
-  }, [networkingGroups, joinedGroups, searchQuery]);
+  }, [networkingGroups, searchQuery]);
 
 
   return (
@@ -156,39 +152,6 @@ function NetworkingPageContent() {
 
       <CreateGroupDialog open={isCreateGroupOpen} onOpenChange={setIsCreateGroupOpen} />
 
-      {/* My Groups Section */}
-      {myGroups.length > 0 && (
-          <div className="mb-12">
-              <h2 className="text-2xl font-headline font-bold mb-6">My Groups</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {myGroups.map((group) => (
-                      <Card key={group.title} className="flex flex-col hover:shadow-lg transition-shadow duration-300">
-                          <CardHeader className="flex-row items-center gap-4">
-                              <GroupIcon iconName={group.iconName} />
-                              <div className="flex-1">
-                                  <CardTitle className="font-headline text-xl">{group.title}</CardTitle>
-                                  <CardDescription>{group.members.length} Members</CardDescription>
-                              </div>
-                          </CardHeader>
-                          <CardContent className="flex-grow">
-                              <p className="text-sm text-muted-foreground">{group.description}</p>
-                          </CardContent>
-                          <CardFooter className="gap-2">
-                            <Button className="w-full" onClick={() => handleGroupClick(group)}>
-                                <MessageSquare className="mr-2 h-4 w-4" /> Go to Chat
-                            </Button>
-                            <ShareDialog contentType="group" contentId={group.title}>
-                                <Button variant="outline" size="icon">
-                                    <Send className="h-4 w-4" />
-                                </Button>
-                            </ShareDialog>
-                          </CardFooter>
-                      </Card>
-                  ))}
-              </div>
-          </div>
-      )}
-
       {/* Explore Groups Section */}
       <div>
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
@@ -201,39 +164,50 @@ function NetworkingPageContent() {
             />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {otherGroups.map((group) => (
-            <Card key={group.title} className="flex flex-col hover:shadow-lg transition-shadow duration-300">
-              <CardHeader className="flex-row items-center gap-4">
-                <GroupIcon iconName={group.iconName} />
-                <div className="flex-1">
-                  <CardTitle className="font-headline text-xl">{group.title}</CardTitle>
-                  <CardDescription>{group.members.length} Members</CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent className="flex-grow">
-                <p className="text-sm text-muted-foreground">{group.description}</p>
-              </CardContent>
-              <CardFooter className="gap-2">
-                <Button 
-                  className="w-full"
-                  onClick={() => handleJoinGroup(group)}
-                >
-                  Join Group
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-                 <ShareDialog contentType="group" contentId={group.title}>
-                    <Button variant="outline" size="icon">
-                        <Send className="h-4 w-4" />
-                    </Button>
-                </ShareDialog>
-              </CardFooter>
-            </Card>
-            ))}
+            {filteredGroups.map((group) => {
+              const isMember = joinedGroups.has(group.title);
+              return (
+              <Card key={group.title} className="flex flex-col hover:shadow-lg transition-shadow duration-300">
+                <CardHeader className="flex-row items-center gap-4">
+                  <GroupIcon iconName={group.iconName} />
+                  <div className="flex-1">
+                    <CardTitle className="font-headline text-xl">{group.title}</CardTitle>
+                    <CardDescription>{group.members.length} Members</CardDescription>
+                  </div>
+                </CardHeader>
+                <CardContent className="flex-grow">
+                  <p className="text-sm text-muted-foreground">{group.description}</p>
+                </CardContent>
+                <CardFooter className="gap-2">
+                  {isMember ? (
+                      <Button className="w-full" variant="secondary" onClick={() => handleGroupClick(group)}>
+                        <CheckCircle className="mr-2 h-4 w-4" /> Go to Chat
+                      </Button>
+                  ) : (
+                      <Button className="w-full" onClick={() => handleJoinToggle(group)}>
+                        Join Group <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                  )}
+                  <ShareDialog contentType="group" contentId={group.title}>
+                      <Button variant="outline" size="icon">
+                          <Send className="h-4 w-4" />
+                      </Button>
+                  </ShareDialog>
+                </CardFooter>
+              </Card>
+            )})}
         </div>
-        {otherGroups.length === 0 && searchQuery && (
+        {filteredGroups.length === 0 && searchQuery && (
              <Card>
               <CardContent className="p-6 text-center text-muted-foreground">
                 <p>No groups found matching "{searchQuery}".</p>
+              </CardContent>
+            </Card>
+        )}
+         {filteredGroups.length === 0 && !searchQuery && (
+             <Card>
+              <CardContent className="p-6 text-center text-muted-foreground">
+                <p>No groups available. Why not create one?</p>
               </CardContent>
             </Card>
         )}
@@ -255,13 +229,6 @@ export default function NetworkingPage() {
                     <Skeleton className="h-6 w-96" />
                 </div>
                 <Skeleton className="h-10 w-36" />
-            </div>
-            <div className="mb-12">
-                <Skeleton className="h-8 w-48 mb-6" />
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <Skeleton className="h-56 w-full" />
-                    <Skeleton className="h-56 w-full" />
-                </div>
             </div>
              <div>
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
