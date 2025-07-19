@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Search, Send, ArrowLeft, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const conversations = [
+const conversationsData = [
   {
     name: "Priya Sharma",
     avatar: "https://placehold.co/100x100.png",
@@ -43,7 +43,7 @@ const conversations = [
   },
 ];
 
-const messagesData = {
+const initialMessagesData = {
   "Priya Sharma": [
     { sender: "other", text: "Hey! I'm a final year student and I saw your profile. Your work at Google is really inspiring!" },
     { sender: "me", text: "Hi! Thanks for reaching out. Happy to help if you have any questions." },
@@ -53,12 +53,53 @@ const messagesData = {
   "Rohan Verma": [
     { sender: "other", text: "Thanks for the resume tips!" },
   ],
+  "Alumni Events Group": [
+    { sender: "other", text: "Don't forget the upcoming Tech Talk on AI." }
+  ],
+  "Vikram Singh": [
+     { sender: "other", text: "It was great meeting you at the reunion." }
+  ]
 };
 
-type Conversation = typeof conversations[0];
+type Conversation = typeof conversationsData[0];
+type Message = { sender: 'me' | 'other'; text: string };
 
 export default function MessagesPage() {
-  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(conversations[0]);
+  const [conversations, setConversations] = useState(conversationsData);
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(conversationsData[0]);
+  const [messagesData, setMessagesData] = useState(initialMessagesData);
+  const [newMessage, setNewMessage] = useState("");
+
+  const handleSendMessage = () => {
+    if (newMessage.trim() === "" || !selectedConversation) return;
+
+    const newMessageObj: Message = {
+      sender: 'me',
+      text: newMessage,
+    };
+
+    const conversationName = selectedConversation.name as keyof typeof messagesData;
+    
+    setMessagesData(prev => ({
+        ...prev,
+        [conversationName]: [...(prev[conversationName] || []), newMessageObj]
+    }));
+    
+    setNewMessage("");
+
+    // Also update the last message in the conversation list
+    setConversations(prev => prev.map(convo => 
+        convo.name === selectedConversation.name 
+        ? {...convo, lastMessage: newMessage, time: "Now"} 
+        : convo
+    ));
+  };
+  
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSendMessage();
+    }
+  }
 
   const messages = selectedConversation ? messagesData[selectedConversation.name as keyof typeof messagesData] || [] : [];
 
@@ -140,8 +181,14 @@ export default function MessagesPage() {
             </div>
             <div className="p-4 border-t bg-background">
               <div className="relative">
-                <Input placeholder="Type a message..." className="pr-12" />
-                <Button size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-10">
+                <Input 
+                    placeholder="Type a message..." 
+                    className="pr-12"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                />
+                <Button size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-10" onClick={handleSendMessage}>
                   <Send className="h-5 w-5" />
                 </Button>
               </div>
