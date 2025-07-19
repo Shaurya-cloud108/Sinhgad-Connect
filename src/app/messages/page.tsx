@@ -258,11 +258,15 @@ export default function MessagesPage() {
     
     setNewMessage("");
 
-    setConversations(prev => prev.map(convo => 
-        convo.name === selectedConversation.name 
-        ? {...convo, lastMessage: newMessage, time: "Now"} 
-        : convo
-    ));
+    setConversations(prev => {
+        const otherConversations = prev.filter(convo => convo.name !== selectedConversation.name);
+        const updatedConversation = {
+            ...selectedConversation,
+            lastMessage: newMessage,
+            time: "Now",
+        };
+        return [updatedConversation, ...otherConversations];
+    });
   };
   
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

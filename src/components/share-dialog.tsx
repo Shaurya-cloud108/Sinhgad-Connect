@@ -122,22 +122,26 @@ export function ShareDialog({ contentType, contentId, children }: ShareDialogPro
       return newMessagesData;
     });
 
-    // Update conversations list (existing and new)
+    // Update conversations list (existing and new), and reorder
     setConversations(prev => {
-        const existingConversations = new Map(prev.map(c => [c.name, c]));
-        
+        const conversationMap = new Map(prev.map(c => [c.name, c]));
+
         selectedTargets.forEach(targetName => {
             const target = allShareTargets.find(t => t.name === targetName);
             if (!target) return;
 
-            if (existingConversations.has(target.name)) {
+            let updatedConvo: Conversation;
+
+            if (conversationMap.has(target.name)) {
                 // Update existing conversation
-                const existingConvo = existingConversations.get(target.name)!;
-                existingConvo.lastMessage = lastMessageText;
-                existingConvo.time = "Now";
-            } else if (!target.isGroup) {
+                updatedConvo = {
+                    ...conversationMap.get(target.name)!,
+                    lastMessage: lastMessageText,
+                    time: "Now",
+                };
+            } else {
                 // This is a new 1-on-1 conversation, create it
-                const newConvo: Conversation = {
+                updatedConvo = {
                     name: target.name,
                     avatar: target.avatar,
                     aiHint: "user avatar",
@@ -146,12 +150,15 @@ export function ShareDialog({ contentType, contentId, children }: ShareDialogPro
                     unread: 0,
                     isGroup: false,
                 };
-                existingConversations.set(target.name, newConvo);
             }
+            conversationMap.set(target.name, updatedConvo);
         });
-        
-        // Return a new array to trigger re-render
-        return Array.from(existingConversations.values());
+
+        const allConversations = Array.from(conversationMap.values());
+        const otherConversations = allConversations.filter(c => !selectedTargets.has(c.name));
+        const updatedConversations = Array.from(selectedTargets).map(name => conversationMap.get(name)!);
+
+        return [...updatedConversations, ...otherConversations];
     });
     
     toast({
