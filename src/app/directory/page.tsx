@@ -1,3 +1,4 @@
+
 import {
   Card,
   CardContent,
@@ -9,14 +10,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { Linkedin } from "lucide-react";
 
 const alumniData = [
@@ -100,35 +93,9 @@ export default function DirectoryPage() {
 
       <Card className="mb-8">
         <CardContent className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-center">
-            <Input placeholder="Search by name, company..." />
-            <Select>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by Industry" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="technology">Technology</SelectItem>
-                <SelectItem value="automotive">Automotive</SelectItem>
-                <SelectItem value="telecommunications">Telecommunications</SelectItem>
-                <SelectItem value="finance">Finance</SelectItem>
-                <SelectItem value="e-commerce">E-commerce</SelectItem>
-                <SelectItem value="construction">Construction</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by Year" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="2010">2010</SelectItem>
-                <SelectItem value="2012">2012</SelectItem>
-                <SelectItem value="2015">2015</SelectItem>
-                <SelectItem value="2008">2008</SelectItem>
-                <SelectItem value="2018">2018</SelectItem>
-                <SelectItem value="2013">2013</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button className="w-full">Search</Button>
+          <div className="flex flex-col md:flex-row gap-4 items-center">
+            <Input placeholder="Search by name..." className="flex-grow" />
+            <Button className="w-full md:w-auto">Search</Button>
           </div>
         </CardContent>
       </Card>
