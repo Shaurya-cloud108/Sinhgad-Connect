@@ -27,7 +27,7 @@ export function SharedPostCard({ postId }: SharedPostCardProps) {
   }
 
   return (
-    <Link href="/" className="block my-2">
+    <Link href={`/?postId=${postId}`} className="block my-2">
         <Card className="bg-background/50 border shadow-none hover:shadow-md transition-shadow">
         <CardHeader className="p-3 flex-row items-center space-x-3 space-y-0">
             <Avatar className="w-8 h-8">

@@ -47,7 +47,9 @@ import {
 
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { useState, useContext, useRef } from "react";
+import { useState, useContext, useRef, useEffect } from "react";
+import { useSearchParams } from 'next/navigation'
+import React from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { stories as initialStories, feedItems as initialFeedItems, FeedItem, Story, Comment, StoryViewer } from "@/lib/data.tsx";
 import Image from "next/image";
@@ -317,8 +319,7 @@ function StoryViewerDialog({ story, open, onOpenChange }: { story: Story | null;
   );
 }
 
-
-export default function Home() {
+function HomePageContent() {
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
   const [isCreateStoryDialogOpen, setIsCreateStoryDialogOpen] = useState(false);
   const [feedItems, setFeedItems] = useState<FeedItem[]>(initialFeedItems);
@@ -327,6 +328,24 @@ export default function Home() {
   const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
   const { profileData } = useContext(ProfileContext);
   const [activeCommentPostId, setActiveCommentPostId] = useState<number | null>(null);
+  
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const postId = searchParams.get('postId');
+    if (postId) {
+      const element = document.getElementById(`post-${postId}`);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          element.classList.add('bg-primary/10', 'transition-all', 'duration-1000');
+          setTimeout(() => {
+            element.classList.remove('bg-primary/10');
+          }, 2000);
+        }, 100);
+      }
+    }
+  }, [searchParams]);
 
   if (!profileData) {
       return (
@@ -491,7 +510,7 @@ export default function Home() {
       {/* Feed */}
       <div className="space-y-4 py-4">
         {feedItems.map((item) => (
-          <Card key={item.id} className="rounded-none md:rounded-lg shadow-none md:shadow-sm border-l-0 border-r-0 md:border">
+          <Card key={item.id} id={`post-${item.id}`} className="rounded-none md:rounded-lg shadow-none md:shadow-sm border-l-0 border-r-0 md:border">
             <CardHeader className="p-4 flex flex-row items-center justify-between">
               <div className="flex items-center space-x-3">
                 <Avatar className="w-10 h-10">
@@ -567,4 +586,13 @@ export default function Home() {
       </div>
     </div>
   );
+}
+
+
+export default function Home() {
+    return (
+        <React.Suspense fallback={<div>Loading...</div>}>
+            <HomePageContent />
+        </React.Suspense>
+    )
 }
