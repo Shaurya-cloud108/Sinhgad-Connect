@@ -72,7 +72,7 @@ const profileFormSchema = z.object({
   location: z.string().min(2, "Location is too short"),
   about: z.string().min(10, "About section is too short"),
   contact: z.object({
-    email: z.string().email("Please enter a valid email."),
+    email: z.string().email("Please enter a valid email.").optional().or(z.literal('')),
     website: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
   }),
   socials: z.object({
@@ -622,12 +622,14 @@ function ProfilePageContent({ handle }: { handle: string }) {
                     <CardTitle className="font-headline text-xl">Contact & Socials</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <div className="flex items-center gap-4">
-                        <Mail className="h-5 w-5 text-muted-foreground"/>
-                        <a href={`mailto:${profileData.contact.email}`} className="text-sm text-primary hover:underline">
-                            {profileData.contact.email}
-                        </a>
-                    </div>
+                    {profileData.contact.email && (
+                      <div className="flex items-center gap-4">
+                          <Mail className="h-5 w-5 text-muted-foreground"/>
+                          <a href={`mailto:${profileData.contact.email}`} className="text-sm text-primary hover:underline">
+                              {profileData.contact.email}
+                          </a>
+                      </div>
+                    )}
                     {profileData.contact.website && (
                          <div className="flex items-center gap-4">
                             <LinkIcon className="h-5 w-5 text-muted-foreground"/>
