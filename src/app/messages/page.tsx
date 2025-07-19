@@ -66,7 +66,7 @@ type Message = { sender: 'me' | 'other'; text: string };
 
 export default function MessagesPage() {
   const [conversations, setConversations] = useState(conversationsData);
-  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(conversationsData[0]);
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [messagesData, setMessagesData] = useState(initialMessagesData);
   const [newMessage, setNewMessage] = useState("");
 
