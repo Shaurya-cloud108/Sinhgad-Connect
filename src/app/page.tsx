@@ -404,17 +404,21 @@ function HomePageContent() {
     const newStoryMedia: StoryMedia = { ...media, timestamp: Date.now() };
 
     setStories(prevStories => {
-        const newStories = [...prevStories];
-        const myStoryIndex = newStories.findIndex(s => s.isOwn);
+      const newStories = [...prevStories];
+      const myStoryIndex = newStories.findIndex(s => s.isOwn);
 
-        if (myStoryIndex !== -1) {
-            newStories[myStoryIndex].media.push(newStoryMedia);
-            // Ensure avatar is up to date
-            newStories[myStoryIndex].avatar = profileData.avatar;
-        }
-        return newStories;
+      if (myStoryIndex !== -1) {
+        // Create a new story object to avoid direct mutation
+        const updatedMyStory = {
+          ...newStories[myStoryIndex],
+          media: [...newStories[myStoryIndex].media, newStoryMedia],
+          avatar: profileData.avatar, // Ensure avatar is up to date
+        };
+        newStories[myStoryIndex] = updatedMyStory;
+      }
+      return newStories;
     });
-  }
+  };
 
   const handleStoryClick = (story: Story) => {
     if (story.isOwn) {
@@ -663,3 +667,5 @@ export default function Home() {
         </React.Suspense>
     )
 }
+
+    
