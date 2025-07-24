@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2, PlusCircle, Linkedin, Github, Mail, Link as LinkIcon, Camera, Video, UserPlus, ImageIcon, Award, X } from "lucide-react";
-import type { CommunityMember, FeedItem, EducationEntry, Story, StoryItem, JobListing } from "@/lib/data.tsx";
+import type { CommunityMember, FeedItem, EducationEntry, Story, StoryItem, JobListing, Comment } from "@/lib/data.tsx";
 import { useState, useContext, useEffect, useMemo, useRef, use } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -65,6 +65,7 @@ import { PostJobDialog } from "@/components/post-job-dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { FollowersSheet } from "@/components/followers-sheet";
 import { CreatePostDialog } from "@/components/create-post-dialog";
+import { CommentSheet } from "@/components/comment-sheet";
 
 
 const profileFormSchema = z.object({
@@ -366,6 +367,7 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
     const [isFollowSheetOpen, setIsFollowSheetOpen] = useState(false);
     const [followSheetTitle, setFollowSheetTitle] = useState<'Followers' | 'Following'>('Followers');
     const [followSheetHandles, setFollowSheetHandles] = useState<string[]>([]);
+    const [activeCommentPostId, setActiveCommentPostId] = useState<number | null>(null);
 
     const isOwnProfile = useMemo(() => {
         return !resolvedParams.handle || resolvedParams.handle === ownProfileData?.handle;
@@ -452,6 +454,40 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
         setFeedItems(prev => prev.filter(item => item.id !== postId));
     };
 
+    const handleLike = (postId: number) => {
+      setFeedItems(prev => prev.map(item => 
+          item.id === postId 
+          ? {...item, liked: !item.liked, likes: item.liked ? item.likes - 1 : item.likes + 1}
+          : item
+      ));
+    };
+
+    const handleAddComment = (postId: number, commentText: string) => {
+      if (!ownProfileData) return;
+      const newComment: Comment = {
+        id: Date.now(),
+        author: {
+          name: ownProfileData.name,
+          avatar: ownProfileData.avatar,
+          handle: ownProfileData.handle
+        },
+        text: commentText,
+      };
+      setFeedItems(prev => prev.map(item =>
+        item.id === postId
+          ? { ...item, comments: [...item.comments, newComment] }
+          : item
+      ));
+    };
+
+    const handleDeleteComment = (postId: number, commentId: number) => {
+      setFeedItems(prev => prev.map(item =>
+        item.id === postId
+          ? { ...item, comments: item.comments.filter(c => c.id !== commentId) }
+          : item
+      ));
+    };
+
     const handleMessageClick = () => {
       if (!profileData) return;
       setSelectedConversationByName(profileData.name);
@@ -470,6 +506,8 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
         postedByHandle: profileData.handle,
         });
     }
+    
+    const activePostForComments = feedItems.find(item => item.id === activeCommentPostId);
 
     if (profileData === undefined) {
         return (
@@ -720,23 +758,25 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
                         </div>
                       )}
                     </CardContent>
-                    <CardContent className="p-4 flex flex-col items-start space-y-3">
-                       <div className="flex items-center space-x-4 text-muted-foreground">
-                          <Button variant="ghost" size="sm" className="flex items-center gap-2">
-                            <Heart className="w-5 h-5" />
-                            <span className="text-sm font-medium">{item.likes}</span>
-                          </Button>
-                          <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                    <CardFooter className="p-2 flex justify-between items-center">
+                       <div className="flex items-center text-sm text-muted-foreground">
+                           <Button variant="ghost" size="sm" className={cn("flex items-center gap-2", item.liked && "text-destructive")} onClick={() => handleLike(item.id)}>
+                            <Heart className={cn("w-5 h-5", item.liked && "fill-current")} />
+                            <span>{item.likes}</span>
+                           </Button>
+                           <Button variant="ghost" size="sm" className="flex items-center gap-2" onClick={() => setActiveCommentPostId(item.id)}>
                             <MessageCircle className="w-5 h-5" />
-                             <span className="text-sm font-medium">{item.comments.length}</span>
-                          </Button>
+                            <span>{item.comments.length}</span>
+                           </Button>
+                        </div>
+                        <div>
                           <ShareDialog contentType="post" contentId={item.id}>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="icon">
                                 <Send className="w-5 h-5" />
                             </Button>
                           </ShareDialog>
-                      </div>
-                    </CardContent>
+                        </div>
+                    </CardFooter>
                   </Card>
                 )) : <p className="text-center text-muted-foreground py-8">This user hasn't posted anything yet.</p>}
               </TabsContent>
@@ -834,6 +874,16 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
             <PostJobDialog open={isPostJobDialogOpen} onOpenChange={setIsPostJobDialogOpen} onJobSubmit={handleJobSubmit}/>
         </>
       )}
+       <CommentSheet
+        open={!!activeCommentPostId}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) setActiveCommentPostId(null);
+        }}
+        post={activePostForComments}
+        onCommentSubmit={handleAddComment}
+        onCommentDelete={handleDeleteComment}
+        currentProfile={ownProfileData!}
+      />
     </div>
     <FollowersSheet 
       open={isFollowSheetOpen} 
