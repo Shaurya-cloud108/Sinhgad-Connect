@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2, PlusCircle, Linkedin, Github, Mail, Link as LinkIcon, Camera, Video, UserPlus, ImageIcon, Award, X } from "lucide-react";
 import type { CommunityMember, FeedItem, EducationEntry, Story, StoryItem, JobListing } from "@/lib/data.tsx";
-import { useState, useContext, useEffect, useMemo, useRef } from "react";
+import { useState, useContext, useEffect, useMemo, useRef, use } from "react";
 import { useRouter } from "next/navigation";
 import {
   Dialog,
@@ -454,6 +454,7 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
 
 
 export default function ProfilePageContent({ params }: { params: { handle: string } }) {
+    const resolvedParams = use(params);
     const { profileData: ownProfileData, setLoggedInUserHandle } = useContext(ProfileContext);
     const { 
         setSelectedConversationByName, 
@@ -473,13 +474,13 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
     const [followSheetHandles, setFollowSheetHandles] = useState<string[]>([]);
 
     const isOwnProfile = useMemo(() => {
-        return !params.handle || params.handle === ownProfileData?.handle;
-    }, [params, ownProfileData]);
+        return !resolvedParams.handle || resolvedParams.handle === ownProfileData?.handle;
+    }, [resolvedParams, ownProfileData]);
 
     const profileData = useMemo(() => {
       if (isOwnProfile) return ownProfileData;
-      return communityMembers.find(m => m.handle === params.handle) || null;
-    }, [params, ownProfileData, isOwnProfile, communityMembers]);
+      return communityMembers.find(m => m.handle === resolvedParams.handle) || null;
+    }, [resolvedParams, ownProfileData, isOwnProfile, communityMembers]);
 
     const profileFeedItems = useMemo(() => {
         if (!profileData) return [];
@@ -948,3 +949,4 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
     </>
   );
 }
+
