@@ -115,7 +115,7 @@ export function LoginForm() {
 
   function onSubmit(values: z.infer<typeof loginFormSchema>) {
     // In a real app, this would involve an API call to verify the password.
-    // For this prototype, we find the user by email in the list fetched from Firestore.
+    // For this prototype, we find the user by email in the list.
     const user = communityMembers.find(m => m.contact.email === values.email);
 
     if (user) {

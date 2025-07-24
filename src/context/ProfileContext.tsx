@@ -4,6 +4,7 @@
 import React, { createContext, useState, ReactNode, useEffect, useMemo, useContext } from 'react';
 import type { CommunityMember } from '@/lib/data.tsx';
 import { AppContext } from './AppContext';
+import { useRouter } from 'next/navigation';
 
 type ProfileContextType = {
     loggedInUserHandle: string | null;
@@ -22,11 +23,11 @@ const MOCK_LOGGED_IN_USER_HANDLE = 'priya-sharma';
 export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     const [loggedInUserHandle, setLoggedInUserHandle] = useState<string | null>(null);
     const { communityMembers } = useContext(AppContext);
+    const router = useRouter();
 
      useEffect(() => {
         // In a real app, this would be determined by an auth session.
         // For this prototype, we'll set a default logged-in user.
-        // We check if communityMembers is loaded before setting the handle.
         if (communityMembers.length > 0) {
             setLoggedInUserHandle(MOCK_LOGGED_IN_USER_HANDLE);
         }

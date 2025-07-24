@@ -1,11 +1,12 @@
 
 "use client";
 
-import React, { createContext, useState, ReactNode, useCallback, useEffect } from 'react';
+import React, { createContext, useState, ReactNode, useCallback } from 'react';
 import { 
     initialConversations, 
     initialMessages,
     initialJobListings, 
+    initialCommunityMembers, 
     initialFeedItems, 
     initialStories,
     initialEventsData
@@ -21,9 +22,6 @@ import type {
     StoryItem,
     Event
 } from '@/lib/data';
-import { db } from '@/lib/firebase';
-import { collection, getDocs } from 'firebase/firestore';
-
 
 // Types
 export type Conversation = ConvType;
@@ -95,27 +93,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
     const [events, setEvents] = useState<Event[]>(initialEventsData);
     const [jobListings, setJobListings] = useState<JobListing[]>(initialJobListings);
-    const [communityMembers, setCommunityMembers] = useState<CommunityMember[]>([]);
+    const [communityMembers, setCommunityMembers] = useState<CommunityMember[]>(initialCommunityMembers);
     const [feedItems, setFeedItems] = useState<FeedItem[]>(initialFeedItems);
     const [stories, setStories] = useState<Story[]>(initialStories);
     
-    useEffect(() => {
-        const fetchCommunityMembers = async () => {
-            try {
-                const membersCollection = collection(db, 'communityMembers');
-                const memberSnapshot = await getDocs(membersCollection);
-                const membersList = memberSnapshot.docs.map(doc => doc.data() as CommunityMember);
-                setCommunityMembers(membersList);
-            } catch (error) {
-                console.error("Error fetching community members:", error);
-                // Handle error, maybe set some default or show an error message
-            }
-        };
-
-        fetchCommunityMembers();
-    }, []);
-
-
     const setSelectedConversationByName = useCallback((name: string) => {
         let conversation = conversations.find(c => c.name === name);
 

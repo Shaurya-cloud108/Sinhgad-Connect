@@ -6,7 +6,6 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useState, useContext } from "react";
 import { useRouter } from "next/navigation";
-import { setDoc, doc } from 'firebase/firestore';
 
 import { Button } from "@/components/ui/button";
 import {
@@ -30,7 +29,6 @@ import { useToast } from "@/hooks/use-toast";
 import { AppContext } from "@/context/AppContext";
 import { ProfileContext } from "@/context/ProfileContext";
 import { CommunityMember } from "@/lib/data";
-import { db } from "@/lib/firebase";
 
 
 const formSchema = z.object({
@@ -77,7 +75,7 @@ export function RegisterForm() {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: z.infer<typeof formSchema>) {
     const userHandle = values.fullName.toLowerCase().replace(/\s+/g, '-') + `-${String(values.graduationYear).slice(-2)}`;
     
     const newUser: CommunityMember = {
@@ -112,34 +110,21 @@ export function RegisterForm() {
         contact: { email: values.email }
     };
 
-    try {
-        // Save the new user to Firestore
-        await setDoc(doc(db, "communityMembers", newUser.handle), newUser);
+    // Add new user to the local state for immediate UI update
+    setCommunityMembers(prev => [...prev, newUser]);
+    
+    // Add a story placeholder for the new user
+    addStoryForUser(newUser);
 
-        // Add new user to the local state for immediate UI update
-        setCommunityMembers(prev => [...prev, newUser]);
-        
-        // Add a story placeholder for the new user
-        addStoryForUser(newUser);
-
-        // "Log in" the new user
-        setLoggedInUserHandle(newUser.handle);
-        
-        toast({
-          title: "Registration Successful!",
-          description: `Welcome to the community, ${values.fullName}!`,
-        });
-        
-        router.push(`/profile/${newUser.handle}`);
-
-    } catch (error) {
-        console.error("Error creating user:", error);
-        toast({
-            variant: "destructive",
-            title: "Registration Failed",
-            description: "There was an error creating your account. Please try again.",
-        });
-    }
+    // "Log in" the new user
+    setLoggedInUserHandle(newUser.handle);
+    
+    toast({
+      title: "Registration Successful!",
+      description: `Welcome to the community, ${values.fullName}!`,
+    });
+    
+    router.push(`/profile/${newUser.handle}`);
   }
 
   return (
