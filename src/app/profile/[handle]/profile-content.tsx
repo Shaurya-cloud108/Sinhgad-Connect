@@ -477,7 +477,7 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
     }, [params, ownProfileData]);
 
     const profileData = useMemo(() => {
-      if (!params.handle) return isOwnProfile ? ownProfileData : null;
+      if (isOwnProfile) return ownProfileData;
       return communityMembers.find(m => m.handle === params.handle) || null;
     }, [params, ownProfileData, isOwnProfile, communityMembers]);
 
@@ -948,5 +948,3 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
     </>
   );
 }
-
-    

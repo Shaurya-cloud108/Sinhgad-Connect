@@ -376,7 +376,7 @@ function StoryViewerDialog({ story, open, onOpenChange, currentUserId }: { story
         clearInterval(interval);
     };
 
-}, [currentItemIndex, activeItems, open]);
+}, [currentItemIndex, activeItems, open, handleNext]);
 
 
   if (!story || activeItems.length === 0) return null;
@@ -816,5 +816,3 @@ export default function Home() {
         </React.Suspense>
     )
 }
-
-    

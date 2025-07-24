@@ -13,7 +13,7 @@ export type Event = {
   aiHint: string;
 };
 
-export const eventsData: Event[] = [
+export const initialEventsData: Event[] = [
   {
     id: "annual-meet-2024",
     title: "Annual Alumni Grand Meet 2024",
@@ -775,5 +775,3 @@ export const notifications: Notification[] = [
         aiHint: "briefcase icon"
     },
 ];
-
-    

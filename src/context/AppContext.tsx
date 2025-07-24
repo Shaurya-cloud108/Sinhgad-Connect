@@ -2,8 +2,26 @@
 "use client";
 
 import React, { createContext, useState, ReactNode, useCallback } from 'react';
-import { initialConversationsData, initialMessagesData, initialCommunityMembers, initialJobListings, initialFeedItems, initialStoriesData } from '@/lib/data.tsx';
-import type { Conversation as ConvType, MessagesData as MsgType, JobListing, CommunityMember, FeedItem, Story, Message, StoryItem } from '@/lib/data';
+import { 
+    initialConversationsData, 
+    initialMessagesData, 
+    initialCommunityMembers, 
+    initialJobListings, 
+    initialFeedItems, 
+    initialStoriesData,
+    initialEventsData
+} from '@/lib/data.tsx';
+import type { 
+    Conversation as ConvType, 
+    MessagesData as MsgType, 
+    JobListing, 
+    CommunityMember, 
+    FeedItem, 
+    Story, 
+    Message, 
+    StoryItem,
+    Event
+} from '@/lib/data';
 
 
 // Types
@@ -20,7 +38,12 @@ type AppContextType = {
     setSelectedConversation: React.Dispatch<React.SetStateAction<Conversation | null>>;
     setSelectedConversationByName: (name: string) => void;
     
+    events: Event[];
+    setEvents: React.Dispatch<React.SetStateAction<Event[]>>;
+    addEvent: (event: Event) => void;
+
     jobListings: JobListing[];
+    setJobListings: React.Dispatch<React.SetStateAction<JobListing[]>>;
     addJobListing: (job: JobListing) => void;
     
     communityMembers: CommunityMember[];
@@ -45,7 +68,11 @@ export const AppContext = createContext<AppContextType>({
     selectedConversation: null,
     setSelectedConversation: () => {},
     setSelectedConversationByName: () => {},
+    events: [],
+    setEvents: () => {},
+    addEvent: () => {},
     jobListings: [],
+    setJobListings: () => {},
     addJobListing: () => {},
     communityMembers: [],
     setCommunityMembers: () => {},
@@ -63,6 +90,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [conversations, setConversations] = useState<Conversation[]>(initialConversationsData);
     const [messagesData, setMessagesData] = useState<MessagesData>(initialMessagesData);
     const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+    const [events, setEvents] = useState<Event[]>(initialEventsData);
     const [jobListings, setJobListings] = useState<JobListing[]>(initialJobListings);
     const [communityMembers, setCommunityMembers] = useState<CommunityMember[]>(initialCommunityMembers);
     const [feedItems, setFeedItems] = useState<FeedItem[]>(initialFeedItems);
@@ -89,6 +117,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         
         setSelectedConversation(conversation || null);
     }, [conversations, communityMembers]);
+
+    const addEvent = useCallback((event: Event) => {
+        setEvents(prev => [event, ...prev]);
+    }, []);
 
     const addJobListing = useCallback((job: JobListing) => {
         setJobListings(prev => [job, ...prev]);
@@ -134,7 +166,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         selectedConversation,
         setSelectedConversation,
         setSelectedConversationByName,
+        events,
+        setEvents,
+        addEvent,
         jobListings,
+        setJobListings,
         addJobListing,
         communityMembers,
         setCommunityMembers,
@@ -153,5 +189,3 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         </AppContext.Provider>
     );
 };
-
-    

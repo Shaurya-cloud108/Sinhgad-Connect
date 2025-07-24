@@ -1,18 +1,20 @@
 
 "use client";
 
-import { eventsData } from "@/lib/data.tsx";
 import { Card, CardHeader, CardContent } from "./ui/card";
 import { Calendar, MapPin } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { useContext } from "react";
+import { AppContext } from "@/context/AppContext";
 
 type SharedEventCardProps = {
   eventId: string;
 };
 
 export function SharedEventCard({ eventId }: SharedEventCardProps) {
-  const event = eventsData.find((item) => item.id === eventId);
+  const { events } = useContext(AppContext);
+  const event = events.find((item) => item.id === eventId);
 
   if (!event) {
     return (

@@ -24,6 +24,8 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     const { communityMembers } = useContext(AppContext);
 
      useEffect(() => {
+        // In a real app, this would be determined by an auth session.
+        // For this prototype, we'll set a default logged-in user.
         setLoggedInUserHandle(MOCK_LOGGED_IN_USER_HANDLE);
     }, []);
 
@@ -39,5 +41,3 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         </ProfileContext.Provider>
     );
 };
-
-    

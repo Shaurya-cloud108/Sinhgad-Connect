@@ -33,9 +33,10 @@ function SearchPageContent() {
     }
     const results = communityMembers.filter((member) =>
       member.name.toLowerCase().includes(lowercasedQuery) ||
+      member.headline.toLowerCase().includes(lowercasedQuery) ||
       member.field.toLowerCase().includes(lowercasedQuery) ||
       member.industry.toLowerCase().includes(lowercasedQuery) ||
-      member.company.toLowerCase().includes(lowercasedQuery)
+      (member.company && member.company.toLowerCase().includes(lowercasedQuery))
     );
     setFilteredMembers(results);
   }, [searchQuery, communityMembers]);
@@ -71,7 +72,7 @@ function SearchPageContent() {
                 </Avatar>
                 <CardTitle className="font-headline">{member.name} {getStatusEmoji(member.graduationYear, member.graduationMonth)}</CardTitle>
                 <CardDescription>
-                  {member.field}, Class of {member.graduationYear}
+                  {member.headline}
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex-grow text-center">

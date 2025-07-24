@@ -13,14 +13,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, Users, Send, PlusCircle } from "lucide-react";
 import { ShareDialog } from "@/components/share-dialog";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { PostEventDialog, EventFormData } from "@/components/post-event-dialog";
 import type { Event } from "@/lib/data.tsx";
-import { eventsData as initialEventsData } from "@/lib/data.tsx";
 import { format } from "date-fns";
+import { AppContext } from "@/context/AppContext";
 
 export default function EventsPage() {
-  const [events, setEvents] = useState<Event[]>(initialEventsData);
+  const { events, addEvent } = useContext(AppContext);
   const [isPostEventOpen, setIsPostEventOpen] = useState(false);
 
   const handleEventSubmit = (data: EventFormData) => {
@@ -33,7 +33,7 @@ export default function EventsPage() {
       image: data.image || "https://placehold.co/600x400.png",
       aiHint: "community event"
     };
-    setEvents(prev => [newEvent, ...prev]);
+    addEvent(newEvent);
   };
 
   return (
