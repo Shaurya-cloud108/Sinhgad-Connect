@@ -9,47 +9,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, BrainCircuit, Lightbulb, Sparkles, UserCheck } from 'lucide-react';
-import { analyzeStory, StoryAnalysisOutput } from '@/ai/flows/story-insights-flow';
 import { Skeleton } from '@/components/ui/skeleton';
-
-function AiInsightsSkeleton() {
-    return (
-        <div className="space-y-6">
-            <div>
-                <Skeleton className="h-8 w-48 mb-4" />
-                <div className="space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-5/6" />
-                </div>
-            </div>
-            <div>
-                <Skeleton className="h-8 w-48 mb-4" />
-                <div className="space-y-3">
-                    <Skeleton className="h-6 w-full" />
-                    <Skeleton className="h-6 w-full" />
-                    <Skeleton className="h-6 w-full" />
-                </div>
-            </div>
-            <div>
-                <Skeleton className="h-8 w-48 mb-4" />
-                 <div className="space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-5/6" />
-                </div>
-            </div>
-        </div>
-    )
-}
-
 
 export default function StoryDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [story, setStory] = useState<SuccessStory | null>(null);
-  const [insights, setInsights] = useState<StoryAnalysisOutput | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const resolvedParams = use(params);
 
@@ -57,33 +21,29 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
     const storyData = successStories.find((s) => s.id === resolvedParams.id);
     if (storyData) {
       setStory(storyData);
-      generateInsights(storyData);
     } else {
       notFound();
     }
   }, [resolvedParams.id]);
 
-  const generateInsights = async (storyData: SuccessStory) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const result = await analyzeStory({
-        name: storyData.name,
-        role: storyData.role,
-        story: storyData.story,
-      });
-      setInsights(result);
-    } catch (e) {
-      console.error(e);
-      setError('Failed to generate AI insights. Please try again later.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   if (!story) {
-    return null; // Or a loading spinner
+    return (
+        <div className="container py-8 md:py-12">
+            <Skeleton className="h-10 w-48 mb-8" />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                <div className="lg:col-span-1 space-y-6">
+                    <Skeleton className="h-96 w-full" />
+                    <Skeleton className="h-64 w-full" />
+                </div>
+                <div className="lg:col-span-2">
+                    <Skeleton className="h-[500px] w-full" />
+                </div>
+            </div>
+      </div>
+    );
   }
+
+  const { insights } = story;
 
   return (
     <div className="container py-8 md:py-12">
@@ -140,9 +100,7 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-8">
-                    {isLoading && <AiInsightsSkeleton />}
-                    {error && <p className="text-destructive">{error}</p>}
-                    {!isLoading && insights && (
+                    {insights && (
                         <>
                             <div>
                                 <h3 className="flex items-center gap-2 font-headline text-xl font-bold mb-3">

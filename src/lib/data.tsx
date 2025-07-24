@@ -172,6 +172,11 @@ export type SuccessStory = {
     aiHint: string;
     story: string;
     tags: string[];
+    insights: {
+        summary: string;
+        keyTakeaways: string[];
+        careerAdvice: string;
+    }
 };
 
 export const successStories: SuccessStory[] = [
@@ -184,6 +189,16 @@ export const successStories: SuccessStory[] = [
     aiHint: "professional woman portrait",
     story: "Sunita Narayan, a 2009 Computer Engineering graduate, is the trailblazing CEO of Innovate Inc. After starting her career at a major tech firm, she identified a gap in the market for sustainable technology solutions. She founded Innovate Inc. with a small team, focusing on creating eco-friendly consumer electronics. Under her leadership, the company developed a breakthrough biodegradable material for device casings. Her vision and relentless drive led Innovate Inc. through multiple funding rounds and ultimately to a successful IPO, establishing her as a leading voice in green technology and an inspiration for aspiring entrepreneurs.",
     tags: ["Leadership", "Technology", "Entrepreneurship"],
+    insights: {
+        summary: "Sunita Narayan's journey is a testament to the power of combining technical expertise with a strong vision. From her beginnings as a software engineer, she identified a niche market for sustainable technology and courageously built a company from the ground up. Her success with Innovate Inc., marked by a successful IPO, showcases her exceptional leadership and entrepreneurial spirit, proving that purpose-driven innovation can lead to both commercial success and a positive global impact.",
+        keyTakeaways: [
+            "Identify and pursue niche market gaps.",
+            "Combine technical skills with a larger, purpose-driven vision.",
+            "Strong leadership is crucial for navigating funding and growth.",
+            "Perseverance in the face of challenges leads to breakthroughs."
+        ],
+        careerAdvice: "For alumni inspired by Sunita's path, focus on developing not just your technical skills but also your business acumen. Look for problems in the world that you are passionate about solving. Don't be afraid to start small and build a strong, dedicated team around your vision. Networking is key, so leverage the alumni community to find mentors and potential partners. Cultivate resilience; the entrepreneurial journey is filled with ups and downs, but a clear purpose will guide you through."
+    }
   },
   {
     id: "rohan-gupta",
@@ -194,6 +209,16 @@ export const successStories: SuccessStory[] = [
     aiHint: "male doctor",
     story: "Dr. Rohan Gupta, a 2005 Electronics & Telecommunication alumnus, has made monumental contributions to medical science. After completing his PhD in biomedical engineering, he joined CureAI, a research lab focused on artificial intelligence in healthcare. He spearheaded a project to develop an AI-driven diagnostic tool that analyzes medical images with unprecedented accuracy. His team's algorithm can detect early-stage cancer markers far more effectively than traditional methods, significantly improving patient outcomes. His work has been published in numerous prestigious journals and is now being adopted by hospitals worldwide.",
     tags: ["Healthcare", "AI/ML", "Research"],
+    insights: {
+        summary: "Dr. Rohan Gupta's career is a powerful example of applying engineering principles to solve critical healthcare challenges. By specializing in biomedical engineering and AI, he positioned himself at the forefront of medical innovation. His work at CureAI resulted in a life-saving AI diagnostic tool, demonstrating a profound impact on patient care. His success underscores the importance of interdisciplinary knowledge and a commitment to research and development.",
+        keyTakeaways: [
+            "Specialized, interdisciplinary knowledge can lead to groundbreaking innovations.",
+            "Long-term dedication to research can yield world-changing results.",
+            "Technology has the potential to dramatically improve healthcare outcomes.",
+            "Publishing and sharing research is vital for global impact."
+        ],
+        careerAdvice: "Alumni interested in a similar path should consider pursuing advanced degrees (Master's or PhD) in a specialized, high-impact field. Focus on building a strong foundation in both your core engineering discipline and a complementary area like AI, biology, or data science. Seek opportunities in research-oriented organizations, whether in academia or the private sector. Patience and persistence are your greatest assets in a research career."
+    }
   },
   {
     id: "meera-desai",
@@ -204,6 +229,16 @@ export const successStories: SuccessStory[] = [
     aiHint: "female architect",
     story: "Meera Desai, a 2012 Civil Engineering graduate, is transforming urban landscapes with her focus on sustainable architecture. After working at several top firms, she started her own practice, 'Desai Designs.' Her firm won the bid to design a major high-rise in Mumbai, resulting in the iconic 'Green Tower.' The building incorporates vertical gardens, solar power, and a revolutionary rainwater harvesting system, setting a new standard for eco-friendly construction in India. Meera has received multiple international awards for her work and is a passionate advocate for sustainable urban development.",
     tags: ["Architecture", "Sustainability", "Design"],
+    insights: {
+        summary: "Meera Desai's career demonstrates a beautiful blend of civil engineering and a passion for sustainable design. After gaining valuable experience in established firms, she took the entrepreneurial leap to start her own practice. Her 'Green Tower' project is a landmark achievement that showcases her ability to integrate eco-friendly solutions into large-scale urban architecture, earning her international acclaim and establishing her as a leader in her field.",
+        keyTakeaways: [
+            "Gain industry experience before starting your own venture.",
+            "Develop a strong, unique design philosophy (e.g., sustainability).",
+            "Winning a high-profile project can define a career.",
+            "Passion for a cause can drive innovation and recognition."
+        ],
+        careerAdvice: "For those in civil engineering and architecture, build a strong portfolio that showcases your unique style and values. Don't be afraid to champion a cause, like sustainability, in your work. Seek mentors who have successfully run their own firms. The first few years may be challenging, but establishing a strong reputation through smaller projects can lead to larger, more impactful opportunities. Continuous learning about new materials and technologies is essential."
+    }
   },
   {
     id: "karan-malhotra",
@@ -214,6 +249,16 @@ export const successStories: SuccessStory[] = [
     aiHint: "young businessman",
     story: "Karan Malhotra, from the 2016 Information Technology batch, was recognized by Forbes for his work in financial inclusion. Noticing the lack of accessible financial services in rural India, Karan co-founded 'BharatFinance,' a mobile-first platform that offers micro-loans, insurance, and investment opportunities through a simple, user-friendly interface. His startup leverages technology to reach underserved communities, empowering thousands of small business owners and farmers. His innovative approach and social impact earned him a coveted spot on the Forbes 30 Under 30 list for Asia.",
     tags: ["Finance", "Startup", "Social Impact"],
+    insights: {
+        summary: "Karan Malhotra's story is a prime example of using technology for social good. As a recent IT graduate, he identified a critical societal problem and applied his skills to create a solution. His startup, 'BharatFinance,' demonstrates a keen understanding of user needs in underserved markets. Being named to the Forbes 30 Under 30 list highlights the immense value of creating a business that is not only profitable but also has a deep, positive social impact.",
+        keyTakeaways: [
+            "Use your technical skills to solve real-world social problems.",
+            "Focus on user-centric design, especially for non-traditional users.",
+            "A strong social mission can attract recognition and investment.",
+            "You don't need decades of experience to make a significant impact."
+        ],
+        careerAdvice: "If you're a recent graduate with a big idea, don't wait! Identify a problem you care about and start building a solution. Focus on creating a Minimum Viable Product (MVP) to test your assumptions. Leverage your college network and startup incubators for support and funding. A business with a strong social mission can be incredibly fulfilling and successful. Develop empathy for your target users to build products that truly serve their needs."
+    }
   },
 ];
 
