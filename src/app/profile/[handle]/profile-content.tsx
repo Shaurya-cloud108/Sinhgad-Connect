@@ -455,7 +455,8 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
 }
 
 
-export default function ProfilePageContent({ params: { handle } }: { params: { handle: string } }) {
+export default function ProfilePageContent({ params }: { params: { handle: string } }) {
+    const { handle } = params;
     const { profileData: ownProfileData, setProfileData } = useContext(ProfileContext);
     const { setSelectedConversationByName, addJobListing, communityMembers, setCommunityMembers } = useContext(AppContext);
     
