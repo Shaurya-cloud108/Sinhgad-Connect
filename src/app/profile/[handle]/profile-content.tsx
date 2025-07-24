@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2, PlusCircle, Linkedin, Github, Mail, Link as LinkIcon, Camera, Video, UserPlus, ImageIcon, Award, X } from "lucide-react";
-import { ProfileData, FeedItem, EducationEntry, feedItems as initialFeedItems, stories as initialStories, Story, StoryItem, JobListing } from "@/lib/data.tsx";
+import { ProfileData, FeedItem, EducationEntry, feedItems as initialFeedItems, stories as initialStories, Story, StoryItem, JobListing, CommunityMember } from "@/lib/data.tsx";
 import { useState, useContext, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -63,6 +63,7 @@ import Link from 'next/link';
 import { Separator } from "@/components/ui/separator";
 import { PostJobDialog } from "@/components/post-job-dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { FollowersSheet } from "@/components/followers-sheet";
 
 
 const profileFormSchema = z.object({
@@ -462,6 +463,9 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
     const [isPostJobDialogOpen, setIsPostJobDialogOpen] = useState(false);
+    const [isFollowSheetOpen, setIsFollowSheetOpen] = useState(false);
+    const [followSheetTitle, setFollowSheetTitle] = useState<'Followers' | 'Following'>('Followers');
+    const [followSheetHandles, setFollowSheetHandles] = useState<string[]>([]);
 
     const [feedItems, setFeedItems] = useState<FeedItem[]>(initialFeedItems);
     const [stories, setStories] = useState<Story[]>(initialStories);
@@ -480,7 +484,7 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
         if (isOwnProfile) return profileToDisplay as ProfileData;
 
         // Create a full profile object for other users
-        const member = profileToDisplay as typeof communityMembers[0];
+        const member = profileToDisplay as CommunityMember;
         return {
             name: member.name,
             avatar: member.avatar,
@@ -536,6 +540,12 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
 
     }, [ownProfileData, profileData, isOwnProfile, communityMembers]);
 
+    const handleShowFollowList = (type: 'Followers' | 'Following') => {
+        if (!profileData) return;
+        setFollowSheetTitle(type);
+        setFollowSheetHandles(type === 'Followers' ? profileData.followers : profileData.following);
+        setIsFollowSheetOpen(true);
+    }
 
     const handleProfileUpdate = (updatedData: Partial<ProfileData>) => {
         if (isOwnProfile) {
@@ -565,6 +575,12 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
                         ? member.followers.filter(h => h !== ownProfileData.handle)
                         : [...member.followers, ownProfileData.handle];
                     return { ...member, followers: newFollowersList };
+                }
+                if (member.handle === ownProfileData.handle) {
+                    const newFollowingList = currentlyFollowing
+                        ? member.following.filter(h => h !== profileData.handle)
+                        : [...member.following, profileData.handle];
+                    return { ...member, following: newFollowingList };
                 }
                 return member;
             })
@@ -643,6 +659,7 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
     const primaryEducation = profileData.education.find(e => e.graduationYear);
 
   return (
+    <>
     <div className="bg-secondary/40">
       <div className="max-w-4xl mx-auto">
         <Card className="rounded-none md:rounded-b-lg overflow-hidden">
@@ -736,12 +753,12 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
                         </div>
                     )}
                     <div className="flex items-center gap-6 mt-2 text-sm">
-                        <div className="flex items-center gap-1.5">
+                        <button onClick={() => handleShowFollowList('Followers')} className="flex items-center gap-1.5 hover:underline">
                             <span className="font-semibold">{profileData.followers.length}</span><span className="text-muted-foreground">Followers</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
+                        </button>
+                        <button onClick={() => handleShowFollowList('Following')} className="flex items-center gap-1.5 hover:underline">
                             <span className="font-semibold">{profileData.following.length}</span><span className="text-muted-foreground">Following</span>
-                        </div>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -959,5 +976,14 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
         </>
       )}
     </div>
+    <FollowersSheet 
+      open={isFollowSheetOpen} 
+      onOpenChange={setIsFollowSheetOpen} 
+      title={followSheetTitle} 
+      userHandles={followSheetHandles} 
+    />
+    </>
   );
 }
+
+    
