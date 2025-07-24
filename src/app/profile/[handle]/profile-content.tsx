@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import Image from "next/image";
@@ -9,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2, PlusCircle, Linkedin, Github, Mail, Link as LinkIcon, Camera, Video, UserPlus } from "lucide-react";
 import { ProfileData, FeedItem, communityMembers, EducationEntry, feedItems, stories, Story } from "@/lib/data.tsx";
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   Dialog,
@@ -352,68 +351,64 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
     
     const router = useRouter();
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-    const [userPosts, setUserPosts] = useState<FeedItem[]>([]);
-    const [userStories, setUserStories] = useState<Story | null>(null);
-    const [isFollowing, setIsFollowing] = useState(false);
     
     const isOwnProfile = !handle || handle === ownProfileData?.handle;
-    const [profileData, setProfileDataState] = useState<ProfileData | null | undefined>(undefined);
 
-    useEffect(() => {
-        let targetProfile: ProfileData | undefined;
+    // Memoize the profile data to prevent re-computation on every render
+    const profileData = useMemo(() => {
         if (isOwnProfile) {
-            targetProfile = ownProfileData || undefined;
-        } else {
-            const member = communityMembers.find(m => m.handle === handle);
-            if (member) {
-                 targetProfile = {
-                    name: member.name,
-                    avatar: member.avatar,
-                    aiHint: member.aiHint,
-                    banner: "https://placehold.co/1200x400.png",
-                    bannerAiHint: "university campus",
-                    handle: member.handle,
-                    headline: `${member.field} at ${member.company}`,
-                    location: member.location,
-                    followers: member.followers,
-                    following: [], // This isn't needed for other profiles
-                    posts: feedItems.filter(item => item.author.handle === member.handle).length,
-                    about: `A passionate ${member.field} professional working in the ${member.industry} industry. Graduate of the class of ${member.graduationYear}.`,
-                    experience: [{ role: member.field, company: member.company, duration: "2020 - Present" }], // Placeholder
-                    education: [{
-                        degree: member.field,
-                        college: "Sinhgad College of Engineering",
-                        yearRange: `${member.graduationYear - 4} - ${member.graduationYear}`,
-                        graduationYear: member.graduationYear,
-                        graduationMonth: member.graduationMonth,
-                    }],
-                    socials: { // Placeholder socials
-                        linkedin: "https://www.linkedin.com/",
-                        github: "https://github.com/",
-                      },
-                      contact: { // Placeholder contact
-                        email: `${member.handle}@example.com`,
-                        website: "https://example.com"
-                      },
-                };
-            }
+            return ownProfileData;
         }
-        setProfileDataState(targetProfile);
-        
-        if (targetProfile) {
-            setUserPosts(feedItems.filter(item => item.author.handle === targetProfile!.handle));
-            const story = stories.find(s => s.author.handle === targetProfile!.handle);
-            setUserStories(story || null);
-        } else {
-             setUserPosts([]);
-             setUserStories(null);
+        const member = communityMembers.find(m => m.handle === handle);
+        if (member) {
+            return {
+                name: member.name,
+                avatar: member.avatar,
+                aiHint: member.aiHint,
+                banner: "https://placehold.co/1200x400.png",
+                bannerAiHint: "university campus",
+                handle: member.handle,
+                headline: `${member.field} at ${member.company}`,
+                location: member.location,
+                followers: member.followers,
+                following: [], // This isn't needed for other profiles
+                posts: feedItems.filter(item => item.author.handle === member.handle).length,
+                about: `A passionate ${member.field} professional working in the ${member.industry} industry. Graduate of the class of ${member.graduationYear}.`,
+                experience: [{ role: member.field, company: member.company, duration: "2020 - Present" }], // Placeholder
+                education: [{
+                    degree: member.field,
+                    college: "Sinhgad College of Engineering",
+                    yearRange: `${member.graduationYear - 4} - ${member.graduationYear}`,
+                    graduationYear: member.graduationYear,
+                    graduationMonth: member.graduationMonth,
+                }],
+                socials: { // Placeholder socials
+                    linkedin: "https://www.linkedin.com/",
+                    github: "https://github.com/",
+                  },
+                  contact: { // Placeholder contact
+                    email: `${member.handle}@example.com`,
+                    website: "https://example.com"
+                  },
+            };
         }
-
-        if (ownProfileData && targetProfile && !isOwnProfile) {
-            setIsFollowing(ownProfileData.following.includes(targetProfile.handle));
-        }
-
+        return null;
     }, [handle, ownProfileData, isOwnProfile]);
+
+    const userPosts = useMemo(() => {
+        if (!profileData) return [];
+        return feedItems.filter(item => item.author.handle === profileData.handle);
+    }, [profileData]);
+
+    const userStories = useMemo(() => {
+        if (!profileData) return null;
+        return stories.find(s => s.author.handle === profileData.handle) || null;
+    }, [profileData]);
+
+    const isFollowing = useMemo(() => {
+        if (!ownProfileData || !profileData || isOwnProfile) return false;
+        return ownProfileData.following.includes(profileData.handle);
+    }, [ownProfileData, profileData, isOwnProfile]);
 
 
     const handleProfileUpdate = (updatedData: Partial<ProfileData>) => {
@@ -427,23 +422,19 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
 
         setProfileData(prev => {
             if (!prev) return null;
-            const newFollowingState = !isFollowing;
-            const newFollowersCount = newFollowingState ? prev.followers + 1 : prev.followers - 1;
-
-            setProfileDataState({ ...prev, followers: newFollowersCount });
-            setIsFollowing(newFollowingState);
-
-            // Update own profile's following list
-            setProfileData(ownPrev => {
-                if (!ownPrev) return null;
-                const newFollowingList = newFollowingState
-                    ? [...ownPrev.following, profileData.handle]
-                    : ownPrev.following.filter(h => h !== profileData.handle);
-                return { ...ownPrev, following: newFollowingList };
-            });
-
-            return { ...prev, followers: newFollowersCount };
+            
+            const newFollowingList = isFollowing
+                ? prev.following.filter(h => h !== profileData.handle)
+                : [...prev.following, profileData.handle];
+            
+            return { ...prev, following: newFollowingList };
         });
+        
+        // This is a mock update for the other user's follower count. In a real app, this would be a backend update.
+        const targetMember = communityMembers.find(m => m.handle === profileData.handle);
+        if (targetMember) {
+            targetMember.followers += isFollowing ? -1 : 1;
+        }
     };
 
     const handleLogout = () => {
@@ -451,7 +442,10 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
     }
 
     const handleDeletePost = (postId: number) => {
-        setUserPosts(prev => prev.filter(item => item.id !== postId));
+        // In a real app, this would also update the main feed state, probably via context
+        // For now, it only updates the local view on the profile page
+        // setUserPosts(prev => prev.filter(item => item.id !== postId));
+        console.log("Would delete post", postId)
     };
 
     const handleMessageClick = () => {
@@ -760,9 +754,7 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
           </CardContent>
         </Card>
       </div>
-      {isOwnProfile && <EditProfileDialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} profile={profileData} onProfileUpdate={handleProfileUpdate} />}
+      {isOwnProfile && profileData && <EditProfileDialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} profile={profileData} onProfileUpdate={handleProfileUpdate} />}
     </div>
   );
 }
-
-    
