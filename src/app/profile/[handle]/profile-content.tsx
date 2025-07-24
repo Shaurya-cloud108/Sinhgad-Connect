@@ -379,7 +379,7 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
             headline: `${member.field} at ${member.company}`,
             location: member.location,
             followers: member.followers,
-            following: [], // This isn't needed for other profiles
+            following: Array(member.following).fill(''), // Create a dummy array of the correct length
             posts: feedItems.filter(item => item.author.handle === member.handle).length,
             about: `A passionate ${member.field} professional working in the ${member.industry} industry. Graduate of the class of ${member.graduationYear}.`,
             experience: [{ role: member.field, company: member.company, duration: "2020 - Present" }], // Placeholder
@@ -553,9 +553,13 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
                     <p className="mt-1 text-sm text-muted-foreground flex items-center gap-2">
                         <MapPin className="h-4 w-4" /> {profileData.location}
                     </p>
-                    <div className="flex items-center gap-4 mt-2 text-sm">
-                        <span className="font-semibold">{profileData.followers}</span><span className="text-muted-foreground">Followers</span>
-                        <span className="font-semibold">{userPosts.length}</span><span className="text-muted-foreground">Posts</span>
+                    <div className="flex items-center gap-6 mt-2 text-sm">
+                        <div className="flex items-center gap-1.5">
+                            <span className="font-semibold">{profileData.followers}</span><span className="text-muted-foreground">Followers</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                            <span className="font-semibold">{profileData.following.length}</span><span className="text-muted-foreground">Following</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -563,7 +567,7 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
           <CardContent>
             <Tabs defaultValue="posts" className="w-full">
               <TabsList className="w-full grid grid-cols-3">
-                <TabsTrigger value="posts">Posts</TabsTrigger>
+                <TabsTrigger value="posts">Posts ({userPosts.length})</TabsTrigger>
                 <TabsTrigger value="stories">Stories</TabsTrigger>
                 <TabsTrigger value="about">About</TabsTrigger>
               </TabsList>

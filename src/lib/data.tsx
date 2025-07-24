@@ -288,7 +288,7 @@ export const profileData: ProfileData = {
   headline: "Senior Software Engineer at Google | Mentor",
   location: "San Francisco Bay Area",
   followers: 500,
-  following: ["rohan-verma", "anjali-mehta"],
+  following: ["rohan-verma", "anjali-mehta", "kavya-iyer"],
   posts: 42,
   about: "Passionate about building scalable systems and helping the next generation of engineers. Graduated in 2009 with a degree in Computer Engineering. Feel free to reach out for advice on careers in tech, interview prep, or anything else!",
   experience: [
@@ -338,6 +338,7 @@ export type CommunityMember = {
     company: string;
     location: string;
     followers: number;
+    following: number;
     aiHint: string;
     handle: string;
 };
@@ -354,6 +355,7 @@ export const communityMembers: CommunityMember[] = [
     company: "Google",
     location: "San Francisco, CA",
     followers: 500,
+    following: 3,
     aiHint: "professional woman",
     handle: "priya-sharma",
   },
@@ -368,6 +370,7 @@ export const communityMembers: CommunityMember[] = [
     company: "Tesla",
     location: "Austin, TX",
     followers: 345,
+    following: 120,
     aiHint: "professional man",
     handle: "rohan-verma",
   },
@@ -382,6 +385,7 @@ export const communityMembers: CommunityMember[] = [
     company: "Verizon",
     location: "New York, NY",
     followers: 412,
+    following: 250,
     aiHint: "corporate woman",
     handle: "anjali-mehta",
   },
@@ -396,6 +400,7 @@ export const communityMembers: CommunityMember[] = [
     company: "Sinhgad College of Engineering",
     location: "Pune, India",
     followers: 150,
+    following: 88,
     aiHint: "female student",
     handle: "kavya-iyer",
   },
@@ -410,6 +415,7 @@ export const communityMembers: CommunityMember[] = [
     company: "Goldman Sachs",
     location: "London, UK",
     followers: 620,
+    following: 50,
     aiHint: "corporate man",
     handle: "vikram-singh",
   },
@@ -424,6 +430,7 @@ export const communityMembers: CommunityMember[] = [
     company: "Amazon",
     location: "Seattle, WA",
     followers: 280,
+    following: 180,
     aiHint: "young professional",
     handle: "sneha-reddy",
   },
@@ -438,6 +445,7 @@ export const communityMembers: CommunityMember[] = [
     company: "Sinhgad College of Engineering",
     location: "Pune, India",
     followers: 95,
+    following: 112,
     aiHint: "male student",
     handle: "arjun-desai",
   },
@@ -452,6 +460,7 @@ export const communityMembers: CommunityMember[] = [
     company: "L&T Construction",
     location: "Mumbai, India",
     followers: 180,
+    following: 45,
     aiHint: "engineer man",
     handle: "amit-patel",
   },
@@ -466,6 +475,7 @@ export const communityMembers: CommunityMember[] = [
     company: "Innovate Inc.",
     location: "Remote",
     followers: 730,
+    following: 300,
     aiHint: "professional woman portrait",
     handle: "sunita-narayan",
   },
@@ -480,6 +490,7 @@ export const communityMembers: CommunityMember[] = [
     company: "Sinhgad Connect",
     location: "Pune, India",
     followers: 1500,
+    following: 1,
     aiHint: "university logo",
     handle: "alumni-events",
   },
@@ -494,6 +505,7 @@ export const communityMembers: CommunityMember[] = [
     company: "Sinhgad Connect",
     location: "Pune, India",
     followers: 2200,
+    following: 1,
     aiHint: "briefcase icon",
     handle: "alumni-network",
   },
