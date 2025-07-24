@@ -6,9 +6,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2, PlusCircle, Linkedin, Github, Mail, Link as LinkIcon, Camera, Video, UserPlus } from "lucide-react";
-import { ProfileData, FeedItem, communityMembers, EducationEntry, feedItems as initialFeedItems, stories as initialStories, Story, StoryItem } from "@/lib/data.tsx";
-import { useState, useContext, useEffect, useMemo } from "react";
+import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2, PlusCircle, Linkedin, Github, Mail, Link as LinkIcon, Camera, Video, UserPlus, ImageIcon, Award } from "lucide-react";
+import { ProfileData, FeedItem, communityMembers, EducationEntry, feedItems as initialFeedItems, stories as initialStories, Story, StoryItem, JobListing } from "@/lib/data.tsx";
+import { useState, useContext, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   Dialog,
@@ -61,6 +61,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ShareDialog } from "@/components/share-dialog";
 import Link from 'next/link';
 import { Separator } from "@/components/ui/separator";
+import { PostJobDialog } from "@/components/post-job-dialog";
 
 
 const profileFormSchema = z.object({
@@ -94,6 +95,113 @@ const profileFormSchema = z.object({
     })
   ),
 });
+
+
+function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean, onOpenChange: (open: boolean) => void, onPostSubmit: (post: FeedItem) => void }) {
+  const { toast } = useToast();
+  const [postContent, setPostContent] = useState("");
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const { profileData } = useContext(ProfileContext);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  
+  const handleSubmit = () => {
+     if (!postContent.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Empty Post",
+        description: "Please write something before posting.",
+      });
+      return;
+    }
+    
+    if (!profileData) return;
+
+    const newPost: FeedItem = {
+        id: Date.now(), // Simple unique ID
+        author: {
+            name: profileData.name,
+            avatar: profileData.avatar,
+            handle: profileData.handle,
+            aiHint: "professional woman"
+        },
+        content: postContent,
+        image: imagePreview,
+        aiHint: "user uploaded",
+        likes: 0,
+        liked: false,
+        comments: []
+    };
+
+    onPostSubmit(newPost);
+    
+    toast({
+      title: "Post Successful!",
+      description: "Your update has been shared with the network.",
+    });
+
+    setPostContent("");
+    setImagePreview(null);
+    if(imageInputRef.current) {
+        imageInputRef.current.value = "";
+    }
+    onOpenChange(false);
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Create a Post</DialogTitle>
+        </DialogHeader>
+        <div className="py-4">
+          <Textarea
+            placeholder="Share an achievement or ask a question..."
+            value={postContent}
+            onChange={(e) => setPostContent(e.target.value)}
+            rows={5}
+          />
+          {imagePreview && (
+            <div className="mt-4 relative">
+              <Image src={imagePreview} alt="Image preview" className="rounded-lg w-full" width={400} height={225} />
+               <Button variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => setImagePreview(null)}>
+                 <X className="h-4 w-4" />
+               </Button>
+            </div>
+          )}
+        </div>
+        <DialogFooter className="justify-between sm:justify-between">
+           <div className="flex items-center gap-2">
+            <Button asChild variant="ghost" size="icon">
+              <label htmlFor="image-upload-profile">
+                <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                <Input id="image-upload-profile" type="file" className="sr-only" accept="image/*" onChange={handleImageUpload} ref={imageInputRef} />
+              </label>
+            </Button>
+           </div>
+           <div className="flex items-center gap-2">
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button onClick={handleSubmit}>Post</Button>
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 
 function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { open: boolean, onOpenChange: (open: boolean) => void, profile: ProfileData, onProfileUpdate: (data: Partial<ProfileData>) => void }) {
@@ -347,10 +455,13 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
 
 export default function ProfilePageContent({ handle }: { handle: string }) {
     const { profileData: ownProfileData, setProfileData } = useContext(ProfileContext);
-    const { setSelectedConversationByName } = useContext(AppContext);
+    const { setSelectedConversationByName, addJobListing } = useContext(AppContext);
     
     const router = useRouter();
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
+    const [isPostJobDialogOpen, setIsPostJobDialogOpen] = useState(false);
+
     const [feedItems, setFeedItems] = useState<FeedItem[]>(initialFeedItems);
     const [stories, setStories] = useState<Story[]>(initialStories);
     
@@ -458,6 +569,20 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
       router.push("/messages");
     }
     
+    const handlePostSubmit = (newPost: FeedItem) => {
+        setFeedItems(prev => [newPost, ...prev]);
+    };
+
+    const handleJobSubmit = (newJob: Omit<JobListing, 'id' | 'postedBy' | 'postedByHandle'>) => {
+        if(!profileData) return;
+        addJobListing({
+        ...newJob,
+        id: Date.now(),
+        postedBy: `${profileData.name} '${profileData.education.graduationYear.toString().slice(-2)}`,
+        postedByHandle: profileData.handle,
+        });
+    }
+
     if (profileData === undefined) { // Loading state for context
         return (
             <div className="bg-secondary/40">
@@ -572,6 +697,38 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
                 <TabsTrigger value="about">About</TabsTrigger>
               </TabsList>
               <TabsContent value="posts" className="mt-6 space-y-6">
+                 {isOwnProfile && (
+                    <Card>
+                        <CardContent className="p-3">
+                            <div className="flex items-center gap-3">
+                            <Avatar>
+                                <AvatarImage src={profileData.avatar} data-ai-hint="user avatar" />
+                                <AvatarFallback>{profileData.name.substring(0,2)}</AvatarFallback>
+                            </Avatar>
+                            <button
+                                className="w-full text-left bg-secondary/50 hover:bg-muted/80 transition-colors py-2 px-4 rounded-full text-sm text-muted-foreground"
+                                onClick={() => setIsPostDialogOpen(true)}
+                            >
+                                Share an update...
+                            </button>
+                            </div>
+                            <div className="flex justify-around mt-3 pt-3 border-t">
+                            <Button variant="ghost" className="w-full" onClick={() => setIsPostDialogOpen(true)}>
+                                <ImageIcon className="text-green-500" />
+                                Photo
+                            </Button>
+                            <Button variant="ghost" className="w-full" onClick={() => setIsPostDialogOpen(true)}>
+                                <Award className="text-yellow-500" />
+                                Achievement
+                            </Button>
+                            <Button variant="ghost" className="w-full" onClick={() => setIsPostJobDialogOpen(true)}>
+                                <Briefcase className="text-blue-500" />
+                                Job
+                            </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                 )}
                  {userPosts.length > 0 ? userPosts.map((item) => (
                   <Card key={item.id}>
                     <CardHeader className="p-4 flex flex-row items-center justify-between">
@@ -762,7 +919,13 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
           </CardContent>
         </Card>
       </div>
-      {isOwnProfile && profileData && <EditProfileDialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} profile={profileData} onProfileUpdate={handleProfileUpdate} />}
+      {isOwnProfile && profileData && (
+        <>
+            <EditProfileDialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} profile={profileData} onProfileUpdate={handleProfileUpdate} />
+            <CreatePostDialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen} onPostSubmit={handlePostSubmit} />
+            <PostJobDialog open={isPostJobDialogOpen} onOpenChange={setIsPostJobDialogOpen} onJobSubmit={handleJobSubmit}/>
+        </>
+      )}
     </div>
   );
 }
