@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { successStories, SuccessStory } from '@/lib/data';
 import { notFound, useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -51,15 +51,17 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const resolvedParams = use(params);
+
   useEffect(() => {
-    const storyData = successStories.find((s) => s.id === params.id);
+    const storyData = successStories.find((s) => s.id === resolvedParams.id);
     if (storyData) {
       setStory(storyData);
       generateInsights(storyData);
     } else {
       notFound();
     }
-  }, [params.id]);
+  }, [resolvedParams.id]);
 
   const generateInsights = async (storyData: SuccessStory) => {
     setIsLoading(true);
