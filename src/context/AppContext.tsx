@@ -58,6 +58,7 @@ type AppContextType = {
     setStories: React.Dispatch<React.SetStateAction<Story[]>>;
     addStoryItem: (userHandle: string, item: StoryItem) => void;
     deleteStoryItem: (userHandle: string, itemId: number) => void;
+    addStoryForUser: (user: CommunityMember) => void;
 };
 
 // Context
@@ -84,6 +85,7 @@ export const AppContext = createContext<AppContextType>({
     setStories: () => {},
     addStoryItem: () => {},
     deleteStoryItem: () => {},
+    addStoryForUser: () => {},
 });
 
 // Provider
@@ -144,6 +146,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setJobListings(prev => [job, ...prev]);
     }, []);
 
+
+
     const addFeedItem = useCallback((post: FeedItem) => {
         setFeedItems(prev => [post, ...prev]);
     }, []);
@@ -190,6 +194,21 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         }));
     }, []);
 
+    const addStoryForUser = useCallback((user: CommunityMember) => {
+        const newStory: Story = {
+            id: Date.now(),
+            author: {
+                name: user.name,
+                avatar: user.avatar,
+                handle: user.handle,
+                aiHint: user.aiHint,
+            },
+            items: [],
+            viewers: [],
+        };
+        setStories(prev => [...prev, newStory]);
+    }, []);
+
     const value = {
         conversations,
         setConversations,
@@ -212,7 +231,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         stories,
         setStories,
         addStoryItem,
-        deleteStoryItem
+        deleteStoryItem,
+        addStoryForUser,
     };
 
     return (

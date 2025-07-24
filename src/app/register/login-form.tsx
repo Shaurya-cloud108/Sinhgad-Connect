@@ -114,8 +114,8 @@ export function LoginForm() {
   });
 
   function onSubmit(values: z.infer<typeof loginFormSchema>) {
-    // In a real app, this would involve an API call and password verification.
-    // For this prototype, we find the user by email and log them in.
+    // In a real app, this would involve an API call to verify the password.
+    // For this prototype, we find the user by email in the list fetched from Firestore.
     const user = communityMembers.find(m => m.contact.email === values.email);
 
     if (user) {
@@ -129,7 +129,7 @@ export function LoginForm() {
         toast({
             variant: "destructive",
             title: "Login Failed",
-            description: "No account found with that email address.",
+            description: "No account found with that email address. Please check your credentials or register.",
         });
     }
   }
