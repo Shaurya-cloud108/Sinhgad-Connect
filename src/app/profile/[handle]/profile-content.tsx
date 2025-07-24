@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2, PlusCircle, Linkedin, Github, Mail, Link as LinkIcon, Camera, Video, UserPlus, ImageIcon, Award, X } from "lucide-react";
-import { CommunityMember, FeedItem, EducationEntry, Story, StoryItem, JobListing, initialFeedItems } from "@/lib/data.tsx";
+import type { CommunityMember, FeedItem, EducationEntry, Story, StoryItem, JobListing } from "@/lib/data.tsx";
 import { useState, useContext, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -99,11 +99,12 @@ const profileFormSchema = z.object({
 });
 
 
-function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean, onOpenChange: (open: boolean) => void, onPostSubmit: (post: FeedItem) => void }) {
+function CreatePostDialog({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
   const { toast } = useToast();
   const [postContent, setPostContent] = useState("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const { profileData } = useContext(ProfileContext);
+  const { addFeedItem } = useContext(AppContext);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -130,7 +131,7 @@ function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean,
     if (!profileData) return;
 
     const newPost: FeedItem = {
-        id: Date.now(), // Simple unique ID
+        id: Date.now(),
         author: {
             name: profileData.name,
             avatar: profileData.avatar,
@@ -145,7 +146,7 @@ function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean,
         comments: []
     };
 
-    onPostSubmit(newPost);
+    addFeedItem(newPost);
     
     toast({
       title: "Post Successful!",
@@ -258,11 +259,9 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
   };
 
   const onSubmit = (values: z.infer<typeof profileFormSchema>) => {
-    // We need to merge back the non-editable fields like graduation year/month for the primary education
     const updatedEducation: EducationEntry[] = values.education.map((edu, index) => {
-      // Find the corresponding original education entry, if it exists
       const originalEdu = profile.education[index];
-      if (originalEdu && originalEdu.graduationYear) { // Check if it's the primary one with metadata
+      if (originalEdu && originalEdu.graduationYear) {
         return {
           ...originalEdu,
           ...edu,
@@ -270,7 +269,6 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
       }
       return {
         ...edu,
-        // Ensure new entries have undefined for the optional fields if not set
         graduationYear: undefined,
         graduationMonth: undefined,
       };
@@ -457,7 +455,14 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
 
 export default function ProfilePageContent({ params }: { params: { handle: string } }) {
     const { profileData: ownProfileData, setLoggedInUserHandle } = useContext(ProfileContext);
-    const { setSelectedConversationByName, addJobListing, communityMembers, setCommunityMembers } = useContext(AppContext);
+    const { 
+        setSelectedConversationByName, 
+        addJobListing, 
+        communityMembers, 
+        setCommunityMembers,
+        feedItems,
+        setFeedItems
+    } = useContext(AppContext);
     
     const router = useRouter();
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -467,26 +472,19 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
     const [followSheetTitle, setFollowSheetTitle] = useState<'Followers' | 'Following'>('Followers');
     const [followSheetHandles, setFollowSheetHandles] = useState<string[]>([]);
 
-    const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
-    
     const isOwnProfile = useMemo(() => {
         return !params.handle || params.handle === ownProfileData?.handle;
     }, [params, ownProfileData]);
 
     const profileData = useMemo(() => {
-      const handle = params.handle;
-      if (!handle) return isOwnProfile ? ownProfileData : null;
-      return communityMembers.find(m => m.handle === handle) || null;
+      if (!params.handle) return isOwnProfile ? ownProfileData : null;
+      return communityMembers.find(m => m.handle === params.handle) || null;
     }, [params, ownProfileData, isOwnProfile, communityMembers]);
 
-    useEffect(() => {
-        if(profileData){
-            setFeedItems(initialFeedItems.filter(item => item.author.handle === profileData.handle))
-        } else {
-            setFeedItems([])
-        }
-
-    },[profileData])
+    const profileFeedItems = useMemo(() => {
+        if (!profileData) return [];
+        return feedItems.filter(item => item.author.handle === profileData.handle);
+    }, [feedItems, profileData]);
 
 
     const isFollowing = useMemo(() => {
@@ -503,7 +501,7 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
 
         return communityMembers
             .filter(member => mutualHandles.includes(member.handle))
-            .slice(0, 3); // Show up to 3 mutuals
+            .slice(0, 3);
 
     }, [ownProfileData, profileData, isOwnProfile, communityMembers]);
 
@@ -532,14 +530,12 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
 
         setCommunityMembers(prevMembers => 
             prevMembers.map(member => {
-                // Update the logged-in user's following list
                 if (member.handle === loggedInUserHandle) {
                     const newFollowing = currentlyFollowing
                         ? member.following.filter(h => h !== targetUserHandle)
                         : [...member.following, targetUserHandle];
                     return { ...member, following: newFollowing };
                 }
-                // Update the target user's followers list
                 if (member.handle === targetUserHandle) {
                     const newFollowers = currentlyFollowing
                         ? member.followers.filter(h => h !== loggedInUserHandle)
@@ -557,7 +553,6 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
     }
 
     const handleDeletePost = (postId: number) => {
-        // In a real app, this would also update the main feed state, probably via context
         setFeedItems(prev => prev.filter(item => item.id !== postId));
     };
 
@@ -567,10 +562,6 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
       router.push("/messages");
     }
     
-    const handlePostSubmit = (newPost: FeedItem) => {
-        setFeedItems(prev => [newPost, ...prev]);
-    };
-
     const handleJobSubmit = (newJob: Omit<JobListing, 'id' | 'postedBy' | 'postedByHandle'>) => {
         if(!profileData) return;
         const primaryEducation = profileData.education.find(e => e.graduationYear);
@@ -584,7 +575,7 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
         });
     }
 
-    if (profileData === undefined) { // Loading state for context
+    if (profileData === undefined) {
         return (
             <div className="bg-secondary/40">
                 <div className="max-w-4xl mx-auto">
@@ -609,7 +600,7 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
         );
     }
     
-    if (profileData === null) { // User not found or not logged in
+    if (profileData === null) {
         return (
             <div className="container py-20 text-center">
                 <h1 className="text-2xl font-bold">User not found</h1>
@@ -624,7 +615,8 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
     const primaryEducation = profileData.education.find(e => e.graduationYear);
     const mutualsText = () => {
         if (mutualFollowers.length === 0) return '';
-        const firstMutualName = (mutualFollowers[0].name || "").split(' ')[0];
+        const firstMutualName = (mutualFollowers[0]?.name || "").split(' ')[0];
+        if (!firstMutualName) return '';
         if (mutualFollowers.length === 1) return `Followed by ${firstMutualName}`;
         if (mutualFollowers.length === 2) return `Followed by ${firstMutualName} and 1 other you follow`;
         return `Followed by ${firstMutualName} and ${mutualFollowers.length -1} others you follow`;
@@ -737,7 +729,7 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
           <CardContent>
             <Tabs defaultValue="posts" className="w-full">
               <TabsList className="w-full grid grid-cols-2">
-                <TabsTrigger value="posts">Posts ({feedItems.length})</TabsTrigger>
+                <TabsTrigger value="posts">Posts ({profileFeedItems.length})</TabsTrigger>
                 <TabsTrigger value="about">About</TabsTrigger>
               </TabsList>
               <TabsContent value="posts" className="mt-6 space-y-6">
@@ -773,7 +765,7 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
                         </CardContent>
                     </Card>
                  )}
-                 {feedItems.length > 0 ? feedItems.map((item) => (
+                 {profileFeedItems.length > 0 ? profileFeedItems.map((item) => (
                   <Card key={item.id}>
                     <CardHeader className="p-4 flex flex-row items-center justify-between">
                       <div className="flex items-center space-x-3">
@@ -942,7 +934,7 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
       {isOwnProfile && profileData && (
         <>
             <EditProfileDialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} profile={profileData} onProfileUpdate={handleProfileUpdate} />
-            <CreatePostDialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen} onPostSubmit={handlePostSubmit} />
+            <CreatePostDialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen} />
             <PostJobDialog open={isPostJobDialogOpen} onOpenChange={setIsPostJobDialogOpen} onJobSubmit={handleJobSubmit}/>
         </>
       )}
@@ -956,3 +948,5 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
     </>
   );
 }
+
+    

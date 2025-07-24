@@ -51,7 +51,7 @@ import { useState, useContext, useRef, useEffect, useMemo } from "react";
 import { useSearchParams } from 'next/navigation'
 import React from 'react';
 import { useToast } from "@/hooks/use-toast";
-import { initialFeedItems, FeedItem, Story, Comment, StoryViewer, JobListing, StoryItem } from "@/lib/data.tsx";
+import type { FeedItem, Story, Comment, StoryViewer, JobListing, StoryItem } from "@/lib/data.tsx";
 import Image from "next/image";
 import { ProfileContext } from "@/context/ProfileContext";
 import { ShareDialog } from "@/components/share-dialog";
@@ -61,14 +61,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PostJobDialog } from "@/components/post-job-dialog";
 import { AppContext } from "@/context/AppContext";
-import { useRouter } from "next/navigation";
 
-
-function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean, onOpenChange: (open: boolean) => void, onPostSubmit: (post: FeedItem) => void }) {
+function CreatePostDialog({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
   const { toast } = useToast();
   const [postContent, setPostContent] = useState("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const { profileData } = useContext(ProfileContext);
+  const { addFeedItem } = useContext(AppContext);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -95,7 +94,7 @@ function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean,
     if (!profileData) return;
 
     const newPost: FeedItem = {
-        id: Date.now(), // Simple unique ID
+        id: Date.now(),
         author: {
             name: profileData.name,
             avatar: profileData.avatar,
@@ -110,7 +109,7 @@ function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean,
         comments: []
     };
 
-    onPostSubmit(newPost);
+    addFeedItem(newPost);
     
     toast({
       title: "Post Successful!",
@@ -170,11 +169,13 @@ function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean,
   );
 }
 
-function CreateStoryDialog({ open, onOpenChange, onStorySubmit }: { open: boolean, onOpenChange: (open: boolean) => void, onStorySubmit: (fileUrl: string, fileType: 'image' | 'video') => void }) {
+function CreateStoryDialog({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
     const { toast } = useToast();
     const [filePreview, setFilePreview] = useState<string | null>(null);
     const [fileType, setFileType] = useState<'image' | 'video' | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const { addStoryItem } = useContext(AppContext);
+    const { profileData } = useContext(ProfileContext);
 
     const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -189,7 +190,7 @@ function CreateStoryDialog({ open, onOpenChange, onStorySubmit }: { open: boolea
     };
 
     const handleSubmit = () => {
-        if (!filePreview || !fileType) {
+        if (!filePreview || !fileType || !profileData) {
             toast({
                 variant: "destructive",
                 title: "No File Selected",
@@ -198,7 +199,14 @@ function CreateStoryDialog({ open, onOpenChange, onStorySubmit }: { open: boolea
             return;
         }
 
-        onStorySubmit(filePreview, fileType);
+        const newStoryItem: StoryItem = {
+            id: Date.now(),
+            url: filePreview,
+            type: fileType,
+            timestamp: Date.now(),
+        };
+
+        addStoryItem(profileData.handle, newStoryItem);
 
         toast({
             title: "Story Posted!",
@@ -292,10 +300,11 @@ function StoryViewersSheet({ viewers, open, onOpenChange }: { viewers: StoryView
   );
 }
 
-function StoryViewerDialog({ story, open, onOpenChange, onDeleteStoryItem, currentUserId }: { story: Story | null; open: boolean; onOpenChange: (open: boolean) => void; onDeleteStoryItem: (storyId: number, itemId: number) => void; currentUserId: string | undefined }) {
+function StoryViewerDialog({ story, open, onOpenChange, currentUserId }: { story: Story | null; open: boolean; onOpenChange: (open: boolean) => void; currentUserId: string | undefined }) {
   const [isViewersSheetOpen, setIsViewersSheetOpen] = useState(false);
   const [currentItemIndex, setCurrentItemIndex] = useState(0);
   const [progress, setProgress] = useState(0);
+  const { deleteStoryItem } = useContext(AppContext);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const activeItems = story?.items.filter(item => Date.now() - item.timestamp < 24 * 60 * 60 * 1000) || [];
@@ -375,19 +384,18 @@ function StoryViewerDialog({ story, open, onOpenChange, onDeleteStoryItem, curre
   const currentItem = activeItems[currentItemIndex];
   
   const handleDelete = () => {
-    onDeleteStoryItem(story.id, currentItem.id);
-    onOpenChange(false);
+    if (currentUserId) {
+        deleteStoryItem(currentUserId, currentItem.id);
+        onOpenChange(false);
+    }
   };
 
   const isOwnStory = story.author.handle === currentUserId;
 
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="p-0 border-0 max-w-md w-full h-[90vh] sm:h-[80vh] bg-black" onInteractOutside={(e) => onOpenChange(false)}>
-          <DialogHeader className="sr-only">
-             <DialogTitle>Story by {story.author.name}</DialogTitle>
-          </DialogHeader>
+      <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onOpenChange(false) }}>
+        <DialogContent className="p-0 border-0 max-w-md w-full h-[90vh] sm:h-[80vh] bg-black" onInteractOutside={() => onOpenChange(false)}>
           <div className="relative w-full h-full rounded-lg overflow-hidden flex flex-col justify-center">
             {/* Click handlers for next/prev */}
             <div className="absolute left-0 top-0 h-full w-1/2 z-10" onClick={handlePrevious} />
@@ -479,48 +487,19 @@ function HomePageContent() {
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
   const [isPostJobDialogOpen, setIsPostJobDialogOpen] = useState(false);
   const [isCreateStoryDialogOpen, setIsCreateStoryDialogOpen] = useState(false);
-  const [feedItems, setFeedItems] = useState<FeedItem[]>(initialFeedItems);
-  const [stories, setStories] = useState<Story[]>([]);
+  
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
   const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
   const { profileData } = useContext(ProfileContext);
-  const { addJobListing, communityMembers } = useContext(AppContext);
+  const { 
+    addJobListing, 
+    stories, 
+    feedItems,
+    setFeedItems
+  } = useContext(AppContext);
   const [activeCommentPostId, setActiveCommentPostId] = useState<number | null>(null);
-  const router = useRouter();
   
   const searchParams = useSearchParams();
-
-  useEffect(() => {
-    // Initialize stories from community members
-    const allUsersAsStories: Story[] = communityMembers.map((member, index) => ({
-        id: index + 1,
-        author: {
-            name: member.name,
-            avatar: member.avatar,
-            handle: member.handle,
-            aiHint: member.aiHint,
-        },
-        items: [], // Start with no items
-        viewers: [],
-    }));
-
-     // Find Rohan Verma's story and add a demo item if it exists
-    const rohanVermaStory = allUsersAsStories.find(s => s.author.handle === 'rohan-verma');
-    if (rohanVermaStory) {
-        rohanVermaStory.items.push({
-            id: Date.now(),
-            url: 'https://placehold.co/400x700.png',
-            type: 'image',
-            timestamp: Date.now() - 12 * 60 * 60 * 1000, // 12 hours ago
-        });
-        rohanVermaStory.viewers = [
-            { name: "Priya Sharma", avatar: "https://placehold.co/100x100.png" },
-            { name: "Anjali Mehta", avatar: "https://placehold.co/100x100.png" },
-        ];
-    }
-    setStories(allUsersAsStories);
-  }, [communityMembers]);
-
 
   const storiesForFeed = useMemo(() => {
     if (!profileData) return [];
@@ -576,10 +555,6 @@ function HomePageContent() {
       );
   }
 
-  const handlePostSubmit = (newPost: FeedItem) => {
-    setFeedItems(prev => [newPost, ...prev]);
-  };
-
   const handleJobSubmit = (newJob: Omit<JobListing, 'id' | 'postedBy' | 'postedByHandle'>) => {
     if(!profileData) return;
     const primaryEducation = profileData.education.find(e => e.graduationYear);
@@ -592,39 +567,6 @@ function HomePageContent() {
       postedByHandle: profileData.handle,
     });
   }
-  
-  const handleStorySubmit = (fileUrl: string, fileType: 'image' | 'video') => {
-    if (!profileData) return;
-    setStories(prevStories => {
-        const newStories = [...prevStories];
-        const userStoryIndex = newStories.findIndex(story => story.author.handle === profileData.handle);
-        
-        const newStoryItem: StoryItem = {
-            id: Date.now(),
-            url: fileUrl,
-            type: fileType,
-            timestamp: Date.now(),
-        };
-
-        if (userStoryIndex !== -1) {
-            const updatedStory = {
-                ...newStories[userStoryIndex],
-                items: [...newStories[userStoryIndex].items, newStoryItem]
-            };
-            newStories[userStoryIndex] = updatedStory;
-        } else {
-            // This case should ideally not happen if stories are initialized for all members
-            const newStory: Story = {
-                id: Date.now(),
-                author: { name: profileData.name, avatar: profileData.avatar, handle: profileData.handle, aiHint: profileData.aiHint },
-                items: [newStoryItem],
-                viewers: [],
-            };
-            newStories.unshift(newStory);
-        }
-        return newStories;
-    });
-  };
 
   const handleStoryClick = (story: Story) => {
     const activeItems = story.items.filter(item => Date.now() - item.timestamp < 24 * 60 * 60 * 1000);
@@ -674,18 +616,6 @@ function HomePageContent() {
         ? { ...item, comments: item.comments.filter(c => c.id !== commentId) }
         : item
     ));
-  };
-
-  const handleDeleteStoryItem = (storyId: number, itemId: number) => {
-    setStories(prev => prev.map(story => {
-        if (story.id === storyId) {
-            return {
-                ...story,
-                items: story.items.filter(item => item.id !== itemId)
-            };
-        }
-        return story;
-    }));
   };
 
   const activePostForComments = feedItems.find(item => item.id === activeCommentPostId);
@@ -762,10 +692,10 @@ function HomePageContent() {
         </Card>
       </div>
 
-      <CreatePostDialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen} onPostSubmit={handlePostSubmit} />
+      <CreatePostDialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen} />
       <PostJobDialog open={isPostJobDialogOpen} onOpenChange={setIsPostJobDialogOpen} onJobSubmit={handleJobSubmit}/>
-      <CreateStoryDialog open={isCreateStoryDialogOpen} onOpenChange={setIsCreateStoryDialogOpen} onStorySubmit={handleStorySubmit} />
-      <StoryViewerDialog story={selectedStory} open={isStoryViewerOpen} onOpenChange={setIsStoryViewerOpen} onDeleteStoryItem={handleDeleteStoryItem} currentUserId={profileData?.handle}/>
+      <CreateStoryDialog open={isCreateStoryDialogOpen} onOpenChange={setIsCreateStoryDialogOpen} />
+      <StoryViewerDialog story={selectedStory} open={isStoryViewerOpen} onOpenChange={setIsStoryViewerOpen} currentUserId={profileData?.handle}/>
       <CommentSheet
         open={!!activeCommentPostId}
         onOpenChange={(isOpen) => {
@@ -886,3 +816,5 @@ export default function Home() {
         </React.Suspense>
     )
 }
+
+    

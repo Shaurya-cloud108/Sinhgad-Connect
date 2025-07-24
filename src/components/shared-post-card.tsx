@@ -1,19 +1,20 @@
 
 "use client";
 
-import { initialFeedItems } from "@/lib/data.tsx";
 import { Card, CardHeader, CardContent } from "./ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import Image from "next/image";
 import Link from "next/link";
+import { useContext } from "react";
+import { AppContext } from "@/context/AppContext";
 
 type SharedPostCardProps = {
   postId: number;
 };
 
 export function SharedPostCard({ postId }: SharedPostCardProps) {
-  // NOTE: This uses static data. In a real app, you'd fetch this from a context or API.
-  const post = initialFeedItems.find((item) => item.id === postId);
+  const { feedItems } = useContext(AppContext);
+  const post = feedItems.find((item) => item.id === postId);
 
   if (!post) {
     return (
@@ -59,3 +60,5 @@ export function SharedPostCard({ postId }: SharedPostCardProps) {
     </Link>
   );
 }
+
+    

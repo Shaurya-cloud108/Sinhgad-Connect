@@ -285,8 +285,7 @@ export type CommunityMember = {
     };
 };
 
-export type ProfileData = Omit<CommunityMember, 'fallback' | 'graduationYear' | 'graduationMonth' | 'field' | 'industry' | 'company'>;
-
+export type ProfileData = CommunityMember;
 
 export const initialCommunityMembers: CommunityMember[] = [
   {
@@ -634,12 +633,65 @@ export const initialFeedItems: FeedItem[] = [
   }
 ];
 
-export const initialConversationsData = [
+export const initialStoriesData: Story[] = initialCommunityMembers.map((member, index) => ({
+    id: index + 1,
+    author: {
+        name: member.name,
+        avatar: member.avatar,
+        handle: member.handle,
+        aiHint: member.aiHint,
+    },
+    items: [],
+    viewers: [],
+}));
+
+// Add a demo story item for Rohan Verma
+const rohanVermaStory = initialStoriesData.find(s => s.author.handle === 'rohan-verma');
+if (rohanVermaStory) {
+    rohanVermaStory.items.push({
+        id: Date.now(),
+        url: 'https://placehold.co/400x700.png',
+        type: 'image',
+        timestamp: Date.now() - 12 * 60 * 60 * 1000, // 12 hours ago
+    });
+    rohanVermaStory.viewers = [
+        { name: "Priya Sharma", avatar: "https://placehold.co/100x100.png" },
+        { name: "Anjali Mehta", avatar: "https://placehold.co/100x100.png" },
+    ];
+}
+
+export type Conversation = {
+    name: string;
+    avatar: string;
+    aiHint: string;
+    lastMessage: string;
+    time: string;
+    unread: number;
+    isGroup: boolean;
+};
+
+export type Message = { 
+    senderId: string;
+    senderName: string;
+    text?: string;
+    sharedPostId?: number;
+    sharedJobId?: number;
+    sharedEventId?: string;
+    sharedStoryId?: string;
+    sharedProfileId?: string;
+    sharedGroupId?: string;
+};
+
+export type MessagesData = {
+    [key: string]: Message[];
+};
+
+export const initialConversationsData: Conversation[] = [
     { name: 'Rohan Verma', avatar: 'https://placehold.co/100x100.png', aiHint: 'professional man', lastMessage: 'You\'re welcome! Let me know if you need more help.', time: '2h', unread: 0, isGroup: false },
     { name: 'Kavya Iyer', avatar: 'https://placehold.co/100x100.png', aiHint: 'female student', lastMessage: 'Thank you for the mentorship!', time: '1d', unread: 2, isGroup: false },
 ];
 
-export const initialMessagesData = {
+export const initialMessagesData: MessagesData = {
   "Rohan Verma": [
     { senderId: "rohan-verma", senderName: "Rohan Verma", text: "Thanks for the resume tips!" },
     { senderId: "priya-sharma", senderName: "Priya Sharma", text: "You're welcome! Let me know if you need more help." },
@@ -723,3 +775,5 @@ export const notifications: Notification[] = [
         aiHint: "briefcase icon"
     },
 ];
+
+    
