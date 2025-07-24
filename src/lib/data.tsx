@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React from 'react';
@@ -256,7 +257,8 @@ export type ProfileData = {
   handle: string;
   headline: string;
   location: string;
-  connections: number;
+  followers: number;
+  following: string[];
   posts: number;
   about: string;
   experience: {
@@ -285,7 +287,8 @@ export const profileData: ProfileData = {
   handle: "priya-sharma",
   headline: "Senior Software Engineer at Google | Mentor",
   location: "San Francisco Bay Area",
-  connections: 500,
+  followers: 500,
+  following: ["rohan-verma", "anjali-mehta"],
   posts: 42,
   about: "Passionate about building scalable systems and helping the next generation of engineers. Graduated in 2009 with a degree in Computer Engineering. Feel free to reach out for advice on careers in tech, interview prep, or anything else!",
   experience: [
@@ -334,6 +337,7 @@ export type CommunityMember = {
     industry: string;
     company: string;
     location: string;
+    followers: number;
     aiHint: string;
     handle: string;
 };
@@ -349,6 +353,7 @@ export const communityMembers: CommunityMember[] = [
     industry: "Technology",
     company: "Google",
     location: "San Francisco, CA",
+    followers: 500,
     aiHint: "professional woman",
     handle: "priya-sharma",
   },
@@ -362,6 +367,7 @@ export const communityMembers: CommunityMember[] = [
     industry: "Automotive",
     company: "Tesla",
     location: "Austin, TX",
+    followers: 345,
     aiHint: "professional man",
     handle: "rohan-verma",
   },
@@ -375,6 +381,7 @@ export const communityMembers: CommunityMember[] = [
     industry: "Telecommunications",
     company: "Verizon",
     location: "New York, NY",
+    followers: 412,
     aiHint: "corporate woman",
     handle: "anjali-mehta",
   },
@@ -388,6 +395,7 @@ export const communityMembers: CommunityMember[] = [
     industry: "Student",
     company: "Sinhgad College of Engineering",
     location: "Pune, India",
+    followers: 150,
     aiHint: "female student",
     handle: "kavya-iyer",
   },
@@ -401,6 +409,7 @@ export const communityMembers: CommunityMember[] = [
     industry: "Finance",
     company: "Goldman Sachs",
     location: "London, UK",
+    followers: 620,
     aiHint: "corporate man",
     handle: "vikram-singh",
   },
@@ -414,6 +423,7 @@ export const communityMembers: CommunityMember[] = [
     industry: "E-commerce",
     company: "Amazon",
     location: "Seattle, WA",
+    followers: 280,
     aiHint: "young professional",
     handle: "sneha-reddy",
   },
@@ -427,6 +437,7 @@ export const communityMembers: CommunityMember[] = [
     industry: "Student",
     company: "Sinhgad College of Engineering",
     location: "Pune, India",
+    followers: 95,
     aiHint: "male student",
     handle: "arjun-desai",
   },
@@ -440,6 +451,7 @@ export const communityMembers: CommunityMember[] = [
     industry: "Construction",
     company: "L&T Construction",
     location: "Mumbai, India",
+    followers: 180,
     aiHint: "engineer man",
     handle: "amit-patel",
   },
@@ -453,6 +465,7 @@ export const communityMembers: CommunityMember[] = [
     industry: "Technology",
     company: "Innovate Inc.",
     location: "Remote",
+    followers: 730,
     aiHint: "professional woman portrait",
     handle: "sunita-narayan",
   },
@@ -466,6 +479,7 @@ export const communityMembers: CommunityMember[] = [
     industry: "Alumni Relations",
     company: "Sinhgad Connect",
     location: "Pune, India",
+    followers: 1500,
     aiHint: "university logo",
     handle: "alumni-events",
   },
@@ -479,6 +493,7 @@ export const communityMembers: CommunityMember[] = [
     industry: "Alumni Relations",
     company: "Sinhgad Connect",
     location: "Pune, India",
+    followers: 2200,
     aiHint: "briefcase icon",
     handle: "alumni-network",
   },

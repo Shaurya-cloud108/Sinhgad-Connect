@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { createContext, useState, ReactNode, useEffect } from 'react';
@@ -27,7 +28,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
             // If user navigates away from register without "logging in", restore profile
             setProfileData(initialProfileData);
         }
-    }, [pathname]);
+    }, [pathname, profileData]);
 
 
     return (

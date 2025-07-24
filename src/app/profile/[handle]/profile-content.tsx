@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import Image from "next/image";
@@ -6,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2, PlusCircle, Linkedin, Github, Mail, Link as LinkIcon, Camera, Video } from "lucide-react";
+import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2, PlusCircle, Linkedin, Github, Mail, Link as LinkIcon, Camera, Video, UserPlus } from "lucide-react";
 import { ProfileData, FeedItem, communityMembers, EducationEntry, feedItems, stories, Story } from "@/lib/data.tsx";
 import { useState, useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -353,6 +354,7 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [userPosts, setUserPosts] = useState<FeedItem[]>([]);
     const [userStories, setUserStories] = useState<Story | null>(null);
+    const [isFollowing, setIsFollowing] = useState(false);
     
     const isOwnProfile = !handle || handle === ownProfileData?.handle;
     const [profileData, setProfileDataState] = useState<ProfileData | null | undefined>(undefined);
@@ -373,7 +375,8 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
                     handle: member.handle,
                     headline: `${member.field} at ${member.company}`,
                     location: member.location,
-                    connections: Math.floor(Math.random() * 500) + 1, // Placeholder
+                    followers: member.followers,
+                    following: [], // This isn't needed for other profiles
                     posts: feedItems.filter(item => item.author.handle === member.handle).length,
                     about: `A passionate ${member.field} professional working in the ${member.industry} industry. Graduate of the class of ${member.graduationYear}.`,
                     experience: [{ role: member.field, company: member.company, duration: "2020 - Present" }], // Placeholder
@@ -406,6 +409,10 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
              setUserStories(null);
         }
 
+        if (ownProfileData && targetProfile && !isOwnProfile) {
+            setIsFollowing(ownProfileData.following.includes(targetProfile.handle));
+        }
+
     }, [handle, ownProfileData, isOwnProfile]);
 
 
@@ -413,6 +420,30 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
         if (isOwnProfile) {
             setProfileData(prev => prev ? {...prev, ...updatedData} as ProfileData : null);
         }
+    };
+    
+    const handleFollowToggle = () => {
+        if (!ownProfileData || !profileData || isOwnProfile) return;
+
+        setProfileData(prev => {
+            if (!prev) return null;
+            const newFollowingState = !isFollowing;
+            const newFollowersCount = newFollowingState ? prev.followers + 1 : prev.followers - 1;
+
+            setProfileDataState({ ...prev, followers: newFollowersCount });
+            setIsFollowing(newFollowingState);
+
+            // Update own profile's following list
+            setProfileData(ownPrev => {
+                if (!ownPrev) return null;
+                const newFollowingList = newFollowingState
+                    ? [...ownPrev.following, profileData.handle]
+                    : ownPrev.following.filter(h => h !== profileData.handle);
+                return { ...ownPrev, following: newFollowingList };
+            });
+
+            return { ...prev, followers: newFollowersCount };
+        });
     };
 
     const handleLogout = () => {
@@ -503,7 +534,11 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
                             </>
                         ) : (
                           <>
-                            <Button onClick={handleMessageClick} className="w-full">
+                            <Button variant={isFollowing ? 'secondary' : 'default'} onClick={handleFollowToggle} className="w-full">
+                               {isFollowing ? <Users className="mr-2 h-4 w-4" /> : <UserPlus className="mr-2 h-4 w-4" />}
+                               {isFollowing ? 'Following' : 'Follow'}
+                            </Button>
+                            <Button onClick={handleMessageClick} className="w-full" variant="outline">
                                <MessageCircle className="mr-2 h-4 w-4" /> Message
                             </Button>
                              <ShareDialog contentType="profile" contentId={profileData.handle}>
@@ -521,7 +556,7 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
                         <MapPin className="h-4 w-4" /> {profileData.location}
                     </p>
                     <div className="flex items-center gap-4 mt-2 text-sm">
-                        <span className="font-semibold">{profileData.connections}</span><span className="text-muted-foreground">Connections</span>
+                        <span className="font-semibold">{profileData.followers}</span><span className="text-muted-foreground">Followers</span>
                         <span className="font-semibold">{userPosts.length}</span><span className="text-muted-foreground">Posts</span>
                     </div>
                 </div>
