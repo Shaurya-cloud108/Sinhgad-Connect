@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2, PlusCircle, Linkedin, Github, Mail, Link as LinkIcon, Camera, Video, UserPlus, ImageIcon, Award, X } from "lucide-react";
-import { CommunityMember, FeedItem, EducationEntry, Story, StoryItem, JobListing } from "@/lib/data.tsx";
+import { CommunityMember, FeedItem, EducationEntry, Story, StoryItem, JobListing, initialFeedItems } from "@/lib/data.tsx";
 import { useState, useContext, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
