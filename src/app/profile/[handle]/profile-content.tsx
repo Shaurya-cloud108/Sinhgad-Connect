@@ -470,14 +470,16 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
     const [feedItems, setFeedItems] = useState<FeedItem[]>(initialFeedItems);
     const [stories, setStories] = useState<Story[]>(initialStories);
     
-    const isOwnProfile = !params.handle || params.handle === ownProfileData?.handle;
+    const isOwnProfile = useMemo(() => {
+        return !params.handle || params.handle === ownProfileData?.handle;
+    }, [params, ownProfileData]);
 
     const profileToDisplay = useMemo(() => {
         if (isOwnProfile) {
             return ownProfileData;
         }
         return communityMembers.find(m => m.handle === params.handle);
-    }, [params.handle, ownProfileData, isOwnProfile, communityMembers]);
+    }, [params, ownProfileData, isOwnProfile, communityMembers]);
 
     const profileData: ProfileData | null = useMemo(() => {
         if (!profileToDisplay) return null;
@@ -985,5 +987,7 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
     </>
   );
 }
+
+    
 
     
