@@ -659,10 +659,23 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
             <div className="p-6 space-y-4">
                 <div className="flex flex-col sm:flex-row items-start sm:items-end sm:justify-between">
                     <div className="flex items-start gap-4">
-                        <Avatar className="w-24 h-24 border-4 border-background -mt-16">
-                            <AvatarImage src={profileData.avatar} data-ai-hint={profileData.aiHint} />
-                            <AvatarFallback>{profileData.name.substring(0,2)}</AvatarFallback>
-                        </Avatar>
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Avatar className="w-24 h-24 border-4 border-background -mt-16 cursor-pointer">
+                                    <AvatarImage src={profileData.avatar} data-ai-hint={profileData.aiHint} />
+                                    <AvatarFallback>{profileData.name.substring(0,2)}</AvatarFallback>
+                                </Avatar>
+                            </DialogTrigger>
+                            <DialogContent className="p-0 border-0 bg-transparent shadow-none w-auto max-w-none">
+                                <Image 
+                                    src={profileData.avatar}
+                                    alt={profileData.name}
+                                    width={512}
+                                    height={512}
+                                    className="rounded-lg max-w-[80vw] max-h-[80vh]"
+                                />
+                            </DialogContent>
+                        </Dialog>
                         <div className="pt-2">
                            <CardTitle className="text-2xl font-bold font-headline flex items-center gap-2">{profileData.name} {primaryEducation?.graduationYear && primaryEducation?.graduationMonth ? getStatusEmoji(primaryEducation.graduationYear, primaryEducation.graduationMonth) : ''}</CardTitle>
                            <p className="text-sm text-muted-foreground">@{profileData.handle}</p>
