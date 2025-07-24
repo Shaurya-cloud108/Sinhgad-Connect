@@ -217,9 +217,13 @@ function JobsPageContent() {
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsViewDetailsOpen(false)}>Close</Button>
-                         <Button>
-                            Apply Now <ExternalLink className="ml-2 h-4 w-4" />
-                        </Button>
+                         {selectedJob.applicationUrl && (
+                          <Button asChild>
+                            <a href={selectedJob.applicationUrl} target="_blank" rel="noopener noreferrer">
+                              Explore <ExternalLink className="ml-2 h-4 w-4" />
+                            </a>
+                          </Button>
+                        )}
                     </DialogFooter>
                 </>
             )}

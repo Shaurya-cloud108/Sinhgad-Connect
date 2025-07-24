@@ -16,6 +16,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -39,6 +40,7 @@ const postJobSchema = z.object({
   company: z.string().min(2, "Company name must be at least 2 characters."),
   location: z.string().min(2, "Location must be at least 2 characters."),
   type: z.enum(["Full-time", "Contract", "Internship"]),
+  applicationUrl: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
   description: z.string().min(20, "Description must be at least 20 characters."),
   tags: z.array(z.string()).optional(),
 });
@@ -58,6 +60,7 @@ export function PostJobDialog({ open, onOpenChange, onJobSubmit }: PostJobDialog
       company: "",
       location: "",
       type: "Full-time",
+      applicationUrl: "",
       description: "",
       tags: [],
     },
@@ -75,7 +78,7 @@ export function PostJobDialog({ open, onOpenChange, onJobSubmit }: PostJobDialog
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="font-headline">Post a New Job</DialogTitle>
           <DialogDescription>
@@ -147,6 +150,22 @@ export function PostJobDialog({ open, onOpenChange, onJobSubmit }: PostJobDialog
             />
             <FormField
               control={form.control}
+              name="applicationUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Application Link</FormLabel>
+                  <FormControl>
+                    <Input placeholder="https://example.com/careers/job-id" {...field} />
+                  </FormControl>
+                   <FormDescription>
+                    Provide the direct link to the job application page.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name="description"
               render={({ field }) => (
                 <FormItem>
@@ -158,7 +177,7 @@ export function PostJobDialog({ open, onOpenChange, onJobSubmit }: PostJobDialog
                 </FormItem>
               )}
             />
-            <DialogFooter>
+            <DialogFooter className="pt-4">
               <DialogClose asChild>
                 <Button type="button" variant="secondary">Cancel</Button>
               </DialogClose>

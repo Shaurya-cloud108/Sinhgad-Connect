@@ -64,6 +64,7 @@ export type JobListing = {
   postedBy: string;
   postedByHandle: string;
   description: string;
+  applicationUrl?: string;
 };
 
 export const jobListings: JobListing[] = [
@@ -76,7 +77,8 @@ export const jobListings: JobListing[] = [
     tags: ["React", "TypeScript", "Next.js"],
     postedBy: "Sunita Narayan '09",
     postedByHandle: "sunita-narayan",
-    description: "Innovate Inc. is seeking a passionate Senior Frontend Engineer to build and scale our next-generation sustainable tech products. You will work with a modern tech stack and a talented team to create beautiful, responsive, and high-performance web applications."
+    description: "Innovate Inc. is seeking a passionate Senior Frontend Engineer to build and scale our next-generation sustainable tech products. You will work with a modern tech stack and a talented team to create beautiful, responsive, and high-performance web applications.",
+    applicationUrl: "https://careers.example.com/job/123",
   },
   {
     id: 2,
@@ -87,7 +89,8 @@ export const jobListings: JobListing[] = [
     tags: ["Python", "Machine Learning", "SQL"],
     postedBy: "Rohan Verma '12",
     postedByHandle: "rohan-verma",
-    description: "Join DataDriven Co. and help us solve complex problems with data. As a Data Scientist, you will be responsible for designing and implementing machine learning models, performing statistical analysis, and communicating insights to stakeholders."
+    description: "Join DataDriven Co. and help us solve complex problems with data. As a Data Scientist, you will be responsible for designing and implementing machine learning models, performing statistical analysis, and communicating insights to stakeholders.",
+    applicationUrl: "https://careers.example.com/job/124",
   },
   {
     id: 3,
@@ -109,7 +112,8 @@ export const jobListings: JobListing[] = [
     tags: ["Figma", "User Research", "Prototyping"],
     postedBy: "Alumni Network",
     postedByHandle: "alumni-network",
-    description: "We are looking for a talented UX/UI Designer to create amazing user experiences. The ideal candidate will have a strong portfolio of design projects and be proficient in Figma, user research, and prototyping."
+    description: "We are looking for a talented UX/UI Designer to create amazing user experiences. The ideal candidate will have a strong portfolio of design projects and be proficient in Figma, user research, and prototyping.",
+    applicationUrl: "https://careers.example.com/job/125",
   },
   {
     id: 5,
@@ -131,7 +135,8 @@ export const jobListings: JobListing[] = [
     tags: ["Social Media", "SEO"],
     postedBy: "Alumni Network",
     postedByHandle: "alumni-network",
-    description: "Gain hands-on experience in digital marketing with GrowthX! This internship will give you exposure to social media marketing, SEO, content creation, and campaign analysis. A great opportunity for aspiring marketers."
+    description: "Gain hands-on experience in digital marketing with GrowthX! This internship will give you exposure to social media marketing, SEO, content creation, and campaign analysis. A great opportunity for aspiring marketers.",
+    applicationUrl: "https://careers.example.com/job/126",
   },
 ];
 
