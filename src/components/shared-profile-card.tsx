@@ -1,17 +1,19 @@
 
 "use client";
 
-import { communityMembers } from "@/lib/data.tsx";
 import { Card, CardContent } from "./ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import Link from "next/link";
 import { Badge } from "./ui/badge";
+import { useContext } from "react";
+import { AppContext } from "@/context/AppContext";
 
 type SharedProfileCardProps = {
   profileId: string; // This will be the user's handle
 };
 
 export function SharedProfileCard({ profileId }: SharedProfileCardProps) {
+  const { communityMembers } = useContext(AppContext);
   const profile = communityMembers.find((member) => member.handle === profileId);
 
   if (!profile) {
@@ -37,9 +39,9 @@ export function SharedProfileCard({ profileId }: SharedProfileCardProps) {
             </Avatar>
             <div className="flex-1">
               <p className="font-semibold text-sm">{profile.name}</p>
-              <p className="text-xs text-muted-foreground truncate">{profile.field} at {profile.company}</p>
+              <p className="text-xs text-muted-foreground truncate">{profile.headline}</p>
               <div className="mt-1">
-                <Badge variant="outline">{profile.industry}</Badge>
+                <Badge variant="outline">{profile.location}</Badge>
               </div>
             </div>
           </div>

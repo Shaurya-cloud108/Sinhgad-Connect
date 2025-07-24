@@ -83,7 +83,7 @@ export const jobListings: JobListing[] = [
     id: 2,
     title: "Data Scientist",
     company: "DataDriven Co.",
-    location: "Pune, India",
+    location: "Pune",
     type: "Full-time",
     tags: ["Python", "Machine Learning", "SQL"],
     postedBy: "Rohan Verma '12",
@@ -95,7 +95,7 @@ export const jobListings: JobListing[] = [
     id: 3,
     title: "Product Manager",
     company: "Connectify",
-    location: "Bangalore, India",
+    location: "Bangalore",
     type: "Full-time",
     tags: ["Agile", "Roadmap", "UX"],
     postedBy: "Anjali Mehta '15",
@@ -118,7 +118,7 @@ export const jobListings: JobListing[] = [
     id: 5,
     title: "DevOps Engineer",
     company: "CloudLeap",
-    location: "Hyderabad, India",
+    location: "Hyderabad",
     type: "Full-time",
     tags: ["AWS", "Kubernetes", "CI/CD"],
     postedBy: "Vikram Singh '08",
@@ -129,7 +129,7 @@ export const jobListings: JobListing[] = [
     id: 6,
     title: "Marketing Intern",
     company: "GrowthX",
-    location: "Mumbai, India",
+    location: "Mumbai",
     type: "Internship",
     tags: ["Social Media", "SEO"],
     postedBy: "Alumni Network",
@@ -345,23 +345,57 @@ export type CommunityMember = {
     following: string[];
     aiHint: string;
     handle: string;
+    banner: string;
+    bannerAiHint: string;
+    headline: string;
+    posts: number;
+    about: string;
+    experience: {
+        role: string;
+        company: string;
+        duration: string;
+    }[];
+    education: EducationEntry[];
+    socials: {
+        linkedin: string;
+        github: string;
+    };
+    contact: {
+        email: string;
+        website?: string;
+    };
 };
 
-export const communityMembers: CommunityMember[] = [
+export const initialCommunityMembers: CommunityMember[] = [
   {
     name: "Priya Sharma",
-    avatar: "https://placehold.co/100x100.png",
+    avatar: "https://placehold.co/150x150.png",
     fallback: "PS",
+    handle: "priya-sharma",
+    headline: "Senior Software Engineer at Google | Mentor",
+    location: "San Francisco Bay Area",
+    followers: ["rohan-verma", "anjali-mehta", "vikram-singh", "sneha-reddy"],
+    following: ["rohan-verma", "anjali-mehta", "kavya-iyer", "sunita-narayan"],
+    aiHint: "professional woman",
+    banner: "https://placehold.co/1000x300.png",
+    bannerAiHint: "university campus",
+    posts: 42,
+    about: "Passionate about building scalable systems and helping the next generation of engineers. Graduated in 2009 with a degree in Computer Engineering. Feel free to reach out for advice on careers in tech, interview prep, or anything else!",
+    experience: [
+        { role: "Senior Software Engineer", company: "Google", duration: "2015 - Present" },
+        { role: "Software Engineer", company: "Innovate Inc.", duration: "2012 - 2015" },
+    ],
+    education: [
+        { degree: "B.E. Computer Engineering", college: "Sinhgad College of Engineering", yearRange: "2005 - 2009", graduationYear: 2009, graduationMonth: 6 },
+        { degree: "M.S. Computer Science", college: "Stanford University", yearRange: "2010 - 2012" },
+    ],
+    socials: { linkedin: "https://www.linkedin.com/in/priya-sharma-example/", github: "https://github.com/priyasharma-example" },
+    contact: { email: "priya.sharma@example.com", website: "https://priya-sharma.dev" },
     graduationYear: 2009,
     graduationMonth: 6,
     field: "Computer Engineering",
     industry: "Technology",
     company: "Google",
-    location: "San Francisco, CA",
-    followers: ["rohan-verma", "anjali-mehta", "vikram-singh", "sneha-reddy"],
-    following: ["rohan-verma", "anjali-mehta", "kavya-iyer", "sunita-narayan"],
-    aiHint: "professional woman",
-    handle: "priya-sharma",
   },
   {
     name: "Rohan Verma",
@@ -377,6 +411,15 @@ export const communityMembers: CommunityMember[] = [
     following: ["priya-sharma", "kavya-iyer", "sunita-narayan"],
     aiHint: "professional man",
     handle: "rohan-verma",
+    banner: "https://placehold.co/1000x300.png",
+    bannerAiHint: "modern factory",
+    headline: "Mechanical Engineer at Tesla",
+    posts: 15,
+    about: "Working on the future of transportation. Sinhgad Mechanical Engg. '12. Fascinated by robotics and sustainable energy.",
+    experience: [{ role: "Mechanical Engineer", company: "Tesla", duration: "2018 - Present" }],
+    education: [{ degree: "B.E. Mechanical Engineering", college: "Sinhgad College of Engineering", yearRange: "2008 - 2012", graduationYear: 2012, graduationMonth: 6 }],
+    socials: { linkedin: "https://www.linkedin.com/", github: "https://github.com/"},
+    contact: { email: "rohan.verma@example.com" },
   },
   {
     name: "Anjali Mehta",
@@ -392,6 +435,15 @@ export const communityMembers: CommunityMember[] = [
     following: ["priya-sharma"],
     aiHint: "corporate woman",
     handle: "anjali-mehta",
+    banner: "https://placehold.co/1000x300.png",
+    bannerAiHint: "city skyline",
+    headline: "Network Architect at Verizon",
+    posts: 8,
+    about: "Designing the communication networks of tomorrow. Proud alumna of Sinhgad E&TC batch of 2015.",
+    experience: [{ role: "Network Architect", company: "Verizon", duration: "2019 - Present" }],
+    education: [{ degree: "B.E. Electronics & Telecommunication", college: "Sinhgad College of Engineering", yearRange: "2011 - 2015", graduationYear: 2015, graduationMonth: 6 }],
+    socials: { linkedin: "https://www.linkedin.com/", github: "https://github.com/"},
+    contact: { email: "anjali.mehta@example.com" },
   },
   {
     name: "Kavya Iyer",
@@ -407,7 +459,17 @@ export const communityMembers: CommunityMember[] = [
     following: ["priya-sharma"],
     aiHint: "female student",
     handle: "kavya-iyer",
+    banner: "https://placehold.co/1000x300.png",
+    bannerAiHint: "library books",
+    headline: "IT Student | Aspiring AI Engineer",
+    posts: 3,
+    about: "Currently in my third year of IT engineering. Passionate about machine learning and looking for internship opportunities!",
+    experience: [],
+    education: [{ degree: "B.E. Information Technology", college: "Sinhgad College of Engineering", yearRange: "2021 - 2025", graduationYear: 2025, graduationMonth: 6 }],
+    socials: { linkedin: "https://www.linkedin.com/", github: "https://github.com/"},
+    contact: { email: "kavya.iyer@example.com" },
   },
+  // Add other members with full profile data
   {
     name: "Vikram Singh",
     avatar: "https://placehold.co/100x100.png",
@@ -422,6 +484,15 @@ export const communityMembers: CommunityMember[] = [
     following: ["priya-sharma", "sunita-narayan"],
     aiHint: "corporate man",
     handle: "vikram-singh",
+    banner: "https://placehold.co/1000x300.png",
+    bannerAiHint: "stock market graph",
+    headline: "VP of Technology at Goldman Sachs",
+    posts: 12,
+    about: "Leading technology initiatives in the financial sector. Sinhgad IT '08.",
+    experience: [{ role: "VP of Technology", company: "Goldman Sachs", duration: "2016 - Present" }],
+    education: [{ degree: "B.E. Information Technology", college: "Sinhgad College of Engineering", yearRange: "2004 - 2008", graduationYear: 2008, graduationMonth: 6 }],
+    socials: { linkedin: "https://www.linkedin.com/", github: "https://github.com/"},
+    contact: { email: "vikram.singh@example.com" },
   },
   {
     name: "Sneha Reddy",
@@ -437,6 +508,15 @@ export const communityMembers: CommunityMember[] = [
     following: ["priya-sharma"],
     aiHint: "young professional",
     handle: "sneha-reddy",
+    banner: "https://placehold.co/1000x300.png",
+    bannerAiHint: "server room",
+    headline: "Cloud Support Engineer at AWS",
+    posts: 5,
+    about: "Helping customers succeed on the cloud. Comp Engg '18.",
+    experience: [{ role: "Cloud Support Engineer", company: "Amazon", duration: "2019 - Present" }],
+    education: [{ degree: "B.E. Computer Engineering", college: "Sinhgad College of Engineering", yearRange: "2014 - 2018", graduationYear: 2018, graduationMonth: 6 }],
+    socials: { linkedin: "https://www.linkedin.com/", github: "https://github.com/"},
+    contact: { email: "sneha.reddy@example.com" },
   },
   {
     name: "Arjun Desai",
@@ -452,6 +532,15 @@ export const communityMembers: CommunityMember[] = [
     following: [],
     aiHint: "male student",
     handle: "arjun-desai",
+    banner: "https://placehold.co/1000x300.png",
+    bannerAiHint: "code on screen",
+    headline: "Computer Engineering Student",
+    posts: 1,
+    about: "Second year student exploring the world of software development.",
+    experience: [],
+    education: [{ degree: "B.E. Computer Engineering", college: "Sinhgad College of Engineering", yearRange: "2022 - 2026", graduationYear: 2026, graduationMonth: 6 }],
+    socials: { linkedin: "https://www.linkedin.com/", github: "https://github.com/"},
+    contact: { email: "arjun.desai@example.com" },
   },
   {
     name: "Amit Patel",
@@ -467,6 +556,15 @@ export const communityMembers: CommunityMember[] = [
     following: [],
     aiHint: "engineer man",
     handle: "amit-patel",
+    banner: "https://placehold.co/1000x300.png",
+    bannerAiHint: "construction site",
+    headline: "Project Manager at L&T Construction",
+    posts: 7,
+    about: "Building the infrastructure of India. Civil '13.",
+    experience: [{ role: "Project Manager", company: "L&T Construction", duration: "2015 - Present" }],
+    education: [{ degree: "B.E. Civil Engineering", college: "Sinhgad College of Engineering", yearRange: "2009 - 2013", graduationYear: 2013, graduationMonth: 6 }],
+    socials: { linkedin: "https://www.linkedin.com/", github: "https://github.com/"},
+    contact: { email: "amit.patel@example.com" },
   },
   {
     name: "Sunita Narayan",
@@ -482,6 +580,15 @@ export const communityMembers: CommunityMember[] = [
     following: ["vikram-singh"],
     aiHint: "professional woman portrait",
     handle: "sunita-narayan",
+    banner: "https://placehold.co/1000x300.png",
+    bannerAiHint: "modern office building",
+    headline: "CEO at Innovate Inc.",
+    posts: 25,
+    about: "Founder of Innovate Inc., focused on sustainable technology. Comp Engg '09.",
+    experience: [{ role: "CEO", company: "Innovate Inc.", duration: "2014 - Present" }],
+    education: [{ degree: "B.E. Computer Engineering", college: "Sinhgad College of Engineering", yearRange: "2005 - 2009", graduationYear: 2009, graduationMonth: 6 }],
+    socials: { linkedin: "https://www.linkedin.com/", github: "https://github.com/"},
+    contact: { email: "sunita.narayan@example.com" },
   },
   {
     name: "Alumni Events Committee",
@@ -497,6 +604,15 @@ export const communityMembers: CommunityMember[] = [
     following: [],
     aiHint: "university logo",
     handle: "alumni-events",
+    banner: "https://placehold.co/1000x300.png",
+    bannerAiHint: "event stage",
+    headline: "Official Events Organizer",
+    posts: 5,
+    about: "We organize events to keep our alumni connected.",
+    experience: [],
+    education: [],
+    socials: { linkedin: "", github: ""},
+    contact: { email: "" },
   },
   {
     name: "Alumni Network Job Board",
@@ -512,6 +628,15 @@ export const communityMembers: CommunityMember[] = [
     following: [],
     aiHint: "briefcase icon",
     handle: "alumni-network",
+    banner: "https://placehold.co/1000x300.png",
+    bannerAiHint: "office lobby",
+    headline: "Curated Job Opportunities",
+    posts: 20,
+    about: "Connecting talented alumni with great career opportunities.",
+    experience: [],
+    education: [],
+    socials: { linkedin: "", github: ""},
+    contact: { email: "" },
   },
 ];
 
@@ -599,7 +724,7 @@ export const feedItems: FeedItem[] = [
   }
 ];
 
-const allUsersAsStories: Story[] = communityMembers.map((member, index) => ({
+const allUsersAsStories: Story[] = initialCommunityMembers.map((member, index) => ({
     id: index + 1,
     author: {
         name: member.name,
@@ -737,5 +862,3 @@ export const notifications: Notification[] = [
         aiHint: "briefcase icon"
     },
 ];
-
-    

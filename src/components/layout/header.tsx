@@ -22,8 +22,7 @@ export function AppHeader() {
   const pathname = usePathname();
   const { profileData } = useContext(ProfileContext);
 
-  const isRegisterPage = pathname === "/register";
-  const showAuthArea = !profileData || isRegisterPage;
+  const showAuthArea = !profileData;
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

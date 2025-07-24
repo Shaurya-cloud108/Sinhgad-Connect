@@ -64,7 +64,7 @@ function JobsPageContent() {
         results = results.filter(job => job.type === jobType);
     }
     if (location && location !== 'all') {
-        results = results.filter(job => job.location.toLowerCase().includes(location.toLowerCase()));
+        results = results.filter(job => job.location.toLowerCase() === location.toLowerCase());
     }
     setFilteredJobListings(results);
   }, [searchQuery, jobType, location, jobListings]);

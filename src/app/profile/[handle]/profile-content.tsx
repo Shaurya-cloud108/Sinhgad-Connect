@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2, PlusCircle, Linkedin, Github, Mail, Link as LinkIcon, Camera, Video, UserPlus, ImageIcon, Award, X } from "lucide-react";
-import { ProfileData, FeedItem, EducationEntry, feedItems as initialFeedItems, stories as initialStories, Story, StoryItem, JobListing, CommunityMember } from "@/lib/data.tsx";
+import { CommunityMember, FeedItem, EducationEntry, feedItems as initialFeedItems, stories as initialStories, Story, StoryItem, JobListing } from "@/lib/data.tsx";
 import { useState, useContext, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -206,7 +206,7 @@ function CreatePostDialog({ open, onOpenChange, onPostSubmit }: { open: boolean,
 }
 
 
-function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { open: boolean, onOpenChange: (open: boolean) => void, profile: ProfileData, onProfileUpdate: (data: Partial<ProfileData>) => void }) {
+function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { open: boolean, onOpenChange: (open: boolean) => void, profile: CommunityMember, onProfileUpdate: (data: Partial<CommunityMember>) => void }) {
   const { toast } = useToast();
   const [avatarPreview, setAvatarPreview] = useState<string | null>(profile.avatar);
   const [bannerPreview, setBannerPreview] = useState<string | null>(profile.banner);
@@ -276,7 +276,7 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
       };
     });
 
-    const updatedProfile: Partial<ProfileData> = { 
+    const updatedProfile: Partial<CommunityMember> = { 
       ...values,
       education: updatedEducation,
       avatar: avatarPreview || profile.avatar,
@@ -456,7 +456,7 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
 
 
 export default function ProfilePageContent({ params }: { params: { handle: string } }) {
-    const { profileData: ownProfileData, setProfileData } = useContext(ProfileContext);
+    const { profileData: ownProfileData, setLoggedInUserHandle } = useContext(ProfileContext);
     const { setSelectedConversationByName, addJobListing, communityMembers, setCommunityMembers } = useContext(AppContext);
     
     const router = useRouter();
@@ -468,56 +468,17 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
     const [followSheetHandles, setFollowSheetHandles] = useState<string[]>([]);
 
     const [feedItems, setFeedItems] = useState<FeedItem[]>(initialFeedItems);
-    const [stories, setStories] = useState<Story[]>(initialStories);
     
     const isOwnProfile = useMemo(() => {
         return !params.handle || params.handle === ownProfileData?.handle;
     }, [params, ownProfileData]);
 
-    const profileToDisplay = useMemo(() => {
-        if (isOwnProfile) {
-            return ownProfileData;
-        }
-        return communityMembers.find(m => m.handle === params.handle);
+    const profileData = useMemo(() => {
+      const handle = params.handle;
+      if (!handle) return isOwnProfile ? ownProfileData : null;
+      return communityMembers.find(m => m.handle === handle) || null;
     }, [params, ownProfileData, isOwnProfile, communityMembers]);
 
-    const profileData: ProfileData | null = useMemo(() => {
-        if (!profileToDisplay) return null;
-        if (isOwnProfile) return profileToDisplay as ProfileData;
-
-        // Create a full profile object for other users
-        const member = profileToDisplay as CommunityMember;
-        return {
-            name: member.name,
-            avatar: member.avatar,
-            aiHint: member.aiHint,
-            banner: "https://placehold.co/1200x400.png",
-            bannerAiHint: "university campus",
-            handle: member.handle,
-            headline: `${member.field} at ${member.company}`,
-            location: member.location,
-            followers: member.followers,
-            following: member.following,
-            posts: feedItems.filter(item => item.author.handle === member.handle).length,
-            about: `A passionate ${member.field} professional working in the ${member.industry} industry. Graduate of the class of ${member.graduationYear}.`,
-            experience: [{ role: member.field, company: member.company, duration: "2020 - Present" }], // Placeholder
-            education: [{
-                degree: member.field,
-                college: "Sinhgad College of Engineering",
-                yearRange: `${member.graduationYear - 4} - ${member.graduationYear}`,
-                graduationYear: member.graduationYear,
-                graduationMonth: member.graduationMonth,
-            }],
-            socials: { // Placeholder socials
-                linkedin: "https://www.linkedin.com/",
-                github: "https://github.com/",
-              },
-              contact: { // Placeholder contact
-                email: `${member.handle}@example.com`,
-                website: "https://example.com"
-              },
-        };
-    }, [profileToDisplay, isOwnProfile, feedItems]);
 
     const userPosts = useMemo(() => {
         if (!profileData) return [];
@@ -549,40 +510,37 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
         setIsFollowSheetOpen(true);
     }
 
-    const handleProfileUpdate = (updatedData: Partial<ProfileData>) => {
-        if (isOwnProfile) {
-            setProfileData(prev => prev ? {...prev, ...updatedData} as ProfileData : null);
-        }
+    const handleProfileUpdate = (updatedData: Partial<CommunityMember>) => {
+      if (isOwnProfile && ownProfileData) {
+          setCommunityMembers(prev => prev.map(member => 
+              member.handle === ownProfileData.handle 
+                  ? { ...member, ...updatedData } 
+                  : member
+          ));
+      }
     };
     
     const handleFollowToggle = () => {
         if (!ownProfileData || !profileData || isOwnProfile) return;
+        const loggedInUserHandle = ownProfileData.handle;
+        const targetUserHandle = profileData.handle;
+        const currentlyFollowing = ownProfileData.following.includes(targetUserHandle);
 
-        const currentlyFollowing = ownProfileData.following.includes(profileData.handle);
-
-        // Update the logged-in user's following list in ProfileContext
-        setProfileData(prev => {
-            if (!prev) return null;
-            const newFollowingList = currentlyFollowing
-                ? prev.following.filter(h => h !== profileData.handle)
-                : [...prev.following, profileData.handle];
-            return { ...prev, following: newFollowingList };
-        });
-        
-        // Update the viewed user's follower list in AppContext
         setCommunityMembers(prevMembers => 
             prevMembers.map(member => {
-                if (member.handle === profileData.handle) {
-                    const newFollowersList = currentlyFollowing
-                        ? member.followers.filter(h => h !== ownProfileData.handle)
-                        : [...member.followers, ownProfileData.handle];
-                    return { ...member, followers: newFollowersList };
+                // Update the logged-in user's following list
+                if (member.handle === loggedInUserHandle) {
+                    const newFollowing = currentlyFollowing
+                        ? member.following.filter(h => h !== targetUserHandle)
+                        : [...member.following, targetUserHandle];
+                    return { ...member, following: newFollowing };
                 }
-                if (member.handle === ownProfileData.handle) {
-                    const newFollowingList = currentlyFollowing
-                        ? member.following.filter(h => h !== profileData.handle)
-                        : [...member.following, profileData.handle];
-                    return { ...member, following: newFollowingList };
+                // Update the target user's followers list
+                if (member.handle === targetUserHandle) {
+                    const newFollowers = currentlyFollowing
+                        ? member.followers.filter(h => h !== loggedInUserHandle)
+                        : [...member.followers, loggedInUserHandle];
+                    return { ...member, followers: newFollowers };
                 }
                 return member;
             })
@@ -590,6 +548,7 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
     };
 
     const handleLogout = () => {
+        setLoggedInUserHandle(null);
         router.push("/register?tab=login");
     }
 
@@ -659,6 +618,13 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
     }
 
     const primaryEducation = profileData.education.find(e => e.graduationYear);
+    const mutualsText = () => {
+        if (mutualFollowers.length === 0) return '';
+        const firstMutualName = mutualFollowers[0].name.split(' ')[0] || mutualFollowers[0].name;
+        if (mutualFollowers.length === 1) return `Followed by ${firstMutualName}`;
+        if (mutualFollowers.length === 2) return `Followed by ${firstMutualName} and 1 other you follow`;
+        return `Followed by ${firstMutualName} and ${mutualFollowers.length -1} others you follow`;
+    };
 
   return (
     <>
@@ -749,8 +715,7 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
                                 ))}
                             </div>
                             <p className="text-xs text-muted-foreground">
-                                Followed by <span className="font-semibold text-foreground">{mutualFollowers[0].name.split(' ')[0]}</span>
-                                {mutualFollowers.length > 1 && ` and ${mutualFollowers.length - 1} other${mutualFollowers.length > 2 ? 's' : ''} you follow`}
+                                {mutualsText()}
                             </p>
                         </div>
                     )}
@@ -987,7 +952,3 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
     </>
   );
 }
-
-    
-
-    

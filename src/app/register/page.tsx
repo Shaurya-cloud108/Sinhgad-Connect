@@ -1,7 +1,7 @@
 
 "use client";
 
-import React from "react";
+import React, { useContext } from "react";
 import Image from "next/image";
 import { RegisterForm } from "./register-form";
 import { LoginForm } from "./login-form";
@@ -9,12 +9,27 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation';
+import { ProfileContext } from "@/context/ProfileContext";
 
 
 function RegisterPageContent() {
   const searchParams = useSearchParams()
   const defaultTab = searchParams.get('tab') || 'register';
+  const { profileData } = useContext(ProfileContext);
+  const router = useRouter();
+
+  // If user is already logged in, redirect them away from the register page.
+  useEffect(() => {
+    if (profileData) {
+      router.replace('/');
+    }
+  }, [profileData, router]);
+
+  // Don't render the form if we are about to redirect.
+  if (profileData) {
+    return null;
+  }
 
   return (
     <div className="container grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">

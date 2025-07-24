@@ -2,7 +2,7 @@
 "use client";
 
 import React, { createContext, useState, ReactNode, useContext, useMemo, useCallback } from 'react';
-import { conversationsData as initialConversations, messagesData as initialMessagesData, communityMembers as initialCommunityMembers, jobListings as initialJobListings, JobListing, CommunityMember } from '@/lib/data.tsx';
+import { conversationsData as initialConversations, messagesData as initialMessagesData, initialCommunityMembers, jobListings as initialJobListings, JobListing, CommunityMember } from '@/lib/data.tsx';
 import { ProfileContext } from './ProfileContext';
 
 // Types
@@ -118,5 +118,3 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         </AppContext.Provider>
     );
 };
-
-    
