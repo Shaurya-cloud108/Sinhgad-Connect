@@ -19,13 +19,14 @@ import {
   DialogTrigger,
   DialogFooter,
   DialogClose,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetDescription,
+  SheetDescription as SheetDescriptionComponent,
 } from "@/components/ui/sheet";
 import {
   DropdownMenu,
@@ -171,9 +172,9 @@ function StoryViewersSheet({ viewers, open, onOpenChange }: { viewers: StoryView
       <SheetContent>
         <SheetHeader>
           <SheetTitle>Viewed by</SheetTitle>
-          <SheetDescription>
+          <SheetDescriptionComponent>
             {viewers.length} {viewers.length === 1 ? 'person' : 'people'} have seen your story.
-          </SheetDescription>
+          </SheetDescriptionComponent>
         </SheetHeader>
         <ScrollArea className="h-[calc(100%-120px)] my-4 pr-6 -mr-6">
           <div className="space-y-4">
@@ -289,6 +290,10 @@ function StoryViewerDialog({ story, open, onOpenChange, currentUserId }: { story
     <>
       <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onOpenChange(false) }}>
         <DialogContent className="p-0 border-0 max-w-md w-full h-[90vh] sm:h-[80vh] bg-black" onInteractOutside={() => onOpenChange(false)}>
+          <div className="sr-only">
+              <DialogTitle>Story Viewer</DialogTitle>
+              <DialogDescription>Viewing a story from {story.author.name}. Use the left and right sides of the screen to navigate.</DialogDescription>
+          </div>
           <div className="relative w-full h-full rounded-lg overflow-hidden flex flex-col justify-center">
             {/* Click handlers for next/prev */}
             <div className="absolute left-0 top-0 h-full w-1/2 z-10" onClick={handlePrevious} />
@@ -709,3 +714,4 @@ export default function Home() {
         </React.Suspense>
     )
 }
+
