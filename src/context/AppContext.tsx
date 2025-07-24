@@ -1,11 +1,10 @@
 
 "use client";
 
-import React, { createContext, useState, ReactNode, useCallback } from 'react';
+import React, { createContext, useState, ReactNode, useCallback, useEffect } from 'react';
 import { 
     initialConversations, 
-    initialMessages, 
-    initialCommunityMembers, 
+    initialMessages,
     initialJobListings, 
     initialFeedItems, 
     initialStories,
@@ -22,6 +21,8 @@ import type {
     StoryItem,
     Event
 } from '@/lib/data';
+import { db } from '@/lib/firebase';
+import { collection, getDocs } from 'firebase/firestore';
 
 
 // Types
@@ -92,9 +93,26 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
     const [events, setEvents] = useState<Event[]>(initialEventsData);
     const [jobListings, setJobListings] = useState<JobListing[]>(initialJobListings);
-    const [communityMembers, setCommunityMembers] = useState<CommunityMember[]>(initialCommunityMembers);
+    const [communityMembers, setCommunityMembers] = useState<CommunityMember[]>([]);
     const [feedItems, setFeedItems] = useState<FeedItem[]>(initialFeedItems);
     const [stories, setStories] = useState<Story[]>(initialStories);
+    
+    useEffect(() => {
+        const fetchCommunityMembers = async () => {
+            try {
+                const membersCollection = collection(db, 'communityMembers');
+                const memberSnapshot = await getDocs(membersCollection);
+                const membersList = memberSnapshot.docs.map(doc => doc.data() as CommunityMember);
+                setCommunityMembers(membersList);
+            } catch (error) {
+                console.error("Error fetching community members:", error);
+                // Handle error, maybe set some default or show an error message
+            }
+        };
+
+        fetchCommunityMembers();
+    }, []);
+
 
     const setSelectedConversationByName = useCallback((name: string) => {
         let conversation = conversations.find(c => c.name === name);
@@ -141,10 +159,24 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                     items: [...newStories[userStoryIndex].items, item]
                 };
                 newStories[userStoryIndex] = updatedStory;
+            } else {
+                 const member = communityMembers.find(m => m.handle === userHandle);
+                 if (member) {
+                    newStories.push({
+                        id: Date.now(),
+                        author: {
+                            name: member.name,
+                            avatar: member.avatar,
+                            handle: member.handle,
+                            aiHint: member.aiHint,
+                        },
+                        items: [item]
+                    });
+                 }
             }
             return newStories;
         });
-    }, []);
+    }, [communityMembers]);
 
     const deleteStoryItem = useCallback((userHandle: string, itemId: number) => {
         setStories(prev => prev.map(story => {

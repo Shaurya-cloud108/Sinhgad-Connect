@@ -57,7 +57,7 @@ const degreeMap: { [key: string]: string } = {
 export function RegisterForm() {
   const { toast } = useToast();
   const router = useRouter();
-  const { setCommunityMembers, setStories } = useContext(AppContext);
+  const { setCommunityMembers } = useContext(AppContext);
   const { setLoggedInUserHandle } = useContext(ProfileContext);
 
   const [role, setRole] = useState("student");
@@ -112,12 +112,6 @@ export function RegisterForm() {
 
     // Add new user to the global state
     setCommunityMembers(prev => [...prev, newUser]);
-    // Also add a story placeholder for the new user
-    setStories(prev => [...prev, {
-        id: prev.length + 1,
-        author: { name: newUser.name, avatar: newUser.avatar, handle: newUser.handle, aiHint: newUser.aiHint },
-        items: [],
-    }])
     // "Log in" the new user
     setLoggedInUserHandle(newUser.handle);
     
@@ -126,6 +120,9 @@ export function RegisterForm() {
       description: `Welcome to the community, ${values.fullName}!`,
     });
     
+    // In a real app, you would also save the user to Firestore here.
+    // e.g., setDoc(doc(db, "communityMembers", newUser.handle), newUser);
+
     router.push(`/profile/${newUser.handle}`);
   }
 

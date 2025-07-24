@@ -26,8 +26,11 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
      useEffect(() => {
         // In a real app, this would be determined by an auth session.
         // For this prototype, we'll set a default logged-in user.
-        setLoggedInUserHandle(MOCK_LOGGED_IN_USER_HANDLE);
-    }, []);
+        // We check if communityMembers is loaded before setting the handle.
+        if (communityMembers.length > 0) {
+            setLoggedInUserHandle(MOCK_LOGGED_IN_USER_HANDLE);
+        }
+    }, [communityMembers]);
 
     const profileData = useMemo(() => {
         if (!loggedInUserHandle) return null;
