@@ -456,7 +456,6 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
 
 
 export default function ProfilePageContent({ params }: { params: { handle: string } }) {
-    const { handle } = params;
     const { profileData: ownProfileData, setProfileData } = useContext(ProfileContext);
     const { setSelectedConversationByName, addJobListing, communityMembers, setCommunityMembers } = useContext(AppContext);
     
@@ -471,14 +470,14 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
     const [feedItems, setFeedItems] = useState<FeedItem[]>(initialFeedItems);
     const [stories, setStories] = useState<Story[]>(initialStories);
     
-    const isOwnProfile = !handle || handle === ownProfileData?.handle;
+    const isOwnProfile = !params.handle || params.handle === ownProfileData?.handle;
 
     const profileToDisplay = useMemo(() => {
         if (isOwnProfile) {
             return ownProfileData;
         }
-        return communityMembers.find(m => m.handle === handle);
-    }, [handle, ownProfileData, isOwnProfile, communityMembers]);
+        return communityMembers.find(m => m.handle === params.handle);
+    }, [params.handle, ownProfileData, isOwnProfile, communityMembers]);
 
     const profileData: ProfileData | null = useMemo(() => {
         if (!profileToDisplay) return null;
