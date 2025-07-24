@@ -490,7 +490,7 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
             headline: `${member.field} at ${member.company}`,
             location: member.location,
             followers: member.followers,
-            following: Array(member.following).fill(''), // Create a dummy array of the correct length
+            following: member.following,
             posts: feedItems.filter(item => item.author.handle === member.handle).length,
             about: `A passionate ${member.field} professional working in the ${member.industry} industry. Graduate of the class of ${member.graduationYear}.`,
             experience: [{ role: member.field, company: member.company, duration: "2020 - Present" }], // Placeholder
@@ -570,10 +570,13 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
 
     const handleJobSubmit = (newJob: Omit<JobListing, 'id' | 'postedBy' | 'postedByHandle'>) => {
         if(!profileData) return;
+        const primaryEducation = profileData.education.find(e => e.graduationYear);
+        const gradYearSuffix = primaryEducation?.graduationYear ? `'${primaryEducation.graduationYear.toString().slice(-2)}` : '';
+
         addJobListing({
         ...newJob,
         id: Date.now(),
-        postedBy: `${profileData.name} '${profileData.education.graduationYear.toString().slice(-2)}`,
+        postedBy: `${profileData.name} ${gradYearSuffix}`.trim(),
         postedByHandle: profileData.handle,
         });
     }

@@ -73,10 +73,13 @@ function JobsPageContent() {
 
   function handleJobSubmit(values: Omit<JobListing, 'id' | 'postedBy' | 'postedByHandle'>) {
     if (!profileData) return;
+    const primaryEducation = profileData.education.find(e => e.graduationYear);
+    const gradYearSuffix = primaryEducation?.graduationYear ? `'${primaryEducation.graduationYear.toString().slice(-2)}` : '';
+
     const newJob: JobListing = {
         id: Date.now(),
         ...values,
-        postedBy: `${profileData.name} '${profileData.education.graduationYear.toString().slice(-2)}`,
+        postedBy: `${profileData.name} ${gradYearSuffix}`.trim(),
         postedByHandle: profileData.handle
     };
     addJobListing(newJob);
