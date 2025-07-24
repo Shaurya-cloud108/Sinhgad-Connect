@@ -1,4 +1,3 @@
-
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -153,12 +152,12 @@ export function PostJobDialog({ open, onOpenChange, onJobSubmit }: PostJobDialog
               name="applicationUrl"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Application Link</FormLabel>
+                  <FormLabel>Job Posting URL</FormLabel>
                   <FormControl>
                     <Input placeholder="https://example.com/careers/job-id" {...field} />
                   </FormControl>
                    <FormDescription>
-                    Provide the direct link to the job application page.
+                    Provide the direct link to the job posting page.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
