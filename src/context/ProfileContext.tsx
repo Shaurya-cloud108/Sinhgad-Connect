@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React, { createContext, useState, ReactNode, useEffect } from 'react';
@@ -17,10 +16,17 @@ export const ProfileContext = createContext<ProfileContextType>({
 });
 
 export const ProfileProvider = ({ children }: { children: ReactNode }) => {
-    const [profileData, setProfileData] = useState<ProfileData | null>(initialProfileData);
+    const [profileData, setProfileData] = useState<ProfileData | null>(null);
     const pathname = usePathname();
 
     // This is a mock auth flow. In a real app, you'd check a token.
+     useEffect(() => {
+        // Simulate loading profile data on initial mount
+        if (initialProfileData) {
+            setProfileData(initialProfileData);
+        }
+    }, []);
+
     useEffect(() => {
         if (pathname === '/register') {
             setProfileData(null);
@@ -28,7 +34,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
             // If user navigates away from register without "logging in", restore profile
             setProfileData(initialProfileData);
         }
-    }, [pathname, profileData]);
+    }, [pathname]);
 
 
     return (

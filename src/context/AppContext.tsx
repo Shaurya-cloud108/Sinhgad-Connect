@@ -25,6 +25,7 @@ export type Message = {
     sharedEventId?: string;
     sharedStoryId?: string;
     sharedProfileId?: string;
+    sharedGroupId?: string;
 };
 
 export type MessagesData = {

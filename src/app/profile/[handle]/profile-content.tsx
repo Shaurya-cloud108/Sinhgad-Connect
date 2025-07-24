@@ -62,6 +62,7 @@ import { ShareDialog } from "@/components/share-dialog";
 import Link from 'next/link';
 import { Separator } from "@/components/ui/separator";
 import { PostJobDialog } from "@/components/post-job-dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 
 const profileFormSchema = z.object({
@@ -522,6 +523,19 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
         return ownProfileData.following.includes(profileData.handle);
     }, [ownProfileData, profileData, isOwnProfile]);
 
+    const mutualFollowers = useMemo(() => {
+        if (!ownProfileData || !profileData || isOwnProfile) return [];
+        
+        const mutualHandles = ownProfileData.following.filter(handle => 
+            profileData.followers.includes(handle)
+        );
+
+        return communityMembers
+            .filter(member => mutualHandles.includes(member.handle))
+            .slice(0, 3); // Show up to 3 mutuals
+
+    }, [ownProfileData, profileData, isOwnProfile, communityMembers]);
+
 
     const handleProfileUpdate = (updatedData: Partial<ProfileData>) => {
         if (isOwnProfile) {
@@ -532,22 +546,28 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
     const handleFollowToggle = () => {
         if (!ownProfileData || !profileData || isOwnProfile) return;
 
-        // Update the logged-in user's following list
+        const currentlyFollowing = ownProfileData.following.includes(profileData.handle);
+
+        // Update the logged-in user's following list in ProfileContext
         setProfileData(prev => {
             if (!prev) return null;
-            const newFollowingList = isFollowing
+            const newFollowingList = currentlyFollowing
                 ? prev.following.filter(h => h !== profileData.handle)
                 : [...prev.following, profileData.handle];
             return { ...prev, following: newFollowingList };
         });
         
-        // Update the viewed user's follower count in the global context
-        setCommunityMembers(prev => 
-            prev.map(member => 
-                member.handle === profileData.handle
-                ? { ...member, followers: member.followers + (isFollowing ? -1 : 1) }
-                : member
-            )
+        // Update the viewed user's follower list in AppContext
+        setCommunityMembers(prevMembers => 
+            prevMembers.map(member => {
+                if (member.handle === profileData.handle) {
+                    const newFollowersList = currentlyFollowing
+                        ? member.followers.filter(h => h !== ownProfileData.handle)
+                        : [...member.followers, ownProfileData.handle];
+                    return { ...member, followers: newFollowersList };
+                }
+                return member;
+            })
         );
     };
 
@@ -677,9 +697,34 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
                     <p className="mt-1 text-sm text-muted-foreground flex items-center gap-2">
                         <MapPin className="h-4 w-4" /> {profileData.location}
                     </p>
+                    {mutualFollowers.length > 0 && (
+                        <div className="flex items-center gap-2 mt-2">
+                            <div className="flex -space-x-2">
+                                {mutualFollowers.map(mutual => (
+                                    <TooltipProvider key={mutual.handle}>
+                                        <Tooltip>
+                                            <TooltipTrigger>
+                                                <Avatar className="h-6 w-6 border-2 border-background">
+                                                    <AvatarImage src={mutual.avatar} data-ai-hint={mutual.aiHint} />
+                                                    <AvatarFallback>{mutual.fallback}</AvatarFallback>
+                                                </Avatar>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>{mutual.name}</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                ))}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                Followed by <span className="font-semibold text-foreground">{mutualFollowers[0].name.split(' ')[0]}</span>
+                                {mutualFollowers.length > 1 && ` and ${mutualFollowers.length - 1} other${mutualFollowers.length > 2 ? 's' : ''} you follow`}
+                            </p>
+                        </div>
+                    )}
                     <div className="flex items-center gap-6 mt-2 text-sm">
                         <div className="flex items-center gap-1.5">
-                            <span className="font-semibold">{profileData.followers}</span><span className="text-muted-foreground">Followers</span>
+                            <span className="font-semibold">{profileData.followers.length}</span><span className="text-muted-foreground">Followers</span>
                         </div>
                         <div className="flex items-center gap-1.5">
                             <span className="font-semibold">{profileData.following.length}</span><span className="text-muted-foreground">Following</span>
