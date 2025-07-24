@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -40,7 +41,7 @@ const postJobSchema = z.object({
   location: z.string().min(2, "Location must be at least 2 characters."),
   type: z.enum(["Full-time", "Contract", "Internship"]),
   applicationUrl: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
-  description: z.string().min(20, "Description must be at least 20 characters."),
+  description: z.string().min(10, "Description must be at least 10 characters."),
   tags: z.array(z.string()).optional(),
 });
 
