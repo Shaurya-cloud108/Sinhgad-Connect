@@ -517,11 +517,6 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
         return feedItems.filter(item => item.author.handle === profileData.handle);
     }, [profileData, feedItems]);
 
-    const userStories = useMemo(() => {
-        if (!profileData) return null;
-        return stories.find(s => s.author.handle === profileData.handle) || null;
-    }, [profileData, stories]);
-
     const isFollowing = useMemo(() => {
         if (!ownProfileData || !profileData || isOwnProfile) return false;
         return ownProfileData.following.includes(profileData.handle);
@@ -621,7 +616,6 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
     }
 
     const primaryEducation = profileData.education.find(e => e.graduationYear);
-    const activeStoryItems = userStories?.items.filter(item => Date.now() - item.timestamp < 24 * 60 * 60 * 1000) || [];
 
   return (
     <div className="bg-secondary/40">
@@ -691,9 +685,8 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="posts" className="w-full">
-              <TabsList className="w-full grid grid-cols-3">
+              <TabsList className="w-full grid grid-cols-2">
                 <TabsTrigger value="posts">Posts ({userPosts.length})</TabsTrigger>
-                <TabsTrigger value="stories">Stories</TabsTrigger>
                 <TabsTrigger value="about">About</TabsTrigger>
               </TabsList>
               <TabsContent value="posts" className="mt-6 space-y-6">
@@ -808,30 +801,6 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
                   </Card>
                 )) : <p className="text-center text-muted-foreground py-8">This user hasn't posted anything yet.</p>}
               </TabsContent>
-              <TabsContent value="stories" className="mt-6">
-                {activeStoryItems.length > 0 ? (
-                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
-                    {activeStoryItems.map((item, index) => (
-                        <div key={item.id} className="aspect-[9/16] relative rounded-md overflow-hidden bg-muted">
-                           {item.type === 'image' && <Image src={item.url} alt={`Story content ${index+1}`} layout="fill" objectFit="cover" />}
-                           {item.type === 'video' && (
-                            <>
-                               <video src={item.url} className="w-full h-full object-cover" />
-                               <div className="absolute bottom-2 right-2 bg-black/50 rounded-full p-1">
-                                   <Video className="h-4 w-4 text-white" />
-                               </div>
-                            </>
-                           )}
-                        </div>
-                    ))}
-                    </div>
-                ) : (
-                    <div className="text-center text-muted-foreground py-8 flex flex-col items-center">
-                        <Camera className="h-12 w-12 mb-4" />
-                        <p>No stories posted yet.</p>
-                    </div>
-                )}
-              </TabsContent>
               <TabsContent value="about" className="mt-6 space-y-6">
                 <Card>
                   <CardHeader>
@@ -929,5 +898,3 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
     </div>
   );
 }
-
-    
