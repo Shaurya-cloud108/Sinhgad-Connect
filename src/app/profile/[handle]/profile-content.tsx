@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2, PlusCircle, Linkedin, Github, Mail, Link as LinkIcon, Camera, Video, UserPlus } from "lucide-react";
-import { ProfileData, FeedItem, communityMembers, EducationEntry, feedItems, stories, Story } from "@/lib/data.tsx";
+import { ProfileData, FeedItem, communityMembers, EducationEntry, feedItems as initialFeedItems, stories as initialStories, Story, StoryItem } from "@/lib/data.tsx";
 import { useState, useContext, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -351,59 +351,65 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
     
     const router = useRouter();
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const [feedItems, setFeedItems] = useState<FeedItem[]>(initialFeedItems);
+    const [stories, setStories] = useState<Story[]>(initialStories);
     
     const isOwnProfile = !handle || handle === ownProfileData?.handle;
 
-    // Memoize the profile data to prevent re-computation on every render
-    const profileData = useMemo(() => {
+    const profileToDisplay = useMemo(() => {
         if (isOwnProfile) {
             return ownProfileData;
         }
-        const member = communityMembers.find(m => m.handle === handle);
-        if (member) {
-            return {
-                name: member.name,
-                avatar: member.avatar,
-                aiHint: member.aiHint,
-                banner: "https://placehold.co/1200x400.png",
-                bannerAiHint: "university campus",
-                handle: member.handle,
-                headline: `${member.field} at ${member.company}`,
-                location: member.location,
-                followers: member.followers,
-                following: [], // This isn't needed for other profiles
-                posts: feedItems.filter(item => item.author.handle === member.handle).length,
-                about: `A passionate ${member.field} professional working in the ${member.industry} industry. Graduate of the class of ${member.graduationYear}.`,
-                experience: [{ role: member.field, company: member.company, duration: "2020 - Present" }], // Placeholder
-                education: [{
-                    degree: member.field,
-                    college: "Sinhgad College of Engineering",
-                    yearRange: `${member.graduationYear - 4} - ${member.graduationYear}`,
-                    graduationYear: member.graduationYear,
-                    graduationMonth: member.graduationMonth,
-                }],
-                socials: { // Placeholder socials
-                    linkedin: "https://www.linkedin.com/",
-                    github: "https://github.com/",
-                  },
-                  contact: { // Placeholder contact
-                    email: `${member.handle}@example.com`,
-                    website: "https://example.com"
-                  },
-            };
-        }
-        return null;
+        return communityMembers.find(m => m.handle === handle);
     }, [handle, ownProfileData, isOwnProfile]);
+
+    const profileData: ProfileData | null = useMemo(() => {
+        if (!profileToDisplay) return null;
+        if (isOwnProfile) return profileToDisplay as ProfileData;
+
+        // Create a full profile object for other users
+        const member = profileToDisplay as typeof communityMembers[0];
+        return {
+            name: member.name,
+            avatar: member.avatar,
+            aiHint: member.aiHint,
+            banner: "https://placehold.co/1200x400.png",
+            bannerAiHint: "university campus",
+            handle: member.handle,
+            headline: `${member.field} at ${member.company}`,
+            location: member.location,
+            followers: member.followers,
+            following: [], // This isn't needed for other profiles
+            posts: feedItems.filter(item => item.author.handle === member.handle).length,
+            about: `A passionate ${member.field} professional working in the ${member.industry} industry. Graduate of the class of ${member.graduationYear}.`,
+            experience: [{ role: member.field, company: member.company, duration: "2020 - Present" }], // Placeholder
+            education: [{
+                degree: member.field,
+                college: "Sinhgad College of Engineering",
+                yearRange: `${member.graduationYear - 4} - ${member.graduationYear}`,
+                graduationYear: member.graduationYear,
+                graduationMonth: member.graduationMonth,
+            }],
+            socials: { // Placeholder socials
+                linkedin: "https://www.linkedin.com/",
+                github: "https://github.com/",
+              },
+              contact: { // Placeholder contact
+                email: `${member.handle}@example.com`,
+                website: "https://example.com"
+              },
+        };
+    }, [profileToDisplay, isOwnProfile, feedItems]);
 
     const userPosts = useMemo(() => {
         if (!profileData) return [];
         return feedItems.filter(item => item.author.handle === profileData.handle);
-    }, [profileData]);
+    }, [profileData, feedItems]);
 
     const userStories = useMemo(() => {
         if (!profileData) return null;
         return stories.find(s => s.author.handle === profileData.handle) || null;
-    }, [profileData]);
+    }, [profileData, stories]);
 
     const isFollowing = useMemo(() => {
         if (!ownProfileData || !profileData || isOwnProfile) return false;
@@ -443,9 +449,7 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
 
     const handleDeletePost = (postId: number) => {
         // In a real app, this would also update the main feed state, probably via context
-        // For now, it only updates the local view on the profile page
-        // setUserPosts(prev => prev.filter(item => item.id !== postId));
-        console.log("Would delete post", postId)
+        setFeedItems(prev => prev.filter(item => item.id !== postId));
     };
 
     const handleMessageClick = () => {
@@ -454,7 +458,7 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
       router.push("/messages");
     }
     
-    if (profileData === undefined) { // Loading state
+    if (profileData === undefined) { // Loading state for context
         return (
             <div className="bg-secondary/40">
                 <div className="max-w-4xl mx-auto">
@@ -479,7 +483,7 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
         );
     }
     
-    if (profileData === null) { // User not found
+    if (profileData === null) { // User not found or not logged in
         return (
             <div className="container py-20 text-center">
                 <h1 className="text-2xl font-bold">User not found</h1>
@@ -758,3 +762,5 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
     </div>
   );
 }
+
+    

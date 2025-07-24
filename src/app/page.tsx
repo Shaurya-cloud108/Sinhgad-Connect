@@ -47,7 +47,7 @@ import {
 
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { useState, useContext, useRef, useEffect } from "react";
+import { useState, useContext, useRef, useEffect, useMemo } from "react";
 import { useSearchParams } from 'next/navigation'
 import React from 'react';
 import { useToast } from "@/hooks/use-toast";
@@ -479,6 +479,26 @@ function HomePageContent() {
   
   const searchParams = useSearchParams();
 
+  const storiesForFeed = useMemo(() => {
+    if (!profileData) return [];
+    
+    // Filter stories to only include the user's own story and stories from people they follow
+    const followedHandles = new Set(profileData.following);
+    const filteredStories = stories.filter(story => {
+      const handle = story.author.handle;
+      return handle === profileData.handle || followedHandles.has(handle);
+    });
+
+    // Ensure the user's story is always first
+    const myStoryIndex = filteredStories.findIndex(story => story.author.handle === profileData.handle);
+    if (myStoryIndex > 0) {
+      const [myStory] = filteredStories.splice(myStoryIndex, 1);
+      filteredStories.unshift(myStory);
+    }
+    
+    return filteredStories;
+  }, [stories, profileData]);
+
   useEffect(() => {
     const postId = searchParams.get('postId');
     if (postId) {
@@ -621,7 +641,7 @@ function HomePageContent() {
       {/* Stories */}
       <div className="py-4 border-b">
         <div className="px-4 flex items-center space-x-4 overflow-x-auto">
-          {stories.map((story) => {
+          {storiesForFeed.map((story) => {
             const isOwn = story.author.handle === profileData.handle;
             const activeItems = story.items.filter(item => Date.now() - item.timestamp < 24 * 60 * 60 * 1000);
             const hasActiveStory = activeItems.length > 0;
@@ -812,3 +832,5 @@ export default function Home() {
         </React.Suspense>
     )
 }
+
+    
