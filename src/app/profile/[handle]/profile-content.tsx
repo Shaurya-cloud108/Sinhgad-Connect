@@ -185,162 +185,162 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl grid-rows-[auto_1fr_auto] max-h-[90vh]">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Edit Profile</DialogTitle>
           <DialogDescription>
             Make changes to your profile here. Click save when you're done.
           </DialogDescription>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <ScrollArea className="pr-6 -mr-6 h-[calc(80vh-150px)]">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <FormLabel>Profile Picture</FormLabel>
-                  <div className="flex items-center gap-4">
-                    <Avatar className="h-20 w-20">
-                      <AvatarImage src={avatarPreview || undefined} />
-                      <AvatarFallback>{profile.name.substring(0, 2)}</AvatarFallback>
-                    </Avatar>
-                    <Button asChild variant="outline">
-                      <label htmlFor="avatar-upload" className="cursor-pointer">
-                        <Upload className="mr-2 h-4 w-4"/>
-                        Upload Image
-                        <Input id="avatar-upload" type="file" className="sr-only" accept="image/*" onChange={(e) => handleImageUpload(e, setAvatarPreview)} />
-                      </label>
-                    </Button>
+        <ScrollArea className="pr-6 -mr-6">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <FormLabel>Profile Picture</FormLabel>
+                    <div className="flex items-center gap-4">
+                      <Avatar className="h-20 w-20">
+                        <AvatarImage src={avatarPreview || undefined} />
+                        <AvatarFallback>{profile.name.substring(0, 2)}</AvatarFallback>
+                      </Avatar>
+                      <Button asChild variant="outline">
+                        <label htmlFor="avatar-upload" className="cursor-pointer">
+                          <Upload className="mr-2 h-4 w-4"/>
+                          Upload Image
+                          <Input id="avatar-upload" type="file" className="sr-only" accept="image/*" onChange={(e) => handleImageUpload(e, setAvatarPreview)} />
+                        </label>
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <FormLabel>Banner Image</FormLabel>
+                    <div className="aspect-[16/6] w-full relative bg-muted rounded-md overflow-hidden flex items-center justify-center">
+                      {bannerPreview && <Image src={bannerPreview} layout="fill" objectFit="cover" alt="Banner preview" />}
+                      <Button asChild variant="outline" className="z-10">
+                        <label htmlFor="banner-upload" className="cursor-pointer">
+                          <Upload className="mr-2 h-4 w-4"/>
+                          Upload Banner
+                          <Input id="banner-upload" type="file" className="sr-only" accept="image/*" onChange={(e) => handleImageUpload(e, setBannerPreview)} />
+                        </label>
+                      </Button>
+                    </div>
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Name</FormLabel>
+                        <FormControl><Input {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="handle"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>User Handle</FormLabel>
+                        <FormControl><Input placeholder="e.g. priya-sharma" {...field} /></FormControl>
+                        <FormDescriptionComponent>This is your unique username on the platform.</FormDescriptionComponent>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="headline"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Headline</FormLabel>
+                        <FormControl><Input {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Location</FormLabel>
+                        <FormControl><Input {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="about"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>About / Bio</FormLabel>
+                        <FormControl><Textarea rows={4} {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <Separator />
+                  
+                  <div>
+                      <h3 className="text-lg font-semibold mb-2">Contact & Socials</h3>
+                      <div className="space-y-4 p-4 border rounded-md">
+                          <FormField control={form.control} name="contact.email" render={({ field }) => (<FormItem><FormLabel>Contact Email</FormLabel><FormControl><Input type="email" placeholder="your.email@example.com" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                          <FormField control={form.control} name="contact.website" render={({ field }) => (<FormItem><FormLabel>Portfolio/Website URL</FormLabel><FormControl><Input placeholder="https://your-portfolio.com" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                          <FormField control={form.control} name="socials.linkedin" render={({ field }) => (<FormItem><FormLabel>LinkedIn URL</FormLabel><FormControl><Input placeholder="https://linkedin.com/in/your-profile" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                          <FormField control={form.control} name="socials.github" render={({ field }) => (<FormItem><FormLabel>GitHub URL</FormLabel><FormControl><Input placeholder="https://github.com/your-username" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                      </div>
+                  </div>
+
+                  <Separator />
+                  
+                  <div>
+                      <h3 className="text-lg font-semibold mb-2">Experience</h3>
+                      <div className="space-y-4">
+                          {expFields.map((field, index) => (
+                            <div key={field.id} className="p-4 border rounded-md relative space-y-2">
+                                <FormField control={form.control} name={`experience.${index}.role`} render={({ field }) => (<FormItem><FormLabel>Role</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                <FormField control={form.control} name={`experience.${index}.company`} render={({ field }) => (<FormItem><FormLabel>Company</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                <FormField control={form.control} name={`experience.${index}.duration`} render={({ field }) => (<FormItem><FormLabel>Duration</FormLabel><FormControl><Input placeholder="e.g. 2020 - Present" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => removeExp(index)}><Trash2 className="h-4 w-4" /></Button>
+                            </div>
+                          ))}
+                           <Button type="button" variant="outline" size="sm" onClick={() => appendExp({ role: '', company: '', duration: '' })}>
+                              <PlusCircle className="mr-2 h-4 w-4" /> Add Experience
+                          </Button>
+                      </div>
+                  </div>
+
+                  <Separator />
+
+                   <div>
+                      <h3 className="text-lg font-semibold mb-2">Education</h3>
+                       <div className="space-y-4">
+                          {eduFields.map((field, index) => (
+                            <div key={field.id} className="p-4 border rounded-md relative space-y-2">
+                                <FormField control={form.control} name={`education.${index}.college`} render={({ field }) => (<FormItem><FormLabel>School / College</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                <FormField control={form.control} name={`education.${index}.degree`} render={({ field }) => (<FormItem><FormLabel>Degree / Certificate</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                <FormField control={form.control} name={`education.${index}.yearRange`} render={({ field }) => (<FormItem><FormLabel>Years Attended</FormLabel><FormControl><Input placeholder="e.g. 2005 - 2009" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                {eduFields.length > 1 && <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => removeEdu(index)}><Trash2 className="h-4 w-4" /></Button>}
+                            </div>
+                          ))}
+                           <Button type="button" variant="outline" size="sm" onClick={() => appendEdu({ college: '', degree: '', yearRange: '' })}>
+                              <PlusCircle className="mr-2 h-4 w-4" /> Add Education
+                          </Button>
+                      </div>
                   </div>
                 </div>
-
-                <div className="space-y-2">
-                  <FormLabel>Banner Image</FormLabel>
-                  <div className="aspect-[16/6] w-full relative bg-muted rounded-md overflow-hidden flex items-center justify-center">
-                    {bannerPreview && <Image src={bannerPreview} layout="fill" objectFit="cover" alt="Banner preview" />}
-                    <Button asChild variant="outline" className="z-10">
-                      <label htmlFor="banner-upload" className="cursor-pointer">
-                        <Upload className="mr-2 h-4 w-4"/>
-                        Upload Banner
-                        <Input id="banner-upload" type="file" className="sr-only" accept="image/*" onChange={(e) => handleImageUpload(e, setBannerPreview)} />
-                      </label>
-                    </Button>
-                  </div>
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Name</FormLabel>
-                      <FormControl><Input {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="handle"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>User Handle</FormLabel>
-                      <FormControl><Input placeholder="e.g. priya-sharma" {...field} /></FormControl>
-                      <FormDescriptionComponent>This is your unique username on the platform.</FormDescriptionComponent>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="headline"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Headline</FormLabel>
-                      <FormControl><Input {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="location"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Location</FormLabel>
-                      <FormControl><Input {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="about"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>About / Bio</FormLabel>
-                      <FormControl><Textarea rows={4} {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <Separator />
-                
-                <div>
-                    <h3 className="text-lg font-semibold mb-2">Contact & Socials</h3>
-                    <div className="space-y-4 p-4 border rounded-md">
-                        <FormField control={form.control} name="contact.email" render={({ field }) => (<FormItem><FormLabel>Contact Email</FormLabel><FormControl><Input type="email" placeholder="your.email@example.com" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                        <FormField control={form.control} name="contact.website" render={({ field }) => (<FormItem><FormLabel>Portfolio/Website URL</FormLabel><FormControl><Input placeholder="https://your-portfolio.com" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                        <FormField control={form.control} name="socials.linkedin" render={({ field }) => (<FormItem><FormLabel>LinkedIn URL</FormLabel><FormControl><Input placeholder="https://linkedin.com/in/your-profile" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                        <FormField control={form.control} name="socials.github" render={({ field }) => (<FormItem><FormLabel>GitHub URL</FormLabel><FormControl><Input placeholder="https://github.com/your-username" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                    </div>
-                </div>
-
-                <Separator />
-                
-                <div>
-                    <h3 className="text-lg font-semibold mb-2">Experience</h3>
-                    <div className="space-y-4">
-                        {expFields.map((field, index) => (
-                          <div key={field.id} className="p-4 border rounded-md relative space-y-2">
-                              <FormField control={form.control} name={`experience.${index}.role`} render={({ field }) => (<FormItem><FormLabel>Role</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
-                              <FormField control={form.control} name={`experience.${index}.company`} render={({ field }) => (<FormItem><FormLabel>Company</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
-                              <FormField control={form.control} name={`experience.${index}.duration`} render={({ field }) => (<FormItem><FormLabel>Duration</FormLabel><FormControl><Input placeholder="e.g. 2020 - Present" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                              <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => removeExp(index)}><Trash2 className="h-4 w-4" /></Button>
-                          </div>
-                        ))}
-                         <Button type="button" variant="outline" size="sm" onClick={() => appendExp({ role: '', company: '', duration: '' })}>
-                            <PlusCircle className="mr-2 h-4 w-4" /> Add Experience
-                        </Button>
-                    </div>
-                </div>
-
-                <Separator />
-
-                 <div>
-                    <h3 className="text-lg font-semibold mb-2">Education</h3>
-                     <div className="space-y-4">
-                        {eduFields.map((field, index) => (
-                          <div key={field.id} className="p-4 border rounded-md relative space-y-2">
-                              <FormField control={form.control} name={`education.${index}.college`} render={({ field }) => (<FormItem><FormLabel>School / College</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
-                              <FormField control={form.control} name={`education.${index}.degree`} render={({ field }) => (<FormItem><FormLabel>Degree / Certificate</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
-                              <FormField control={form.control} name={`education.${index}.yearRange`} render={({ field }) => (<FormItem><FormLabel>Years Attended</FormLabel><FormControl><Input placeholder="e.g. 2005 - 2009" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                              {eduFields.length > 1 && <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => removeEdu(index)}><Trash2 className="h-4 w-4" /></Button>}
-                          </div>
-                        ))}
-                         <Button type="button" variant="outline" size="sm" onClick={() => appendEdu({ college: '', degree: '', yearRange: '' })}>
-                            <PlusCircle className="mr-2 h-4 w-4" /> Add Education
-                        </Button>
-                    </div>
-                </div>
-              </div>
-            </ScrollArea>
-             <DialogFooter className="pt-4 pr-6">
-              <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
-              <Button type="submit">Save Changes</Button>
-            </DialogFooter>
-          </form>
-        </Form>
+            </form>
+          </Form>
+        </ScrollArea>
+        <DialogFooter>
+          <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
+          <Button type="submit" form="edit-profile-form" onClick={form.handleSubmit(onSubmit)}>Save Changes</Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
