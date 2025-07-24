@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2, PlusCircle, Linkedin, Github, Mail, Link as LinkIcon, Camera, Video, UserPlus, ImageIcon, Award, X } from "lucide-react";
-import { CommunityMember, FeedItem, EducationEntry, feedItems as initialFeedItems, stories as initialStories, Story, StoryItem, JobListing } from "@/lib/data.tsx";
+import { CommunityMember, FeedItem, EducationEntry, Story, StoryItem, JobListing } from "@/lib/data.tsx";
 import { useState, useContext, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -467,7 +467,7 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
     const [followSheetTitle, setFollowSheetTitle] = useState<'Followers' | 'Following'>('Followers');
     const [followSheetHandles, setFollowSheetHandles] = useState<string[]>([]);
 
-    const [feedItems, setFeedItems] = useState<FeedItem[]>(initialFeedItems);
+    const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
     
     const isOwnProfile = useMemo(() => {
         return !params.handle || params.handle === ownProfileData?.handle;
@@ -479,11 +479,15 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
       return communityMembers.find(m => m.handle === handle) || null;
     }, [params, ownProfileData, isOwnProfile, communityMembers]);
 
+    useEffect(() => {
+        if(profileData){
+            setFeedItems(initialFeedItems.filter(item => item.author.handle === profileData.handle))
+        } else {
+            setFeedItems([])
+        }
 
-    const userPosts = useMemo(() => {
-        if (!profileData) return [];
-        return feedItems.filter(item => item.author.handle === profileData.handle);
-    }, [profileData, feedItems]);
+    },[profileData])
+
 
     const isFollowing = useMemo(() => {
         if (!ownProfileData || !profileData || isOwnProfile) return false;
@@ -620,7 +624,7 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
     const primaryEducation = profileData.education.find(e => e.graduationYear);
     const mutualsText = () => {
         if (mutualFollowers.length === 0) return '';
-        const firstMutualName = mutualFollowers[0].name.split(' ')[0] || mutualFollowers[0].name;
+        const firstMutualName = (mutualFollowers[0].name || "").split(' ')[0];
         if (mutualFollowers.length === 1) return `Followed by ${firstMutualName}`;
         if (mutualFollowers.length === 2) return `Followed by ${firstMutualName} and 1 other you follow`;
         return `Followed by ${firstMutualName} and ${mutualFollowers.length -1} others you follow`;
@@ -733,7 +737,7 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
           <CardContent>
             <Tabs defaultValue="posts" className="w-full">
               <TabsList className="w-full grid grid-cols-2">
-                <TabsTrigger value="posts">Posts ({userPosts.length})</TabsTrigger>
+                <TabsTrigger value="posts">Posts ({feedItems.length})</TabsTrigger>
                 <TabsTrigger value="about">About</TabsTrigger>
               </TabsList>
               <TabsContent value="posts" className="mt-6 space-y-6">
@@ -769,7 +773,7 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
                         </CardContent>
                     </Card>
                  )}
-                 {userPosts.length > 0 ? userPosts.map((item) => (
+                 {feedItems.length > 0 ? feedItems.map((item) => (
                   <Card key={item.id}>
                     <CardHeader className="p-4 flex flex-row items-center justify-between">
                       <div className="flex items-center space-x-3">

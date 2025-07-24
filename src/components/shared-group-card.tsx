@@ -1,10 +1,11 @@
 
 "use client";
 
-import { networkingGroups } from "@/lib/data.tsx";
+// This component has been removed as the networking page was removed.
+// The component is kept for now to avoid breaking existing message shares.
+
 import { Card, CardContent } from "./ui/card";
 import { Users } from "lucide-react";
-import Link from "next/link";
 import { useContext } from "react";
 import { AppContext } from "@/context/AppContext";
 import { useRouter } from "next/navigation";
@@ -14,24 +15,11 @@ type SharedGroupCardProps = {
 };
 
 export function SharedGroupCard({ groupId }: SharedGroupCardProps) {
-  const group = networkingGroups.find((item) => item.title === groupId);
   const { setSelectedConversationByName } = useContext(AppContext);
   const router = useRouter();
 
-  if (!group) {
-    return (
-      <Card className="my-2 bg-background/50">
-        <CardContent className="p-3">
-          <p className="text-sm text-muted-foreground italic">
-            This group is no longer available.
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
-
   const handleGoToChat = () => {
-    setSelectedConversationByName(group.title);
+    setSelectedConversationByName(groupId);
     router.push('/messages');
   }
 
@@ -43,8 +31,8 @@ export function SharedGroupCard({ groupId }: SharedGroupCardProps) {
                     <Users className="h-6 w-6 text-muted-foreground" />
                 </div>
                 <div className="space-y-1 overflow-hidden">
-                    <p className="font-semibold text-sm line-clamp-1">{group.title}</p>
-                    <p className="text-xs text-muted-foreground line-clamp-2">{group.description}</p>
+                    <p className="font-semibold text-sm line-clamp-1">{groupId}</p>
+                    <p className="text-xs text-muted-foreground line-clamp-2">Shared group chat.</p>
                 </div>
             </div>
         </CardContent>

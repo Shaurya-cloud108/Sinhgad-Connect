@@ -1,16 +1,18 @@
 
 "use client";
 
-import { jobListings } from "@/lib/data.tsx";
+import { AppContext } from "@/context/AppContext";
 import { Card, CardContent } from "./ui/card";
 import { Briefcase, MapPin } from "lucide-react";
 import Link from "next/link";
+import { useContext } from "react";
 
 type SharedJobCardProps = {
   jobId: number;
 };
 
 export function SharedJobCard({ jobId }: SharedJobCardProps) {
+  const { jobListings } = useContext(AppContext);
   const job = jobListings.find((item) => item.id === jobId);
 
   if (!job) {

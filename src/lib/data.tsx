@@ -2,7 +2,6 @@
 "use client";
 
 import React from 'react';
-import { Conversation, MessagesData } from "@/context/AppContext";
 
 export type Event = {
   id: string;
@@ -66,7 +65,7 @@ export type JobListing = {
   applicationUrl?: string;
 };
 
-export const jobListings: JobListing[] = [
+export const initialJobListings: JobListing[] = [
   {
     id: 1,
     title: "Senior Frontend Engineer",
@@ -252,85 +251,6 @@ export type EducationEntry = {
   graduationMonth?: number;
 };
 
-export type ProfileData = {
-  name: string;
-  avatar: string;
-  aiHint: string;
-  banner: string;
-  bannerAiHint: string;
-  handle: string;
-  headline: string;
-  location: string;
-  followers: string[]; // Now an array of handles
-  following: string[]; // Now an array of handles
-  posts: number;
-  about: string;
-  experience: {
-    role: string;
-    company: string;
-    duration: string;
-  }[];
-  education: EducationEntry[];
-  socials: {
-    linkedin: string;
-    github: string;
-  };
-  contact: {
-    email: string;
-    website?: string;
-  };
-};
-
-
-export const profileData: ProfileData = {
-  name: "Priya Sharma",
-  avatar: "https://placehold.co/150x150.png",
-  aiHint: "professional woman",
-  banner: "https://placehold.co/1000x300.png",
-  bannerAiHint: "university campus",
-  handle: "priya-sharma",
-  headline: "Senior Software Engineer at Google | Mentor",
-  location: "San Francisco Bay Area",
-  followers: ["rohan-verma", "anjali-mehta", "vikram-singh", "sneha-reddy"],
-  following: ["rohan-verma", "anjali-mehta", "kavya-iyer", "sunita-narayan"],
-  posts: 42,
-  about: "Passionate about building scalable systems and helping the next generation of engineers. Graduated in 2009 with a degree in Computer Engineering. Feel free to reach out for advice on careers in tech, interview prep, or anything else!",
-  experience: [
-    {
-      role: "Senior Software Engineer",
-      company: "Google",
-      duration: "2015 - Present",
-    },
-    {
-      role: "Software Engineer",
-      company: "Innovate Inc.",
-      duration: "2012 - 2015",
-    },
-  ],
-  education: [
-    {
-      degree: "B.E. Computer Engineering",
-      college: "Sinhgad College of Engineering",
-      yearRange: "2005 - 2009",
-      graduationYear: 2009,
-      graduationMonth: 6,
-    },
-     {
-      degree: "M.S. Computer Science",
-      college: "Stanford University",
-      yearRange: "2010 - 2012",
-    },
-  ],
-  socials: {
-    linkedin: "https://www.linkedin.com/in/priya-sharma-example/",
-    github: "https://github.com/priyasharma-example",
-  },
-  contact: {
-    email: "priya.sharma@example.com",
-    website: "https://priya-sharma.dev"
-  },
-};
-
 export type CommunityMember = {
     name: string;
     avatar: string;
@@ -341,14 +261,13 @@ export type CommunityMember = {
     industry: string;
     company: string;
     location: string;
-    followers: string[];
-    following: string[];
+    followers: string[]; // Array of user handles
+    following: string[]; // Array of user handles
     aiHint: string;
     handle: string;
     banner: string;
     bannerAiHint: string;
     headline: string;
-    posts: number;
     about: string;
     experience: {
         role: string;
@@ -366,6 +285,9 @@ export type CommunityMember = {
     };
 };
 
+export type ProfileData = Omit<CommunityMember, 'fallback' | 'graduationYear' | 'graduationMonth' | 'field' | 'industry' | 'company'>;
+
+
 export const initialCommunityMembers: CommunityMember[] = [
   {
     name: "Priya Sharma",
@@ -379,7 +301,6 @@ export const initialCommunityMembers: CommunityMember[] = [
     aiHint: "professional woman",
     banner: "https://placehold.co/1000x300.png",
     bannerAiHint: "university campus",
-    posts: 42,
     about: "Passionate about building scalable systems and helping the next generation of engineers. Graduated in 2009 with a degree in Computer Engineering. Feel free to reach out for advice on careers in tech, interview prep, or anything else!",
     experience: [
         { role: "Senior Software Engineer", company: "Google", duration: "2015 - Present" },
@@ -414,7 +335,6 @@ export const initialCommunityMembers: CommunityMember[] = [
     banner: "https://placehold.co/1000x300.png",
     bannerAiHint: "modern factory",
     headline: "Mechanical Engineer at Tesla",
-    posts: 15,
     about: "Working on the future of transportation. Sinhgad Mechanical Engg. '12. Fascinated by robotics and sustainable energy.",
     experience: [{ role: "Mechanical Engineer", company: "Tesla", duration: "2018 - Present" }],
     education: [{ degree: "B.E. Mechanical Engineering", college: "Sinhgad College of Engineering", yearRange: "2008 - 2012", graduationYear: 2012, graduationMonth: 6 }],
@@ -438,7 +358,6 @@ export const initialCommunityMembers: CommunityMember[] = [
     banner: "https://placehold.co/1000x300.png",
     bannerAiHint: "city skyline",
     headline: "Network Architect at Verizon",
-    posts: 8,
     about: "Designing the communication networks of tomorrow. Proud alumna of Sinhgad E&TC batch of 2015.",
     experience: [{ role: "Network Architect", company: "Verizon", duration: "2019 - Present" }],
     education: [{ degree: "B.E. Electronics & Telecommunication", college: "Sinhgad College of Engineering", yearRange: "2011 - 2015", graduationYear: 2015, graduationMonth: 6 }],
@@ -462,14 +381,12 @@ export const initialCommunityMembers: CommunityMember[] = [
     banner: "https://placehold.co/1000x300.png",
     bannerAiHint: "library books",
     headline: "IT Student | Aspiring AI Engineer",
-    posts: 3,
     about: "Currently in my third year of IT engineering. Passionate about machine learning and looking for internship opportunities!",
     experience: [],
     education: [{ degree: "B.E. Information Technology", college: "Sinhgad College of Engineering", yearRange: "2021 - 2025", graduationYear: 2025, graduationMonth: 6 }],
     socials: { linkedin: "https://www.linkedin.com/", github: "https://github.com/"},
     contact: { email: "kavya.iyer@example.com" },
   },
-  // Add other members with full profile data
   {
     name: "Vikram Singh",
     avatar: "https://placehold.co/100x100.png",
@@ -487,7 +404,6 @@ export const initialCommunityMembers: CommunityMember[] = [
     banner: "https://placehold.co/1000x300.png",
     bannerAiHint: "stock market graph",
     headline: "VP of Technology at Goldman Sachs",
-    posts: 12,
     about: "Leading technology initiatives in the financial sector. Sinhgad IT '08.",
     experience: [{ role: "VP of Technology", company: "Goldman Sachs", duration: "2016 - Present" }],
     education: [{ degree: "B.E. Information Technology", college: "Sinhgad College of Engineering", yearRange: "2004 - 2008", graduationYear: 2008, graduationMonth: 6 }],
@@ -511,7 +427,6 @@ export const initialCommunityMembers: CommunityMember[] = [
     banner: "https://placehold.co/1000x300.png",
     bannerAiHint: "server room",
     headline: "Cloud Support Engineer at AWS",
-    posts: 5,
     about: "Helping customers succeed on the cloud. Comp Engg '18.",
     experience: [{ role: "Cloud Support Engineer", company: "Amazon", duration: "2019 - Present" }],
     education: [{ degree: "B.E. Computer Engineering", college: "Sinhgad College of Engineering", yearRange: "2014 - 2018", graduationYear: 2018, graduationMonth: 6 }],
@@ -535,7 +450,6 @@ export const initialCommunityMembers: CommunityMember[] = [
     banner: "https://placehold.co/1000x300.png",
     bannerAiHint: "code on screen",
     headline: "Computer Engineering Student",
-    posts: 1,
     about: "Second year student exploring the world of software development.",
     experience: [],
     education: [{ degree: "B.E. Computer Engineering", college: "Sinhgad College of Engineering", yearRange: "2022 - 2026", graduationYear: 2026, graduationMonth: 6 }],
@@ -559,7 +473,6 @@ export const initialCommunityMembers: CommunityMember[] = [
     banner: "https://placehold.co/1000x300.png",
     bannerAiHint: "construction site",
     headline: "Project Manager at L&T Construction",
-    posts: 7,
     about: "Building the infrastructure of India. Civil '13.",
     experience: [{ role: "Project Manager", company: "L&T Construction", duration: "2015 - Present" }],
     education: [{ degree: "B.E. Civil Engineering", college: "Sinhgad College of Engineering", yearRange: "2009 - 2013", graduationYear: 2013, graduationMonth: 6 }],
@@ -583,7 +496,6 @@ export const initialCommunityMembers: CommunityMember[] = [
     banner: "https://placehold.co/1000x300.png",
     bannerAiHint: "modern office building",
     headline: "CEO at Innovate Inc.",
-    posts: 25,
     about: "Founder of Innovate Inc., focused on sustainable technology. Comp Engg '09.",
     experience: [{ role: "CEO", company: "Innovate Inc.", duration: "2014 - Present" }],
     education: [{ degree: "B.E. Computer Engineering", college: "Sinhgad College of Engineering", yearRange: "2005 - 2009", graduationYear: 2009, graduationMonth: 6 }],
@@ -607,7 +519,6 @@ export const initialCommunityMembers: CommunityMember[] = [
     banner: "https://placehold.co/1000x300.png",
     bannerAiHint: "event stage",
     headline: "Official Events Organizer",
-    posts: 5,
     about: "We organize events to keep our alumni connected.",
     experience: [],
     education: [],
@@ -631,7 +542,6 @@ export const initialCommunityMembers: CommunityMember[] = [
     banner: "https://placehold.co/1000x300.png",
     bannerAiHint: "office lobby",
     headline: "Curated Job Opportunities",
-    posts: 20,
     about: "Connecting talented alumni with great career opportunities.",
     experience: [],
     education: [],
@@ -640,7 +550,7 @@ export const initialCommunityMembers: CommunityMember[] = [
   },
 ];
 
-export const feedItems: FeedItem[] = [
+export const initialFeedItems: FeedItem[] = [
   {
     id: 1,
     author: {
@@ -724,68 +634,19 @@ export const feedItems: FeedItem[] = [
   }
 ];
 
-const allUsersAsStories: Story[] = initialCommunityMembers.map((member, index) => ({
-    id: index + 1,
-    author: {
-        name: member.name,
-        avatar: member.avatar,
-        handle: member.handle,
-        aiHint: member.aiHint,
-    },
-    items: [],
-    viewers: [],
-}));
-
-// Let's add a story for one user to start with
-const rohanVermaStory = allUsersAsStories.find(s => s.author.handle === 'rohan-verma');
-if (rohanVermaStory) {
-    rohanVermaStory.items.push({
-        id: Date.now(),
-        url: 'https://placehold.co/400x700.png',
-        type: 'image',
-        timestamp: Date.now() - 12 * 60 * 60 * 1000, // 12 hours ago
-    });
-    rohanVermaStory.viewers = [
-        { name: "Priya Sharma", avatar: "https://placehold.co/100x100.png" },
-        { name: "Anjali Mehta", avatar: "https://placehold.co/100x100.png" },
-    ];
-}
-
-// Ensure the current user (Priya Sharma) is in the list and first
-const currentUserIndex = allUsersAsStories.findIndex(s => s.author.handle === profileData.handle);
-if (currentUserIndex !== -1) {
-    const [currentUserStory] = allUsersAsStories.splice(currentUserIndex, 1);
-    allUsersAsStories.unshift(currentUserStory);
-} else {
-    allUsersAsStories.unshift({
-        id: 0,
-        author: {
-            name: profileData.name,
-            avatar: profileData.avatar,
-            handle: profileData.handle,
-            aiHint: profileData.aiHint,
-        },
-        items: [],
-        viewers: [],
-    });
-}
-
-export const stories: Story[] = allUsersAsStories;
-
-
-export const conversationsData: Conversation[] = [
+export const initialConversationsData = [
     { name: 'Rohan Verma', avatar: 'https://placehold.co/100x100.png', aiHint: 'professional man', lastMessage: 'You\'re welcome! Let me know if you need more help.', time: '2h', unread: 0, isGroup: false },
     { name: 'Kavya Iyer', avatar: 'https://placehold.co/100x100.png', aiHint: 'female student', lastMessage: 'Thank you for the mentorship!', time: '1d', unread: 2, isGroup: false },
 ];
 
-export const messagesData: MessagesData = {
+export const initialMessagesData = {
   "Rohan Verma": [
     { senderId: "rohan-verma", senderName: "Rohan Verma", text: "Thanks for the resume tips!" },
-    { senderId: profileData.handle, senderName: profileData.name, text: "You're welcome! Let me know if you need more help." },
+    { senderId: "priya-sharma", senderName: "Priya Sharma", text: "You're welcome! Let me know if you need more help." },
   ],
   "Kavya Iyer": [
       { senderId: 'kavya-iyer', senderName: 'Kavya Iyer', text: "Hi Priya! I had a question about my project." },
-      { senderId: profileData.handle, senderName: profileData.name, text: "Of course, ask away!" },
+      { senderId: "priya-sharma", senderName: "Priya Sharma", text: "Of course, ask away!" },
       { senderId: 'kavya-iyer', senderName: 'Kavya Iyer', text: "Thank you for the mentorship!" },
   ],
 };

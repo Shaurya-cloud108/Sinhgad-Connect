@@ -51,7 +51,7 @@ import { useState, useContext, useRef, useEffect, useMemo } from "react";
 import { useSearchParams } from 'next/navigation'
 import React from 'react';
 import { useToast } from "@/hooks/use-toast";
-import { stories as initialStories, feedItems as initialFeedItems, FeedItem, Story, Comment, StoryViewer, JobListing, StoryItem } from "@/lib/data.tsx";
+import { initialFeedItems, FeedItem, Story, Comment, StoryViewer, JobListing, StoryItem } from "@/lib/data.tsx";
 import Image from "next/image";
 import { ProfileContext } from "@/context/ProfileContext";
 import { ShareDialog } from "@/components/share-dialog";
@@ -383,7 +383,7 @@ function StoryViewerDialog({ story, open, onOpenChange, onDeleteStoryItem, curre
 
   return (
     <>
-      <Dialog open={open} onOpenChange={(val) => { if (!val) onOpenChange(false)}}>
+      <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="p-0 border-0 max-w-md w-full h-[90vh] sm:h-[80vh] bg-black" onInteractOutside={(e) => onOpenChange(false)}>
           <DialogHeader className="sr-only">
              <DialogTitle>Story by {story.author.name}</DialogTitle>
@@ -480,15 +480,47 @@ function HomePageContent() {
   const [isPostJobDialogOpen, setIsPostJobDialogOpen] = useState(false);
   const [isCreateStoryDialogOpen, setIsCreateStoryDialogOpen] = useState(false);
   const [feedItems, setFeedItems] = useState<FeedItem[]>(initialFeedItems);
-  const [stories, setStories] = useState<Story[]>(initialStories);
+  const [stories, setStories] = useState<Story[]>([]);
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
   const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
   const { profileData } = useContext(ProfileContext);
-  const { addJobListing } = useContext(AppContext);
+  const { addJobListing, communityMembers } = useContext(AppContext);
   const [activeCommentPostId, setActiveCommentPostId] = useState<number | null>(null);
   const router = useRouter();
   
   const searchParams = useSearchParams();
+
+  useEffect(() => {
+    // Initialize stories from community members
+    const allUsersAsStories: Story[] = communityMembers.map((member, index) => ({
+        id: index + 1,
+        author: {
+            name: member.name,
+            avatar: member.avatar,
+            handle: member.handle,
+            aiHint: member.aiHint,
+        },
+        items: [], // Start with no items
+        viewers: [],
+    }));
+
+     // Find Rohan Verma's story and add a demo item if it exists
+    const rohanVermaStory = allUsersAsStories.find(s => s.author.handle === 'rohan-verma');
+    if (rohanVermaStory) {
+        rohanVermaStory.items.push({
+            id: Date.now(),
+            url: 'https://placehold.co/400x700.png',
+            type: 'image',
+            timestamp: Date.now() - 12 * 60 * 60 * 1000, // 12 hours ago
+        });
+        rohanVermaStory.viewers = [
+            { name: "Priya Sharma", avatar: "https://placehold.co/100x100.png" },
+            { name: "Anjali Mehta", avatar: "https://placehold.co/100x100.png" },
+        ];
+    }
+    setStories(allUsersAsStories);
+  }, [communityMembers]);
+
 
   const storiesForFeed = useMemo(() => {
     if (!profileData) return [];
@@ -506,6 +538,12 @@ function HomePageContent() {
     if (myStoryIndex > 0) {
       const [myStory] = filteredStories.splice(myStoryIndex, 1);
       filteredStories.unshift(myStory);
+    } else if (myStoryIndex === -1) {
+        // If the user has no story, create a placeholder for them
+        const myStoryPlaceholder = stories.find(s => s.author.handle === profileData.handle);
+        if (myStoryPlaceholder) {
+            filteredStories.unshift(myStoryPlaceholder);
+        }
     }
     
     return filteredStories;
@@ -575,6 +613,7 @@ function HomePageContent() {
             };
             newStories[userStoryIndex] = updatedStory;
         } else {
+            // This case should ideally not happen if stories are initialized for all members
             const newStory: Story = {
                 id: Date.now(),
                 author: { name: profileData.name, avatar: profileData.avatar, handle: profileData.handle, aiHint: profileData.aiHint },

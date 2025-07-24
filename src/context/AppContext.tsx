@@ -2,8 +2,10 @@
 "use client";
 
 import React, { createContext, useState, ReactNode, useContext, useMemo, useCallback } from 'react';
-import { conversationsData as initialConversations, messagesData as initialMessagesData, initialCommunityMembers, jobListings as initialJobListings, JobListing, CommunityMember } from '@/lib/data.tsx';
+import { initialConversationsData, initialMessagesData, initialCommunityMembers, initialJobListings, JobListing, CommunityMember } from '@/lib/data.tsx';
+import type { Conversation as ConvType, MessagesData as MsgType } from '@/lib/data';
 import { ProfileContext } from './ProfileContext';
+
 
 // Types
 export type Conversation = {
@@ -66,7 +68,7 @@ export const AppContext = createContext<AppContextType>({
 // Provider
 export const AppProvider = ({ children }: { children: ReactNode }) => {
     const { profileData } = useContext(ProfileContext);
-    const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
+    const [conversations, setConversations] = useState<Conversation[]>(initialConversationsData);
     const [messagesData, setMessagesData] = useState<MessagesData>(initialMessagesData);
     const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
     const [jobListings, setJobListings] = useState<JobListing[]>(initialJobListings);
