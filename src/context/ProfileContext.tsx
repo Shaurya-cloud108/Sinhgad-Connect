@@ -2,7 +2,7 @@
 "use client";
 
 import React, { createContext, useState, ReactNode, useEffect, useMemo, useContext } from 'react';
-import { CommunityMember } from '@/lib/data.tsx';
+import type { CommunityMember } from '@/lib/data.tsx';
 import { AppContext } from './AppContext';
 
 type ProfileContextType = {
