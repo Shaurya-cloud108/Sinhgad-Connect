@@ -17,7 +17,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { ProfileContext } from "@/context/ProfileContext";
-import { communityMembers, CommunityMember } from "@/lib/data.tsx";
+import { CommunityMember } from "@/lib/data.tsx";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Tooltip,

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import Link from "next/link";
 import {
   Card,
@@ -15,11 +15,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { communityMembers, CommunityMember } from "@/lib/data.tsx";
+import { CommunityMember } from "@/lib/data.tsx";
 import { getStatusEmoji } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AppContext } from "@/context/AppContext";
 
 function SearchPageContent() {
+  const { communityMembers } = useContext(AppContext);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredMembers, setFilteredMembers] = useState<CommunityMember[]>(communityMembers);
 
@@ -36,7 +38,7 @@ function SearchPageContent() {
       member.company.toLowerCase().includes(lowercasedQuery)
     );
     setFilteredMembers(results);
-  }, [searchQuery]);
+  }, [searchQuery, communityMembers]);
 
 
   return (

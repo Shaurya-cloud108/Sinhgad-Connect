@@ -36,13 +36,12 @@ import { PostJobDialog } from "@/components/post-job-dialog";
 import { AppContext } from "@/context/AppContext";
 import { ProfileContext } from "@/context/ProfileContext";
 import Link from "next/link";
-import { communityMembers } from "@/lib/data.tsx";
 
 function JobsPageContent() {
   const [isPostJobOpen, setIsPostJobOpen] = useState(false);
   const [isViewDetailsOpen, setIsViewDetailsOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<JobListing | null>(null);
-  const { jobListings, addJobListing } = useContext(AppContext);
+  const { jobListings, addJobListing, communityMembers } = useContext(AppContext);
   const { profileData } = useContext(ProfileContext);
 
   const [filteredJobListings, setFilteredJobListings] = useState<JobListing[]>(jobListings);

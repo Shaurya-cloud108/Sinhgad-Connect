@@ -20,7 +20,6 @@ import { AppContext, Message, Conversation } from "@/context/AppContext";
 import { ProfileContext } from "@/context/ProfileContext";
 import { Check, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { communityMembers } from '@/lib/data.tsx';
 
 type ShareDialogProps = {
   contentType: 'post' | 'job' | 'event' | 'story' | 'group' | 'profile';
@@ -36,7 +35,7 @@ type ShareTarget = {
 };
 
 export function ShareDialog({ contentType, contentId, children }: ShareDialogProps) {
-  const { conversations, setMessagesData, setConversations } = useContext(AppContext);
+  const { conversations, setMessagesData, setConversations, communityMembers } = useContext(AppContext);
   const { profileData } = useContext(ProfileContext);
   const { toast } = useToast();
   
@@ -74,7 +73,7 @@ export function ShareDialog({ contentType, contentId, children }: ShareDialogPro
     return Array.from(targetsMap.values()).filter(target => 
       target.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [conversations, profileData, searchQuery]);
+  }, [conversations, profileData, searchQuery, communityMembers]);
 
 
   const handleSelectTarget = (name: string) => {

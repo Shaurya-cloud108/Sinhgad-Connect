@@ -6,8 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2, PlusCircle, Linkedin, Github, Mail, Link as LinkIcon, Camera, Video, UserPlus, ImageIcon, Award } from "lucide-react";
-import { ProfileData, FeedItem, communityMembers, EducationEntry, feedItems as initialFeedItems, stories as initialStories, Story, StoryItem, JobListing } from "@/lib/data.tsx";
+import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2, PlusCircle, Linkedin, Github, Mail, Link as LinkIcon, Camera, Video, UserPlus, ImageIcon, Award, X } from "lucide-react";
+import { ProfileData, FeedItem, EducationEntry, feedItems as initialFeedItems, stories as initialStories, Story, StoryItem, JobListing } from "@/lib/data.tsx";
 import { useState, useContext, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -455,7 +455,7 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
 
 export default function ProfilePageContent({ handle }: { handle: string }) {
     const { profileData: ownProfileData, setProfileData } = useContext(ProfileContext);
-    const { setSelectedConversationByName, addJobListing } = useContext(AppContext);
+    const { setSelectedConversationByName, addJobListing, communityMembers, setCommunityMembers } = useContext(AppContext);
     
     const router = useRouter();
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -472,7 +472,7 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
             return ownProfileData;
         }
         return communityMembers.find(m => m.handle === handle);
-    }, [handle, ownProfileData, isOwnProfile]);
+    }, [handle, ownProfileData, isOwnProfile, communityMembers]);
 
     const profileData: ProfileData | null = useMemo(() => {
         if (!profileToDisplay) return null;
@@ -532,21 +532,23 @@ export default function ProfilePageContent({ handle }: { handle: string }) {
     const handleFollowToggle = () => {
         if (!ownProfileData || !profileData || isOwnProfile) return;
 
+        // Update the logged-in user's following list
         setProfileData(prev => {
             if (!prev) return null;
-            
             const newFollowingList = isFollowing
                 ? prev.following.filter(h => h !== profileData.handle)
                 : [...prev.following, profileData.handle];
-            
             return { ...prev, following: newFollowingList };
         });
         
-        // This is a mock update for the other user's follower count. In a real app, this would be a backend update.
-        const targetMember = communityMembers.find(m => m.handle === profileData.handle);
-        if (targetMember) {
-            targetMember.followers += isFollowing ? -1 : 1;
-        }
+        // Update the viewed user's follower count in the global context
+        setCommunityMembers(prev => 
+            prev.map(member => 
+                member.handle === profileData.handle
+                ? { ...member, followers: member.followers + (isFollowing ? -1 : 1) }
+                : member
+            )
+        );
     };
 
     const handleLogout = () => {
