@@ -3,8 +3,8 @@
 
 import ProfilePageContent from './profile-content';
 
-export default function ProfilePage({ params: { handle } }: { params: { handle: string } }) {
-  // This is now a Client Component to handle hooks and context.
-  // It passes the handle to the main content component.
-  return <ProfilePageContent handle={handle} />;
+// This page component is kept simple to pass the params down to the
+// main content component, which is also a client component and handles all logic.
+export default function ProfilePage({ params }: { params: { handle: string } }) {
+  return <ProfilePageContent params={params} />;
 }
