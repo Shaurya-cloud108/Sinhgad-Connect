@@ -326,16 +326,15 @@ function StoryViewerDialog({ story, open, onOpenChange, onDeleteStoryItem, curre
 
     if (!currentItem || !open) return;
 
+    let timer: NodeJS.Timeout;
+    let interval: NodeJS.Timer;
+
     if (currentItem.type === 'image') {
-        const timer = setTimeout(handleNext, 15000); // 15-second timer for images
-        const interval = setInterval(() => {
+        timer = setTimeout(handleNext, 15000); // 15-second timer for images
+        interval = setInterval(() => {
             setProgress(p => p + 100 / (15000 / 50));
         }, 50);
 
-        return () => {
-            clearTimeout(timer);
-            clearInterval(interval);
-        };
     } else if (currentItem.type === 'video' && videoRef.current) {
         const videoElement = videoRef.current;
         
@@ -362,6 +361,12 @@ function StoryViewerDialog({ story, open, onOpenChange, onDeleteStoryItem, curre
             videoElement.removeEventListener('loadeddata', onLoadedData);
         };
     }
+    
+    return () => {
+        clearTimeout(timer);
+        clearInterval(interval);
+    };
+
 }, [currentItemIndex, activeItems, open]);
 
 
@@ -380,6 +385,9 @@ function StoryViewerDialog({ story, open, onOpenChange, onDeleteStoryItem, curre
     <>
       <Dialog open={open} onOpenChange={(val) => { if (!val) onOpenChange(false)}}>
         <DialogContent className="p-0 border-0 max-w-md w-full h-[90vh] sm:h-[80vh] bg-black" onInteractOutside={(e) => onOpenChange(false)}>
+          <DialogHeader className="sr-only">
+             <DialogTitle>Story by {story.author.name}</DialogTitle>
+          </DialogHeader>
           <div className="relative w-full h-full rounded-lg overflow-hidden flex flex-col justify-center">
             {/* Click handlers for next/prev */}
             <div className="absolute left-0 top-0 h-full w-1/2 z-10" onClick={handlePrevious} />
@@ -396,8 +404,11 @@ function StoryViewerDialog({ story, open, onOpenChange, onDeleteStoryItem, curre
                 {activeItems.map((_, index) => (
                     <div key={index} className="h-1 flex-1 bg-white/30 rounded-full overflow-hidden">
                         <div 
-                            className="h-full bg-white transition-all duration-50" 
-                            style={{ width: `${index < currentItemIndex ? 100 : (index === currentItemIndex ? progress : 0)}%` }}
+                            className="h-full bg-white transition-transform duration-[50ms] ease-linear" 
+                            style={{ 
+                                transform: `scaleX(${(index < currentItemIndex ? 1 : (index === currentItemIndex ? progress / 100 : 0))})`,
+                                transformOrigin: 'left'
+                            }}
                         />
                     </div>
                 ))}
@@ -486,7 +497,8 @@ function HomePageContent() {
     const followedHandles = new Set(profileData.following);
     const filteredStories = stories.filter(story => {
       const handle = story.author.handle;
-      return handle === profileData.handle || followedHandles.has(handle);
+      const hasActiveStory = story.items.some(item => Date.now() - item.timestamp < 24 * 60 * 60 * 1000);
+      return (handle === profileData.handle) || (followedHandles.has(handle) && hasActiveStory);
     });
 
     // Ensure the user's story is always first
@@ -532,10 +544,13 @@ function HomePageContent() {
 
   const handleJobSubmit = (newJob: Omit<JobListing, 'id' | 'postedBy' | 'postedByHandle'>) => {
     if(!profileData) return;
+    const primaryEducation = profileData.education.find(e => e.graduationYear);
+    const gradYearSuffix = primaryEducation?.graduationYear ? `'${primaryEducation.graduationYear.toString().slice(-2)}` : '';
+
     addJobListing({
       ...newJob,
       id: Date.now(),
-      postedBy: `${profileData.name} '${profileData.education.graduationYear.toString().slice(-2)}`,
+      postedBy: `${profileData.name} ${gradYearSuffix}`.trim(),
       postedByHandle: profileData.handle,
     });
   }
@@ -832,5 +847,7 @@ export default function Home() {
         </React.Suspense>
     )
 }
+
+    
 
     
