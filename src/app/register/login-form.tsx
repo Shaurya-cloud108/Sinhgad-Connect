@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Eye, EyeOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,8 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
+import { ProfileContext } from "@/context/ProfileContext";
+import { AppContext } from "@/context/AppContext";
 
 const loginFormSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
@@ -98,6 +100,8 @@ function ForgotPasswordDialog({ open, onOpenChange }: { open: boolean; onOpenCha
 export function LoginForm() {
   const { toast } = useToast();
   const router = useRouter();
+  const { setLoggedInUserHandle } = useContext(ProfileContext);
+  const { communityMembers } = useContext(AppContext);
   const [isForgotPassOpen, setIsForgotPassOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -110,18 +114,24 @@ export function LoginForm() {
   });
 
   function onSubmit(values: z.infer<typeof loginFormSchema>) {
-    console.log(values);
-    // Here you would typically handle the login logic (e.g., call an API)
-    // For this prototype, we'll simulate a successful login.
-    
-    toast({
-      title: "Login Successful!",
-      description: `Welcome back!`,
-    });
-    // Redirect to home page after a short delay to allow toast to be seen
-    setTimeout(() => {
-        router.push("/");
-    }, 1000);
+    // In a real app, this would involve an API call and password verification.
+    // For this prototype, we find the user by email and log them in.
+    const user = communityMembers.find(m => m.contact.email === values.email);
+
+    if (user) {
+        setLoggedInUserHandle(user.handle);
+        toast({
+            title: "Login Successful!",
+            description: `Welcome back, ${user.name.split(' ')[0]}!`,
+        });
+        router.push(`/profile/${user.handle}`);
+    } else {
+        toast({
+            variant: "destructive",
+            title: "Login Failed",
+            description: "No account found with that email address.",
+        });
+    }
   }
 
   return (
@@ -135,7 +145,7 @@ export function LoginForm() {
             <FormItem>
               <FormLabel>Email Address</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="you@example.com" {...field} />
+                <Input type="email" placeholder="priya.sharma@example.com" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

@@ -3,14 +3,14 @@
 
 import React, { createContext, useState, ReactNode, useCallback } from 'react';
 import { 
-    initialConversationsData, 
-    initialMessagesData, 
+    initialConversations, 
+    initialMessages, 
     initialCommunityMembers, 
     initialJobListings, 
     initialFeedItems, 
-    initialStoriesData,
+    initialStories,
     initialEventsData
-} from '@/lib/data.tsx';
+} from '@/lib/data';
 import type { 
     Conversation as ConvType, 
     MessagesData as MsgType, 
@@ -87,14 +87,14 @@ export const AppContext = createContext<AppContextType>({
 
 // Provider
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-    const [conversations, setConversations] = useState<Conversation[]>(initialConversationsData);
-    const [messagesData, setMessagesData] = useState<MessagesData>(initialMessagesData);
+    const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
+    const [messagesData, setMessagesData] = useState<MessagesData>(initialMessages);
     const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
     const [events, setEvents] = useState<Event[]>(initialEventsData);
     const [jobListings, setJobListings] = useState<JobListing[]>(initialJobListings);
     const [communityMembers, setCommunityMembers] = useState<CommunityMember[]>(initialCommunityMembers);
     const [feedItems, setFeedItems] = useState<FeedItem[]>(initialFeedItems);
-    const [stories, setStories] = useState<Story[]>(initialStoriesData);
+    const [stories, setStories] = useState<Story[]>(initialStories);
 
     const setSelectedConversationByName = useCallback((name: string) => {
         let conversation = conversations.find(c => c.name === name);

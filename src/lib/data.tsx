@@ -633,7 +633,7 @@ export const initialFeedItems: FeedItem[] = [
   }
 ];
 
-export const initialStoriesData: Story[] = initialCommunityMembers.map((member, index) => ({
+export const initialStories: Story[] = initialCommunityMembers.map((member, index) => ({
     id: index + 1,
     author: {
         name: member.name,
@@ -646,7 +646,7 @@ export const initialStoriesData: Story[] = initialCommunityMembers.map((member, 
 }));
 
 // Add a demo story item for Rohan Verma
-const rohanVermaStory = initialStoriesData.find(s => s.author.handle === 'rohan-verma');
+const rohanVermaStory = initialStories.find(s => s.author.handle === 'rohan-verma');
 if (rohanVermaStory) {
     rohanVermaStory.items.push({
         id: Date.now(),
@@ -686,12 +686,12 @@ export type MessagesData = {
     [key: string]: Message[];
 };
 
-export const initialConversationsData: Conversation[] = [
+export const initialConversations: Conversation[] = [
     { name: 'Rohan Verma', avatar: 'https://placehold.co/100x100.png', aiHint: 'professional man', lastMessage: 'You\'re welcome! Let me know if you need more help.', time: '2h', unread: 0, isGroup: false },
     { name: 'Kavya Iyer', avatar: 'https://placehold.co/100x100.png', aiHint: 'female student', lastMessage: 'Thank you for the mentorship!', time: '1d', unread: 2, isGroup: false },
 ];
 
-export const initialMessagesData: MessagesData = {
+export const initialMessages: MessagesData = {
   "Rohan Verma": [
     { senderId: "rohan-verma", senderName: "Rohan Verma", text: "Thanks for the resume tips!" },
     { senderId: "priya-sharma", senderName: "Priya Sharma", text: "You're welcome! Let me know if you need more help." },

@@ -4,7 +4,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,10 @@ import {
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
+import { AppContext } from "@/context/AppContext";
+import { ProfileContext } from "@/context/ProfileContext";
+import { CommunityMember } from "@/lib/data";
+
 
 const formSchema = z.object({
   role: z.enum(["student", "alumni"], { required_error: "Please select your role." }),
@@ -42,9 +46,20 @@ const months = [
     "July", "August", "September", "October", "November", "December"
 ];
 
+const degreeMap: { [key: string]: string } = {
+    "comp": "Computer Engineering",
+    "it": "Information Technology",
+    "entc": "E & TC",
+    "mech": "Mechanical Engineering",
+    "civil": "Civil Engineering"
+};
+
 export function RegisterForm() {
   const { toast } = useToast();
   const router = useRouter();
+  const { setCommunityMembers, setStories } = useContext(AppContext);
+  const { setLoggedInUserHandle } = useContext(ProfileContext);
+
   const [role, setRole] = useState("student");
   
   const form = useForm<z.infer<typeof formSchema>>({
@@ -61,15 +76,57 @@ export function RegisterForm() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+    const userHandle = values.fullName.toLowerCase().replace(/\s+/g, '-') + `-${String(values.graduationYear).slice(-2)}`;
+    
+    const newUser: CommunityMember = {
+        name: values.fullName,
+        handle: userHandle,
+        avatar: `https://placehold.co/150x150.png`,
+        fallback: values.fullName.split(' ').map(n => n[0]).join(''),
+        graduationYear: parseInt(values.graduationYear),
+        graduationMonth: parseInt(values.graduationMonth),
+        field: degreeMap[values.degree] || "Engineering",
+        industry: values.role === "alumni" ? "Technology" : "Student",
+        company: values.role === "alumni" ? "Your Company" : "Sinhgad College of Engineering",
+        location: "Pune, India",
+        followers: [],
+        following: [],
+        aiHint: "user avatar",
+        banner: "https://placehold.co/1000x300.png",
+        bannerAiHint: "university campus",
+        headline: values.role === "alumni" ? "Your Headline" : "Eager to learn and connect!",
+        about: `A ${values.role} from the class of ${values.graduationYear}.`,
+        experience: [],
+        education: [
+            {
+                degree: `B.E. ${degreeMap[values.degree] || "Engineering"}`,
+                college: "Sinhgad College of Engineering",
+                yearRange: `${parseInt(values.graduationYear) - 4} - ${values.graduationYear}`,
+                graduationYear: parseInt(values.graduationYear),
+                graduationMonth: parseInt(values.graduationMonth)
+            }
+        ],
+        socials: { linkedin: "", github: "" },
+        contact: { email: values.email }
+    };
+
+    // Add new user to the global state
+    setCommunityMembers(prev => [...prev, newUser]);
+    // Also add a story placeholder for the new user
+    setStories(prev => [...prev, {
+        id: prev.length + 1,
+        author: { name: newUser.name, avatar: newUser.avatar, handle: newUser.handle, aiHint: newUser.aiHint },
+        items: [],
+    }])
+    // "Log in" the new user
+    setLoggedInUserHandle(newUser.handle);
+    
     toast({
       title: "Registration Successful!",
       description: `Welcome to the community, ${values.fullName}!`,
     });
-    // Redirect to home page after a short delay to allow toast to be seen
-    setTimeout(() => {
-        router.push("/");
-    }, 1000);
+    
+    router.push(`/profile/${newUser.handle}`);
   }
 
   return (
@@ -140,7 +197,7 @@ export function RegisterForm() {
                 name="graduationMonth"
                 render={({ field }) => (
                 <FormItem>
-                    <FormLabel>{role === 'student' ? 'Grad Month' : 'Grad Month'}</FormLabel>
+                    <FormLabel>{role === 'student' ? 'Expected Grad Month' : 'Grad Month'}</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                         <SelectTrigger>
@@ -164,7 +221,7 @@ export function RegisterForm() {
                 name="graduationYear"
                 render={({ field }) => (
                 <FormItem>
-                    <FormLabel>{role === 'student' ? 'Grad Year' : 'Grad Year'}</FormLabel>
+                    <FormLabel>{role === 'student' ? 'Expected Grad Year' : 'Grad Year'}</FormLabel>
                     <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
