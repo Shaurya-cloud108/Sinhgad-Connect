@@ -71,11 +71,19 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
     }
   }, [resolvedParams.id, groups]);
 
-  useEffect(() => {
-    if (group && profileData) {
-      setIsMember(profileData.groups?.includes(group.id) || false);
-    }
+  const userRole = useMemo(() => {
+    if (!group || !profileData) return null;
+    return group.members.find(m => m.handle === profileData.handle)?.role || null;
   }, [group, profileData]);
+
+
+  useEffect(() => {
+    if (userRole) {
+      setIsMember(true);
+    } else {
+      setIsMember(false);
+    }
+  }, [userRole]);
 
   const groupFeedItems = useMemo(() => {
     if (!group) return [];
@@ -193,7 +201,7 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
     );
   }
 
-  const isOwnProfileAdmin = profileData.handle === group.adminHandle;
+  const canPost = userRole === 'admin' || userRole === 'moderator';
 
   return (
     <>
@@ -222,11 +230,11 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
               </CardTitle>
               <CardDescription className="flex items-center gap-2 text-sm mt-2">
                 <Users className="h-4 w-4" />
-                {group.memberCount} Members
+                {group.members.length} Members
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
-              {isOwnProfileAdmin && (
+              {userRole === 'admin' && (
                 <>
                   <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={handleBannerUpload} />
                   <DropdownMenu>
@@ -302,7 +310,7 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
       </Card>
 
       <div className="max-w-4xl mx-auto mt-8 space-y-6">
-        {isMember && (
+        {isMember && canPost && (
           <Card>
             <CardContent className="p-3">
               <div className="flex items-center gap-3">

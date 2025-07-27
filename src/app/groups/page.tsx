@@ -44,7 +44,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 
 function GroupCard({ group, isMember, onJoinClick, onLeaveClick, currentUserId }: { group: Group, isMember: boolean, onJoinClick: (groupId: string) => void, onLeaveClick: (groupId: string) => void, currentUserId?: string }) {
-  const isAdmin = group.adminHandle === currentUserId;
+  const isAdmin = group.members.some(m => m.handle === currentUserId && m.role === 'admin');
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const { setGroups } = useContext(AppContext);
 
@@ -118,7 +118,7 @@ function GroupCard({ group, isMember, onJoinClick, onLeaveClick, currentUserId }
           <CardTitle className="font-headline text-xl">{group.name}</CardTitle>
           <CardDescription className="flex items-center gap-2 text-sm">
             <Users className="h-4 w-4" />
-            {group.memberCount} Members
+            {group.members.length} Members
           </CardDescription>
         </CardHeader>
         <CardContent className="flex-grow">
@@ -186,7 +186,13 @@ function GroupsPageContent() {
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
   const { toast } = useToast();
 
-  const userGroupIds = profileData?.groups || [];
+  const userGroupIds = useMemo(() => {
+    if (!profileData) return [];
+    return groups
+        .filter(g => g.members.some(m => m.handle === profileData.handle))
+        .map(g => g.id);
+  }, [groups, profileData]);
+
 
   const filteredGroups = useMemo(() => {
     const lowercasedQuery = searchQuery.toLowerCase();
@@ -213,16 +219,15 @@ function GroupsPageContent() {
   const handleGroupSubmit = (data: GroupFormData) => {
     if (!profileData) return;
 
-    const newGroup: Omit<Group, 'id' | 'memberCount' | 'tags'> = {
+    const newGroup: Omit<Group, 'id' | 'members' | 'tags'> = {
       name: data.name,
       description: data.description,
       type: data.type,
       banner: data.banner || "https://placehold.co/600x400.png",
       aiHint: "community gathering",
-      adminHandle: profileData.handle,
     };
 
-    const addedGroup = addGroup(newGroup);
+    const addedGroup = addGroup(newGroup, profileData.handle);
     
     // Also join the group you created
     handleJoinClick(addedGroup.id);

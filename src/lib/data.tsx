@@ -3,16 +3,20 @@
 
 import React from 'react';
 
+export type GroupMember = {
+  handle: string;
+  role: 'admin' | 'moderator' | 'member';
+};
+
 export type Group = {
   id: string;
   name: string;
   description: string;
   banner: string;
   aiHint: string;
-  memberCount: number;
+  members: GroupMember[];
   type: 'public' | 'private';
   tags: string[];
-  adminHandle: string;
 };
 
 export const initialGroupsData: Group[] = [
@@ -22,10 +26,14 @@ export const initialGroupsData: Group[] = [
     description: "A group for all past and present students of the Computer Engineering department to connect and share opportunities.",
     banner: "https://placehold.co/600x400.png",
     aiHint: "circuit board",
-    memberCount: 1250,
+    members: [
+        { handle: "priya-sharma", role: 'admin' },
+        { handle: "sunita-narayan", role: 'moderator' },
+        { handle: "sneha-reddy", role: 'member' },
+        { handle: "arjun-desai", role: 'member' },
+    ],
     type: 'public',
     tags: ["#hiring", "#mentorship", "#tech-talks"],
-    adminHandle: "priya-sharma"
   },
   {
     id: "batch-of-2015",
@@ -33,10 +41,11 @@ export const initialGroupsData: Group[] = [
     description: "Planning and discussions for the 10-year reunion for the graduating class of 2015. All departments welcome!",
     banner: "https://placehold.co/600x400.png",
     aiHint: "graduation celebration",
-    memberCount: 180,
+    members: [
+        { handle: "anjali-mehta", role: 'admin' },
+    ],
     type: 'private',
     tags: ["#reunion", "#events", "#nostalgia"],
-    adminHandle: "anjali-mehta"
   },
   {
     id: "bay-area-alumni",
@@ -44,10 +53,11 @@ export const initialGroupsData: Group[] = [
     description: "Connect with fellow Sinhgad alumni living and working in the San Francisco Bay Area for networking, meetups, and support.",
     banner: "https://placehold.co/600x400.png",
     aiHint: "golden gate bridge",
-    memberCount: 230,
+    members: [
+        { handle: "priya-sharma", role: 'admin' },
+    ],
     type: 'public',
     tags: ["#networking", "#bay-area", "#meetups"],
-    adminHandle: "priya-sharma"
   },
   {
     id: "entrepreneur-club",
@@ -55,10 +65,13 @@ export const initialGroupsData: Group[] = [
     description: "A group for aspiring and established entrepreneurs to share ideas, find co-founders, and discuss startup life.",
     banner: "https://placehold.co/600x400.png",
     aiHint: "lightbulb idea",
-    memberCount: 450,
+    members: [
+        { handle: "sunita-narayan", role: 'admin' },
+        { handle: "priya-sharma", role: 'member' },
+        { handle: "rohan-verma", role: 'member' },
+    ],
     type: 'public',
     tags: ["#startup", "#funding", "#innovation"],
-    adminHandle: "sunita-narayan"
   },
    {
     id: "photography-enthusiasts",
@@ -66,10 +79,11 @@ export const initialGroupsData: Group[] = [
     description: "A casual group for alumni and students who love photography to share their work and organize photo walks.",
     banner: "https://placehold.co/600x400.png",
     aiHint: "camera lens",
-    memberCount: 95,
+    members: [
+        { handle: "kavya-iyer", role: 'admin' },
+    ],
     type: 'public',
     tags: ["#hobby", "#photography", "#art"],
-    adminHandle: "kavya-iyer"
   },
   {
     id: "job-seekers-2024",
@@ -77,10 +91,12 @@ export const initialGroupsData: Group[] = [
     description: "A support group for the graduating class of 2024 to share job leads, interview tips, and referral requests.",
     banner: "https://placehold.co/600x400.png",
     aiHint: "job interview",
-    memberCount: 310,
+    members: [
+        { handle: "alumni-network", role: 'admin' },
+        { handle: "kavya-iyer", role: 'member' },
+    ],
     type: 'private',
     tags: ["#jobs", "#career-advice", "#referrals"],
-    adminHandle: "alumni-network"
   },
 ];
 

@@ -22,7 +22,8 @@ import type {
     Message, 
     StoryItem,
     Event,
-    Group
+    Group,
+    GroupMember
 } from '@/lib/data';
 import { ProfileContext } from './ProfileContext';
 
@@ -46,7 +47,7 @@ type AppContextType = {
 
     groups: Group[];
     setGroups: React.Dispatch<React.SetStateAction<Group[]>>;
-    addGroup: (groupData: Omit<Group, 'id' | 'memberCount' | 'tags'>) => Group;
+    addGroup: (groupData: Omit<Group, 'id' | 'members' | 'tags'>, adminHandle: string) => Group;
     joinGroup: (groupId: string, userHandle: string) => void;
     leaveGroup: (groupId: string, userHandle: string) => void;
 
@@ -115,7 +116,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     
     useEffect(() => {
         if (profileData) {
-            const userGroupIds = new Set(profileData.groups || []);
+            const userGroupIds = new Set(groups.filter(g => g.members.some(m => m.handle === profileData.handle)).map(g => g.id));
             const groupConversations = initialGroupsData
                 .filter(group => userGroupIds.has(group.id))
                 .map(group => ({
@@ -134,7 +135,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
             setConversations(prev => [...prev, ...newGroupConvos]);
         }
-    }, [profileData]);
+    }, [profileData, groups]);
 
     const setSelectedConversationByName = useCallback((name: string) => {
         let conversation = conversations.find(c => c.name === name);
@@ -162,11 +163,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setEvents(prev => [event, ...prev]);
     }, []);
 
-    const addGroup = useCallback((groupData: Omit<Group, 'id' | 'memberCount' | 'tags'>): Group => {
+    const addGroup = useCallback((groupData: Omit<Group, 'id' | 'members' | 'tags'>, adminHandle: string): Group => {
         const newGroup: Group = {
             ...groupData,
             id: groupData.name.toLowerCase().replace(/\s+/g, '-'),
-            memberCount: 1, // Starts with the creator
+            members: [{ handle: adminHandle, role: 'admin' }],
             tags: [], // Tags can be added later
         };
         setGroups(prev => [newGroup, ...prev]);
@@ -174,46 +175,48 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }, []);
     
     const joinGroup = useCallback((groupId: string, userHandle: string) => {
-        setCommunityMembers(prevMembers =>
-            prevMembers.map(member =>
-                member.handle === userHandle
-                    ? { ...member, groups: [...(member.groups || []), groupId] }
-                    : member
-            )
-        );
-      
-        const group = groups.find(g => g.id === groupId);
-        if (group) {
-          const existingConvo = conversations.find(c => c.name === group.name);
-          if (!existingConvo) {
-            const newConversation: Conversation = {
-              name: group.name,
-              avatar: group.banner,
-              aiHint: group.aiHint,
-              lastMessage: "You joined the group.",
-              time: "Now",
-              unread: 0,
-              isGroup: true,
-            };
-            setConversations(prev => [newConversation, ...prev]);
-            setMessagesData(prev => ({
-              ...prev,
-              [group.name]: [{ senderId: 'system', senderName: 'System', text: 'Welcome to the group!' }]
-            }));
-          }
+      setGroups(prevGroups => prevGroups.map(g => {
+        if (g.id === groupId && !g.members.some(m => m.handle === userHandle)) {
+          return {
+            ...g,
+            members: [...g.members, { handle: userHandle, role: 'member' }],
+          };
         }
+        return g;
+      }));
+
+      const group = groups.find(g => g.id === groupId);
+      if (group) {
+        const existingConvo = conversations.find(c => c.name === group.name);
+        if (!existingConvo) {
+          const newConversation: Conversation = {
+            name: group.name,
+            avatar: group.banner,
+            aiHint: group.aiHint,
+            lastMessage: "You joined the group.",
+            time: "Now",
+            unread: 0,
+            isGroup: true,
+          };
+          setConversations(prev => [newConversation, ...prev]);
+          setMessagesData(prev => ({
+            ...prev,
+            [group.name]: [{ senderId: 'system', senderName: 'System', text: 'Welcome to the group!' }]
+          }));
+        }
+      }
     }, [groups, conversations]);
 
     const leaveGroup = useCallback((groupId: string, userHandle: string) => {
-        setCommunityMembers(prevMembers =>
-            prevMembers.map(member =>
-                member.handle === userHandle
-                    ? { ...member, groups: (member.groups || []).filter(gId => gId !== groupId) }
-                    : member
-            )
-        );
-        // The conversation is intentionally not removed from the list,
-        // to allow the user to rejoin from the messages screen.
+      setGroups(prevGroups => prevGroups.map(g => {
+        if (g.id === groupId) {
+          return {
+            ...g,
+            members: g.members.filter(m => m.handle !== userHandle),
+          };
+        }
+        return g;
+      }));
     }, []);
 
     const addJobListing = useCallback((job: JobListing) => {
