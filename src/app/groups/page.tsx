@@ -217,7 +217,7 @@ function GroupsPageContent() {
       name: data.name,
       description: data.description,
       type: data.type,
-      banner: "https://placehold.co/600x400.png",
+      banner: data.banner || "https://placehold.co/600x400.png",
       aiHint: "community gathering",
       adminHandle: profileData.handle,
     };
