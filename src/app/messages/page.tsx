@@ -222,16 +222,18 @@ function MessagesPageContent() {
                  <Button variant="ghost" size="icon" className="md:hidden flex-shrink-0" onClick={() => setSelectedConversation(null)}>
                   <ArrowLeft />
                 </Button>
-                <Avatar className="flex-shrink-0">
-                  <AvatarImage src={selectedConversation.avatar} data-ai-hint={selectedConversation.aiHint}/>
-                  <AvatarFallback>{selectedConversation.name.substring(0, 2)}</AvatarFallback>
-                </Avatar>
-                <div className="overflow-hidden">
-                  <p className="font-semibold truncate">{selectedConversation.name}</p>
-                   <p className="text-sm text-muted-foreground">
-                    {selectedConversation.isGroup ? `${groups.find(g => g.name === selectedConversation.name)?.memberCount} members` : "Online"}
-                   </p>
-                </div>
+                <Link href={selectedConversation.isGroup ? `/groups/${groups.find(g => g.name === selectedConversation.name)?.id}` : `/profile/${selectedConversation.name}`} className="flex items-center gap-4 group">
+                  <Avatar className="flex-shrink-0">
+                    <AvatarImage src={selectedConversation.avatar} data-ai-hint={selectedConversation.aiHint}/>
+                    <AvatarFallback>{selectedConversation.name.substring(0, 2)}</AvatarFallback>
+                  </Avatar>
+                  <div className="overflow-hidden">
+                    <p className="font-semibold truncate group-hover:underline">{selectedConversation.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {selectedConversation.isGroup ? `${groups.find(g => g.name === selectedConversation.name)?.memberCount} members` : "Online"}
+                    </p>
+                  </div>
+                </Link>
               </div>
                {selectedConversation.isGroup && (
                 <DropdownMenu>

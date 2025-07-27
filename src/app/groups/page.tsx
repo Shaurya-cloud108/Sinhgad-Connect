@@ -64,113 +64,118 @@ function GroupCard({ group, isMember, onJoinClick, onLeaveClick, currentUserId }
     bannerInputRef.current?.click();
   };
 
+  const stopPropagation = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
 
   return (
-    <Card className="flex flex-col hover:shadow-xl transition-shadow duration-300">
-      <div className="relative h-40 w-full">
-        <Image
-          src={group.banner}
-          alt={`${group.name} banner`}
-          fill
-          className="object-cover"
-          data-ai-hint={group.aiHint}
-        />
-        <div className="absolute top-2 right-2 flex items-center gap-1">
-          {isAdmin && (
-            <>
-            <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={handleBannerUpload} />
-            <DropdownMenu>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="secondary" size="icon" className="h-8 w-8 rounded-full bg-background/80">
-                        <Crown className="h-4 w-4 text-yellow-500" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Admin Controls</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={triggerBannerUpload}>
-                    <ImageIcon className="mr-2 h-4 w-4" />
-                    Edit Banner
-                  </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            </>
-          )}
-          {group.type === 'private' && (
-            <div className="bg-background/80 p-1.5 rounded-full">
-              <Lock className="h-4 w-4" />
-            </div>
-          )}
-        </div>
-      </div>
-      <CardHeader>
-        <CardTitle className="font-headline text-xl">{group.name}</CardTitle>
-        <CardDescription className="flex items-center gap-2 text-sm">
-          <Users className="h-4 w-4" />
-          {group.memberCount} Members
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex-grow">
-        <p className="text-sm text-muted-foreground line-clamp-2">{group.description}</p>
-        <div className="flex flex-wrap gap-2 mt-4">
-          {group.tags.map(tag => (
-            <Badge key={tag} variant="secondary">{tag}</Badge>
-          ))}
-        </div>
-      </CardContent>
-      <CardFooter>
-        {isMember ? (
-          <div className="w-full flex items-center gap-2">
-            <Button className="w-full" disabled>
-              <CheckCircle className="mr-2 h-4 w-4" />
-              Joined
-            </Button>
-            <AlertDialog>
+    <Link href={`/groups/${group.id}`} className="block h-full">
+      <Card className="flex flex-col hover:shadow-xl transition-shadow duration-300 h-full">
+        <div className="relative h-40 w-full">
+          <Image
+            src={group.banner}
+            alt={`${group.name} banner`}
+            fill
+            className="object-cover"
+            data-ai-hint={group.aiHint}
+          />
+          <div className="absolute top-2 right-2 flex items-center gap-1" onClick={stopPropagation}>
+            {isAdmin && (
+              <>
+              <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={handleBannerUpload} />
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="secondary" size="icon" className="h-8 w-8 rounded-full bg-background/80">
+                          <Crown className="h-4 w-4 text-yellow-500" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Admin Controls</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
                 <DropdownMenuContent align="end">
-                  <AlertDialogTrigger asChild>
-                    <DropdownMenuItem className="text-destructive cursor-pointer">
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Leave Group
+                    <DropdownMenuItem onClick={triggerBannerUpload}>
+                      <ImageIcon className="mr-2 h-4 w-4" />
+                      Edit Banner
                     </DropdownMenuItem>
-                  </AlertDialogTrigger>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Leave "{group.name}"?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    You will need to request to join again if this is a private group. Are you sure you want to leave?
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => onLeaveClick(group)}>
-                    Leave
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+              </>
+            )}
+            {group.type === 'private' && (
+              <div className="bg-background/80 p-1.5 rounded-full">
+                <Lock className="h-4 w-4" />
+              </div>
+            )}
           </div>
-        ) : (
-          <Button className="w-full" onClick={() => onJoinClick(group)}>
-            {group.type === 'private' ? 'Request to Join' : 'Join Group'}
-          </Button>
-        )}
-      </CardFooter>
-    </Card>
+        </div>
+        <CardHeader>
+          <CardTitle className="font-headline text-xl">{group.name}</CardTitle>
+          <CardDescription className="flex items-center gap-2 text-sm">
+            <Users className="h-4 w-4" />
+            {group.memberCount} Members
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex-grow">
+          <p className="text-sm text-muted-foreground line-clamp-2">{group.description}</p>
+          <div className="flex flex-wrap gap-2 mt-4">
+            {group.tags.map(tag => (
+              <Badge key={tag} variant="secondary">{tag}</Badge>
+            ))}
+          </div>
+        </CardContent>
+        <CardFooter onClick={stopPropagation}>
+          {isMember ? (
+            <div className="w-full flex items-center gap-2">
+              <Button className="w-full" disabled>
+                <CheckCircle className="mr-2 h-4 w-4" />
+                Joined
+              </Button>
+              <AlertDialog>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="icon">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <AlertDialogTrigger asChild>
+                      <DropdownMenuItem className="text-destructive cursor-pointer">
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Leave Group
+                      </DropdownMenuItem>
+                    </AlertDialogTrigger>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Leave "{group.name}"?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      You will need to request to join again if this is a private group. Are you sure you want to leave?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => onLeaveClick(group)}>
+                      Leave
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          ) : (
+            <Button className="w-full" onClick={() => onJoinClick(group)}>
+              {group.type === 'private' ? 'Request to Join' : 'Join Group'}
+            </Button>
+          )}
+        </CardFooter>
+      </Card>
+    </Link>
   );
 }
 
