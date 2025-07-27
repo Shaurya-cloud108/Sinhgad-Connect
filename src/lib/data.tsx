@@ -279,7 +279,7 @@ export const successStories: SuccessStory[] = [
             "Strong leadership is crucial for navigating funding and growth.",
             "Perseverance in the face of challenges leads to breakthroughs."
         ],
-        careerAdvice: "For alumni inspired by Sunita's path, focus on developing not just your technical skills but also your business acumen. Look for problems in the world that you are passionate about solving. Don't be afraid to start small and build a strong, dedicated team around your vision. Networking is key, so leverage the alumni community to find mentors and potential partners. Cultivate resilience; the entrepreneurial journey is filled with ups and downs, but a clear purpose will guide you through."
+        careerAdvice: "For alumni inspired by Sunita's path, focus on developing not just your technical skills but also your business acumen. Look for problems in the world that you are passionate about solving. Don't be afraid to start small and build a strong, dedicated team around your vision. Leverage the alumni community to find mentors and potential partners. Cultivate resilience; the entrepreneurial journey is filled with ups and downs, but a clear purpose will guide you through."
     }
   },
   {
@@ -368,6 +368,7 @@ export type FeedItem = {
     likes: number;
     liked?: boolean;
     comments: Comment[];
+    groupId?: string;
 }
 
 export type EducationEntry = {
@@ -765,6 +766,22 @@ export const initialFeedItems: FeedItem[] = [
     likes: 98,
     comments: [],
     liked: false,
+  },
+  {
+    id: 6,
+    author: {
+      name: "Priya Sharma",
+      avatar: "https://placehold.co/150x150.png",
+      handle: "priya-sharma",
+      aiHint: "professional woman"
+    },
+    content: "Checking out the new Bay Area Alumni group! Great to connect with folks out here.",
+    image: null,
+    aiHint: "",
+    likes: 45,
+    comments: [],
+    liked: false,
+    groupId: "bay-area-alumni",
   }
 ];
 

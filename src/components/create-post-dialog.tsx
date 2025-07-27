@@ -23,9 +23,10 @@ import type { FeedItem } from "@/lib/data";
 type CreatePostDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  groupId?: string;
 };
 
-export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) {
+export function CreatePostDialog({ open, onOpenChange, groupId }: CreatePostDialogProps) {
   const { toast } = useToast();
   const [postContent, setPostContent] = useState("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -69,14 +70,15 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
         aiHint: "user uploaded",
         likes: 0,
         liked: false,
-        comments: []
+        comments: [],
+        groupId: groupId
     };
 
     addFeedItem(newPost);
     
     toast({
       title: "Post Successful!",
-      description: "Your update has been shared with the network.",
+      description: "Your update has been shared.",
     });
 
     setPostContent("");

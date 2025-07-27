@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useContext, useEffect, use, useRef } from "react";
+import { useState, useContext, useEffect, use, useRef, useMemo } from "react";
 import Image from "next/image";
 import { notFound, useRouter } from "next/navigation";
 import {
@@ -10,13 +10,14 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
+  CardFooter
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppContext } from "@/context/AppContext";
 import { ProfileContext } from "@/context/ProfileContext";
-import { ArrowLeft, Users, Lock, CheckCircle, PlusCircle, LogOut, Crown, ImageIcon, MoreHorizontal } from "lucide-react";
+import { ArrowLeft, Users, Lock, CheckCircle, PlusCircle, LogOut, Crown, ImageIcon, MoreHorizontal, Heart, MessageCircle, Send, Trash2, Award, Briefcase } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import {
@@ -37,19 +38,27 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CreatePostDialog } from "@/components/create-post-dialog";
+import { CommentSheet } from "@/components/comment-sheet";
+import { cn } from "@/lib/utils";
+import type { Comment } from "@/lib/data.tsx";
+import { ShareDialog } from "@/components/share-dialog";
 
 
 export default function GroupProfilePage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const resolvedParams = use(params);
 
-  const { groups, joinGroup, leaveGroup, setGroups } = useContext(AppContext);
+  const { groups, joinGroup, leaveGroup, setGroups, feedItems, setFeedItems } = useContext(AppContext);
   const { profileData } = useContext(ProfileContext);
   const { toast } = useToast();
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
   const [group, setGroup] = useState<(typeof groups)[0] | null>(null);
   const [isMember, setIsMember] = useState(false);
+  const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
+  const [activeCommentPostId, setActiveCommentPostId] = useState<number | null>(null);
   
   useEffect(() => {
     const groupData = groups.find((g) => g.id === resolvedParams.id);
@@ -65,6 +74,12 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
       setIsMember(profileData.groups?.includes(group.id) || false);
     }
   }, [group, profileData]);
+
+  const groupFeedItems = useMemo(() => {
+    if (!group) return [];
+    return feedItems.filter(item => item.groupId === group.id);
+  }, [feedItems, group]);
+
 
   const handleJoinClick = () => {
     if (!profileData || !group) return;
@@ -109,6 +124,45 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
     bannerInputRef.current?.click();
   };
 
+  const handleLike = (postId: number) => {
+    setFeedItems(prev => prev.map(item =>
+        item.id === postId
+        ? {...item, liked: !item.liked, likes: item.liked ? item.likes - 1 : item.likes + 1}
+        : item
+    ));
+  };
+
+  const handleAddComment = (postId: number, commentText: string) => {
+    if (!profileData) return;
+    const newComment: Comment = {
+      id: Date.now(),
+      author: {
+        name: profileData.name,
+        avatar: profileData.avatar,
+        handle: profileData.handle
+      },
+      text: commentText,
+    };
+    setFeedItems(prev => prev.map(item =>
+      item.id === postId
+        ? { ...item, comments: [...item.comments, newComment] }
+        : item
+    ));
+  };
+
+  const handleDeleteComment = (postId: number, commentId: number) => {
+    setFeedItems(prev => prev.map(item =>
+      item.id === postId
+        ? { ...item, comments: item.comments.filter(c => c.id !== commentId) }
+        : item
+    ));
+  };
+
+  const handleDeletePost = (postId: number) => {
+    setFeedItems(prev => prev.filter(item => item.id !== postId));
+  };
+  
+  const activePostForComments = feedItems.find(item => item.id === activeCommentPostId);
 
   if (!group || !profileData) {
     return (
@@ -131,6 +185,7 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
   const isOwnProfileAdmin = profileData.handle === group.adminHandle;
 
   return (
+    <>
     <div className="container py-8 md:py-12">
       <Button variant="ghost" onClick={() => router.back()} className="mb-8">
         <ArrowLeft className="mr-2 h-4 w-4" />
@@ -231,15 +286,126 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
         </CardContent>
       </Card>
 
-      {/* Placeholder for group feed or members list */}
-      <div className="max-w-4xl mx-auto mt-8">
-        <Card>
-            <CardContent className="p-12 text-center text-muted-foreground">
-                <p>Group content and posts will appear here.</p>
+      <div className="max-w-4xl mx-auto mt-8 space-y-6">
+        {isMember && (
+          <Card>
+            <CardContent className="p-3">
+              <div className="flex items-center gap-3">
+                <Avatar>
+                  <AvatarImage src={profileData.avatar} data-ai-hint="user avatar" />
+                  <AvatarFallback>{profileData.name.substring(0,2)}</AvatarFallback>
+                </Avatar>
+                <button
+                  className="w-full text-left bg-secondary/50 hover:bg-muted/80 transition-colors py-2 px-4 rounded-full text-sm text-muted-foreground"
+                  onClick={() => setIsPostDialogOpen(true)}
+                >
+                  Post in {group.name}...
+                </button>
+              </div>
             </CardContent>
-        </Card>
+          </Card>
+        )}
+        
+        {groupFeedItems.length > 0 ? (
+          groupFeedItems.map((item) => (
+            <Card key={item.id} id={`post-${item.id}`} className="shadow-sm">
+            <CardHeader className="p-4 flex flex-row items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <Link href={`/profile/${item.author.handle}`} className="flex items-center space-x-3 group">
+                  <Avatar className="w-10 h-10">
+                    <AvatarImage src={item.author.avatar} data-ai-hint={item.author.aiHint} />
+                    <AvatarFallback>{item.author.name.substring(0,2)}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-semibold text-sm group-hover:underline">{item.author.name}</p>
+                    <p className="text-xs text-muted-foreground">@{item.author.handle}</p>
+                  </div>
+                </Link>
+              </div>
+              {item.author.handle === profileData.handle && (
+                <AlertDialog>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                       <AlertDialogTrigger asChild>
+                          <DropdownMenuItem className="text-destructive cursor-pointer">
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                       </AlertDialogTrigger>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                   <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently delete your post.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDeletePost(item.id)}>
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+              )}
+            </CardHeader>
+            <CardContent className="p-0">
+              <p className="px-4 pb-3 text-sm">{item.content}</p>
+              {item.image && (
+                <div className="w-full aspect-video bg-card">
+                   <Image src={item.image} alt="Feed item" className="w-full h-full object-cover" data-ai-hint={item.aiHint} width={600} height={400}/>
+                </div>
+              )}
+            </CardContent>
+            <CardFooter className="p-2 flex justify-between items-center">
+               <div className="flex items-center text-sm text-muted-foreground">
+                  <Button variant="ghost" size="sm" className={cn("flex items-center gap-2", item.liked && "text-destructive")} onClick={() => handleLike(item.id)}>
+                    <Heart className={cn("w-5 h-5", item.liked && "fill-current")} />
+                    <span>{item.likes}</span>
+                  </Button>
+                  <Button variant="ghost" size="sm" className="flex items-center gap-2" onClick={() => setActiveCommentPostId(item.id)}>
+                    <MessageCircle className="w-5 h-5" />
+                     <span>{item.comments.length}</span>
+                  </Button>
+                </div>
+                <div>
+                    <ShareDialog contentType="post" contentId={item.id}>
+                      <Button variant="ghost" size="icon">
+                          <Send className="w-5 h-5" />
+                      </Button>
+                    </ShareDialog>
+                </div>
+            </CardFooter>
+          </Card>
+          ))
+        ) : (
+          <Card>
+            <CardContent className="p-12 text-center text-muted-foreground">
+              <p className="font-semibold">It's quiet in here...</p>
+              <p className="text-sm">Be the first to post in this group!</p>
+            </CardContent>
+          </Card>
+        )}
       </div>
-
     </div>
+    <CreatePostDialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen} groupId={group.id} />
+    <CommentSheet
+      open={!!activeCommentPostId}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) setActiveCommentPostId(null);
+      }}
+      post={activePostForComments}
+      onCommentSubmit={handleAddComment}
+      onCommentDelete={handleDeleteComment}
+      currentProfile={profileData}
+    />
+    </>
   );
 }
