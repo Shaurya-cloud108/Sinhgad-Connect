@@ -18,7 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppContext } from "@/context/AppContext";
 import { ProfileContext } from "@/context/ProfileContext";
-import { ArrowLeft, Users, Lock, CheckCircle, PlusCircle, LogOut, Crown, ImageIcon, MoreHorizontal, Heart, MessageCircle, Send, Trash2, Award, Briefcase, Edit, UserCog, Link as LinkIcon } from "lucide-react";
+import { ArrowLeft, Users, Lock, CheckCircle, PlusCircle, LogOut, Crown, ImageIcon, MoreHorizontal, Heart, MessageCircle, Send, Trash2, Award, Briefcase, Edit, UserCog, Link as LinkIcon, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import {
@@ -47,6 +47,7 @@ import type { Comment, Group, GroupLink, GroupMember } from "@/lib/data.tsx";
 import { ShareDialog } from "@/components/share-dialog";
 import { EditGroupDialog, GroupEditFormData } from "@/components/edit-group-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 
 
 export default function GroupProfilePage({ params }: { params: { id: string } }) {
@@ -64,6 +65,7 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
   const [isEditGroupOpen, setIsEditGroupOpen] = useState(false);
   const [activeCommentPostId, setActiveCommentPostId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState("feed");
+  const [memberSearchQuery, setMemberSearchQuery] = useState("");
   
   useEffect(() => {
     const groupData = groups.find((g) => g.id === resolvedParams.id);
@@ -95,14 +97,24 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
 
   const groupMembersWithDetails = useMemo(() => {
     if (!group) return [];
-    return group.members.map(member => {
+    const membersWithDetails = group.members.map(member => {
         const memberDetails = communityMembers.find(cm => cm.handle === member.handle);
         return {
             ...member,
             ...memberDetails,
         }
     }).filter(member => member.name); // Filter out any members not found in communityMembers
-  }, [group, communityMembers]);
+    
+    if (!memberSearchQuery) {
+        return membersWithDetails;
+    }
+
+    return membersWithDetails.filter(member => 
+        member.name?.toLowerCase().includes(memberSearchQuery.toLowerCase()) ||
+        member.handle?.toLowerCase().includes(memberSearchQuery.toLowerCase())
+    );
+
+  }, [group, communityMembers, memberSearchQuery]);
 
 
   const handleJoinClick = () => {
@@ -486,8 +498,17 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
                     <CardHeader>
                         <CardTitle>Group Members ({group.members.length})</CardTitle>
                         <CardDescription>
-                            {isAdmin ? "Manage member roles below." : "A list of people in this group."}
+                            {isAdmin ? "Manage member roles or search for members below." : "A list of people in this group."}
                         </CardDescription>
+                         <div className="relative pt-2">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                            <Input
+                                placeholder="Search members by name or handle..."
+                                className="pl-10"
+                                value={memberSearchQuery}
+                                onChange={(e) => setMemberSearchQuery(e.target.value)}
+                            />
+                        </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         {groupMembersWithDetails.map(member => (
@@ -543,6 +564,11 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
                                 )}
                             </div>
                         ))}
+                         {groupMembersWithDetails.length === 0 && (
+                            <p className="text-center text-muted-foreground py-4">
+                                No members found matching your search.
+                            </p>
+                        )}
                     </CardContent>
                 </Card>
             </TabsContent>
