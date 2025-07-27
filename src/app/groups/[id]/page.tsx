@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useState, useContext, useEffect, use, useRef, useMemo } from "react";
@@ -18,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppContext } from "@/context/AppContext";
 import { ProfileContext } from "@/context/ProfileContext";
-import { ArrowLeft, Users, Lock, CheckCircle, PlusCircle, LogOut, Crown, ImageIcon, MoreHorizontal, Heart, MessageCircle, Send, Trash2, Award, Briefcase, Edit, UserCog, Link as LinkIcon, Search } from "lucide-react";
+import { ArrowLeft, Users, Lock, CheckCircle, PlusCircle, LogOut, Crown, ImageIcon, MoreHorizontal, Heart, MessageCircle, Send, Trash2, Award, Briefcase, Edit, UserCog, Link as LinkIcon, Search, UserX } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import {
@@ -37,6 +36,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -54,7 +54,7 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
   const router = useRouter();
   const resolvedParams = use(params);
 
-  const { groups, joinGroup, leaveGroup, setGroups, feedItems, setFeedItems, communityMembers } = useContext(AppContext);
+  const { groups, joinGroup, leaveGroup, setGroups, feedItems, setFeedItems, communityMembers } from useContext(AppContext);
   const { profileData } = useContext(ProfileContext);
   const { toast } = useToast();
   const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -223,7 +223,24 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
         description: `The user's role has been changed to ${newRole}.`
     });
   };
-  
+
+  const handleRemoveMember = (targetHandle: string) => {
+    if (!group) return;
+    setGroups(prevGroups => prevGroups.map(g => {
+        if (g.id === group.id) {
+            return {
+                ...g,
+                members: g.members.filter(m => m.handle !== targetHandle)
+            }
+        }
+        return g;
+    }));
+    toast({
+        title: "Member Removed",
+        description: `The user has been removed from the group.`
+    });
+  };
+
   const activePostForComments = feedItems.find(item => item.id === activeCommentPostId);
 
   if (!group || !profileData) {
@@ -544,18 +561,30 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
                                                         </DropdownMenuItem>
                                                     </AlertDialogTrigger>
                                                 )}
+                                                <DropdownMenuSeparator />
+                                                <AlertDialogTrigger asChild>
+                                                    <DropdownMenuItem className="text-destructive">
+                                                        <UserX className="mr-2 h-4 w-4" /> Remove from Group
+                                                    </DropdownMenuItem>
+                                                </AlertDialogTrigger>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                         <AlertDialogContent>
                                             <AlertDialogHeader>
-                                                <AlertDialogTitle>Confirm Role Change</AlertDialogTitle>
+                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                                                 <AlertDialogDescription>
-                                                    Are you sure you want to {member.role === 'member' ? 'make' : 'revoke'} {member.name} a moderator?
+                                                    This action cannot be undone.
                                                 </AlertDialogDescription>
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
                                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                <AlertDialogAction onClick={() => handleSetRole(member.handle!, member.role === 'member' ? 'moderator' : 'member')}>
+                                                <AlertDialogAction onClick={() => {
+                                                    if (member.role === 'member' || member.role === 'moderator') {
+                                                        handleRemoveMember(member.handle!);
+                                                    } else {
+                                                        handleSetRole(member.handle!, member.role === 'member' ? 'moderator' : 'member')
+                                                    }
+                                                }}>
                                                     Confirm
                                                 </AlertDialogAction>
                                             </AlertDialogFooter>
@@ -590,3 +619,5 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
     </>
   );
 }
+
+    
