@@ -63,6 +63,7 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
   const [isEditGroupOpen, setIsEditGroupOpen] = useState(false);
   const [activeCommentPostId, setActiveCommentPostId] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState("feed");
   
   useEffect(() => {
     const groupData = groups.find((g) => g.id === resolvedParams.id);
@@ -259,10 +260,10 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
                 {group.name}
                 {group.type === "private" && <Lock className="h-5 w-5 text-muted-foreground" />}
               </CardTitle>
-              <CardDescription className="flex items-center gap-2 text-sm mt-2">
+              <button onClick={() => setActiveTab('members')} className="flex items-center gap-2 text-sm mt-2 text-muted-foreground hover:text-primary hover:underline">
                 <Users className="h-4 w-4" />
                 {group.members.length} Members
-              </CardDescription>
+              </button>
             </div>
             <div className="flex items-center gap-2">
               {isAdmin && (
@@ -341,7 +342,7 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
       </Card>
 
       <div className="max-w-4xl mx-auto mt-8">
-        <Tabs defaultValue="feed" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} defaultValue="feed" className="w-full">
             <TabsList className="w-full grid grid-cols-3">
                 <TabsTrigger value="feed">Feed</TabsTrigger>
                 <TabsTrigger value="about">About</TabsTrigger>
