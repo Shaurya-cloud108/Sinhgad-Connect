@@ -1,9 +1,9 @@
 
 "use client";
 
-import React, { createContext, useState, ReactNode, useCallback, useContext } from 'react';
+import React, { createContext, useState, ReactNode, useCallback, useContext, useEffect, useMemo } from 'react';
 import { 
-    initialConversations, 
+    initialConversations as baseInitialConversations, 
     initialMessages,
     initialJobListings, 
     initialCommunityMembers, 
@@ -102,7 +102,8 @@ export const AppContext = createContext<AppContextType>({
 
 // Provider
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-    const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
+    const { profileData } = useContext(ProfileContext);
+    const [conversations, setConversations] = useState<Conversation[]>(baseInitialConversations);
     const [messagesData, setMessagesData] = useState<MessagesData>(initialMessages);
     const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
     const [events, setEvents] = useState<Event[]>(initialEventsData);
@@ -112,6 +113,29 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [feedItems, setFeedItems] = useState<FeedItem[]>(initialFeedItems);
     const [stories, setStories] = useState<Story[]>(initialStories);
     
+    useEffect(() => {
+        if (profileData) {
+            const userGroupIds = new Set(profileData.groups || []);
+            const groupConversations = initialGroupsData
+                .filter(group => userGroupIds.has(group.id))
+                .map(group => ({
+                    name: group.name,
+                    avatar: group.banner,
+                    aiHint: group.aiHint,
+                    lastMessage: "You are a member of this group.",
+                    time: "Synced",
+                    unread: 0,
+                    isGroup: true,
+                }));
+            
+            // Filter out any duplicates that might already be in baseInitialConversations
+            const existingConvoNames = new Set(baseInitialConversations.map(c => c.name));
+            const newGroupConvos = groupConversations.filter(gc => !existingConvoNames.has(gc.name));
+
+            setConversations(prev => [...prev, ...newGroupConvos]);
+        }
+    }, [profileData]);
+
     const setSelectedConversationByName = useCallback((name: string) => {
         let conversation = conversations.find(c => c.name === name);
 
