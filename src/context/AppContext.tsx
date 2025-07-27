@@ -47,8 +47,8 @@ type AppContextType = {
     groups: Group[];
     setGroups: React.Dispatch<React.SetStateAction<Group[]>>;
     addGroup: (groupData: Omit<Group, 'id' | 'memberCount' | 'tags'>) => Group;
-    joinGroup: (group: Group, profile: CommunityMember) => void;
-    leaveGroup: (group: Group, profile: CommunityMember) => void;
+    joinGroup: (groupId: string, userHandle: string) => void;
+    leaveGroup: (groupId: string, userHandle: string) => void;
 
     jobListings: JobListing[];
     setJobListings: React.Dispatch<React.SetStateAction<JobListing[]>>;
@@ -173,40 +173,43 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         return newGroup;
     }, []);
     
-    const joinGroup = useCallback((group: Group, profile: CommunityMember) => {
-      setCommunityMembers(prevMembers =>
-        prevMembers.map(member =>
-          member.handle === profile.handle
-            ? { ...member, groups: [...(member.groups || []), group.id] }
-            : member
-        )
-      );
-    
-      const existingConvo = conversations.find(c => c.name === group.name);
-      if (!existingConvo) {
-        const newConversation: Conversation = {
-          name: group.name,
-          avatar: group.banner,
-          aiHint: group.aiHint,
-          lastMessage: "You joined the group.",
-          time: "Now",
-          unread: 0,
-          isGroup: true,
-        };
-        setConversations(prev => [newConversation, ...prev]);
-        setMessagesData(prev => ({
-          ...prev,
-          [group.name]: [{ senderId: 'system', senderName: 'System', text: 'Welcome to the group!' }]
-        }));
-      }
-    }, [conversations]);
+    const joinGroup = useCallback((groupId: string, userHandle: string) => {
+        setCommunityMembers(prevMembers =>
+            prevMembers.map(member =>
+                member.handle === userHandle
+                    ? { ...member, groups: [...(member.groups || []), groupId] }
+                    : member
+            )
+        );
+      
+        const group = groups.find(g => g.id === groupId);
+        if (group) {
+          const existingConvo = conversations.find(c => c.name === group.name);
+          if (!existingConvo) {
+            const newConversation: Conversation = {
+              name: group.name,
+              avatar: group.banner,
+              aiHint: group.aiHint,
+              lastMessage: "You joined the group.",
+              time: "Now",
+              unread: 0,
+              isGroup: true,
+            };
+            setConversations(prev => [newConversation, ...prev]);
+            setMessagesData(prev => ({
+              ...prev,
+              [group.name]: [{ senderId: 'system', senderName: 'System', text: 'Welcome to the group!' }]
+            }));
+          }
+        }
+    }, [groups, conversations]);
 
-    const leaveGroup = useCallback((group: Group, profile: CommunityMember) => {
-        setCommunityMembers(prevMembers => 
-            prevMembers.map(member => 
-                member.handle === profile.handle
-                ? { ...member, groups: (member.groups || []).filter(gId => gId !== group.id) } 
-                : member
+    const leaveGroup = useCallback((groupId: string, userHandle: string) => {
+        setCommunityMembers(prevMembers =>
+            prevMembers.map(member =>
+                member.handle === userHandle
+                    ? { ...member, groups: (member.groups || []).filter(gId => gId !== groupId) }
+                    : member
             )
         );
         // The conversation is intentionally not removed from the list,
@@ -317,5 +320,3 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         </AppContext.Provider>
     );
 };
-
-    

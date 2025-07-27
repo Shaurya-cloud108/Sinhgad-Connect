@@ -90,7 +90,7 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
         description: `Your request to join "${group.name}" has been sent for approval.`,
       });
     } else {
-      joinGroup(group, profileData);
+      joinGroup(group.id, profileData.handle);
       toast({
         title: "Joined Group!",
         description: `You are now a member of "${group.name}".`,
@@ -101,7 +101,7 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
   const handleLeaveClick = () => {
     if (!profileData || !group) return;
 
-    leaveGroup(group, profileData);
+    leaveGroup(group.id, profileData.handle);
     toast({
       title: "You have left the group",
       description: `You are no longer a member of "${group.name}".`,
@@ -127,7 +127,7 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
   const handleLike = (postId: number) => {
     setFeedItems(prev => prev.map(item =>
         item.id === postId
-        ? {...item, liked: !item.liked, likes: item.liked ? item.likes - 1 : item.likes + 1}
+        ? {...item, liked: !item.liked, likes: item.liked ? item.liked - 1 : item.likes + 1}
         : item
     ));
   };

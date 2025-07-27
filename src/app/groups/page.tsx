@@ -15,7 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Users, Lock, Search, PlusCircle, CheckCircle, MoreHorizontal, LogOut, Crown, Image as ImageIcon } from "lucide-react";
+import { Users, Lock, Search, PlusCircle, CheckCircle, MoreHorizontal, LogOut, Crown, ImageIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppContext } from "@/context/AppContext";
 import type { Group } from "@/lib/data";
@@ -43,7 +43,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 
-function GroupCard({ group, isMember, onJoinClick, onLeaveClick, currentUserId }: { group: Group, isMember: boolean, onJoinClick: (group: Group) => void, onLeaveClick: (group: Group) => void, currentUserId?: string }) {
+function GroupCard({ group, isMember, onJoinClick, onLeaveClick, currentUserId }: { group: Group, isMember: boolean, onJoinClick: (groupId: string) => void, onLeaveClick: (groupId: string) => void, currentUserId?: string }) {
   const isAdmin = group.adminHandle === currentUserId;
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const { setGroups } = useContext(AppContext);
@@ -131,12 +131,12 @@ function GroupCard({ group, isMember, onJoinClick, onLeaveClick, currentUserId }
         </CardContent>
         <CardFooter onClick={stopPropagation}>
           {isMember ? (
-            <div className="w-full flex items-center gap-2">
-              <Button className="w-full" disabled>
-                <CheckCircle className="mr-2 h-4 w-4" />
-                Joined
-              </Button>
-              <AlertDialog>
+             <AlertDialog>
+              <div className="w-full flex items-center gap-2">
+                <Button className="w-full" disabled>
+                  <CheckCircle className="mr-2 h-4 w-4" />
+                  Joined
+                </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="icon">
@@ -152,24 +152,24 @@ function GroupCard({ group, isMember, onJoinClick, onLeaveClick, currentUserId }
                     </AlertDialogTrigger>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Leave "{group.name}"?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      You will need to request to join again if this is a private group. Are you sure you want to leave?
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => onLeaveClick(group)}>
-                      Leave
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
+              </div>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Leave "{group.name}"?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    You will need to request to join again if this is a private group. Are you sure you want to leave?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => onLeaveClick(group.id)}>
+                    Leave
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           ) : (
-            <Button className="w-full" onClick={() => onJoinClick(group)}>
+            <Button className="w-full" onClick={() => onJoinClick(group.id)}>
               {group.type === 'private' ? 'Request to Join' : 'Join Group'}
             </Button>
           )}
@@ -225,11 +225,14 @@ function GroupsPageContent() {
     const addedGroup = addGroup(newGroup);
     
     // Also join the group you created
-    handleJoinClick(addedGroup);
+    handleJoinClick(addedGroup.id);
   };
   
-  const handleJoinClick = (group: Group) => {
+  const handleJoinClick = (groupId: string) => {
     if (!profileData) return;
+
+    const group = groups.find(g => g.id === groupId);
+    if (!group) return;
 
     if (group.type === 'private') {
       toast({
@@ -237,7 +240,7 @@ function GroupsPageContent() {
         description: `Your request to join "${group.name}" has been sent for approval.`,
       });
     } else {
-      joinGroup(group, profileData);
+      joinGroup(groupId, profileData.handle);
       toast({
         title: "Joined Group!",
         description: `You are now a member of "${group.name}".`,
@@ -245,10 +248,13 @@ function GroupsPageContent() {
     }
   };
 
-  const handleLeaveClick = (group: Group) => {
+  const handleLeaveClick = (groupId: string) => {
     if (!profileData) return;
+
+    const group = groups.find(g => g.id === groupId);
+    if (!group) return;
     
-    leaveGroup(group, profileData);
+    leaveGroup(groupId, profileData.handle);
 
     toast({
       title: "You have left the group",
@@ -296,8 +302,8 @@ function GroupsPageContent() {
                   key={group.id}
                   group={group}
                   isMember={true}
-                  onJoinClick={handleJoinClick}
-                  onLeaveClick={handleLeaveClick}
+                  onJoinClick={() => handleJoinClick(group.id)}
+                  onLeaveClick={() => handleLeaveClick(group.id)}
                   currentUserId={profileData?.handle}
                 />
               ))}
@@ -318,8 +324,8 @@ function GroupsPageContent() {
                     key={group.id}
                     group={group}
                     isMember={false}
-                    onJoinClick={handleJoinClick}
-                    onLeaveClick={handleLeaveClick}
+                    onJoinClick={() => handleJoinClick(group.id)}
+                    onLeaveClick={() => handleLeaveClick(group.id)}
                     currentUserId={profileData?.handle}
                   />
               ))}
