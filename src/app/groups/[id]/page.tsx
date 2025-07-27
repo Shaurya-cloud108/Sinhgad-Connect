@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppContext } from "@/context/AppContext";
 import { ProfileContext } from "@/context/ProfileContext";
-import { ArrowLeft, Users, Lock, CheckCircle, PlusCircle, LogOut, Crown, ImageIcon, MoreHorizontal, Heart, MessageCircle, Send, Trash2, Award, Briefcase } from "lucide-react";
+import { ArrowLeft, Users, Lock, CheckCircle, PlusCircle, LogOut, Crown, ImageIcon, MoreHorizontal, Heart, MessageCircle, Send, Trash2, Award, Briefcase, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import {
@@ -42,8 +42,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CreatePostDialog } from "@/components/create-post-dialog";
 import { CommentSheet } from "@/components/comment-sheet";
 import { cn } from "@/lib/utils";
-import type { Comment } from "@/lib/data.tsx";
+import type { Comment, Group } from "@/lib/data.tsx";
 import { ShareDialog } from "@/components/share-dialog";
+import { EditGroupDialog, GroupEditFormData } from "@/components/edit-group-dialog";
 
 
 export default function GroupProfilePage({ params }: { params: { id: string } }) {
@@ -58,6 +59,7 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
   const [group, setGroup] = useState<(typeof groups)[0] | null>(null);
   const [isMember, setIsMember] = useState(false);
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
+  const [isEditGroupOpen, setIsEditGroupOpen] = useState(false);
   const [activeCommentPostId, setActiveCommentPostId] = useState<number | null>(null);
   
   useEffect(() => {
@@ -118,6 +120,15 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
       };
       reader.readAsDataURL(file);
     }
+  };
+  
+  const handleGroupUpdate = (data: GroupEditFormData) => {
+    if (!group) return;
+    setGroups(prevGroups => prevGroups.map(g => g.id === group.id ? { ...g, name: data.name, description: data.description } : g));
+    toast({
+      title: "Group Updated",
+      description: "The group details have been saved.",
+    });
   };
 
   const triggerBannerUpload = () => {
@@ -234,6 +245,10 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
                       </Tooltip>
                     </TooltipProvider>
                     <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => setIsEditGroupOpen(true)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit Group
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={triggerBannerUpload}>
                           <ImageIcon className="mr-2 h-4 w-4" />
                           Edit Banner
@@ -396,6 +411,7 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
       </div>
     </div>
     <CreatePostDialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen} groupId={group.id} />
+    <EditGroupDialog open={isEditGroupOpen} onOpenChange={setIsEditGroupOpen} onGroupUpdate={handleGroupUpdate} group={group} />
     <CommentSheet
       open={!!activeCommentPostId}
       onOpenChange={(isOpen) => {
