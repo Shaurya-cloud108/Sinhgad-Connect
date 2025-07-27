@@ -8,6 +8,11 @@ export type GroupMember = {
   role: 'admin' | 'moderator' | 'member';
 };
 
+export type GroupLink = {
+  label: string;
+  url: string;
+};
+
 export type Group = {
   id: string;
   name: string;
@@ -17,6 +22,7 @@ export type Group = {
   members: GroupMember[];
   type: 'public' | 'private';
   tags: string[];
+  links?: GroupLink[];
 };
 
 export const initialGroupsData: Group[] = [
@@ -34,6 +40,10 @@ export const initialGroupsData: Group[] = [
     ],
     type: 'public',
     tags: ["#hiring", "#mentorship", "#tech-talks"],
+    links: [
+        { label: "Department Page", url: "#" },
+        { label: "Join our Slack", url: "#" }
+    ]
   },
   {
     id: "batch-of-2015",

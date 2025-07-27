@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useContext, useEffect, use, useRef, useMemo } from "react";
@@ -17,7 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppContext } from "@/context/AppContext";
 import { ProfileContext } from "@/context/ProfileContext";
-import { ArrowLeft, Users, Lock, CheckCircle, PlusCircle, LogOut, Crown, ImageIcon, MoreHorizontal, Heart, MessageCircle, Send, Trash2, Award, Briefcase, Edit, UserCog } from "lucide-react";
+import { ArrowLeft, Users, Lock, CheckCircle, PlusCircle, LogOut, Crown, ImageIcon, MoreHorizontal, Heart, MessageCircle, Send, Trash2, Award, Briefcase, Edit, UserCog, Link as LinkIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import {
@@ -42,7 +43,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CreatePostDialog } from "@/components/create-post-dialog";
 import { CommentSheet } from "@/components/comment-sheet";
 import { cn } from "@/lib/utils";
-import type { Comment, Group, GroupMember } from "@/lib/data.tsx";
+import type { Comment, Group, GroupLink, GroupMember } from "@/lib/data.tsx";
 import { ShareDialog } from "@/components/share-dialog";
 import { EditGroupDialog, GroupEditFormData } from "@/components/edit-group-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -144,7 +145,7 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
   
   const handleGroupUpdate = (data: GroupEditFormData) => {
     if (!group) return;
-    setGroups(prevGroups => prevGroups.map(g => g.id === group.id ? { ...g, name: data.name, description: data.description } : g));
+    setGroups(prevGroups => prevGroups.map(g => g.id === group.id ? { ...g, name: data.name, description: data.description, links: data.links } : g));
     toast({
       title: "Group Updated",
       description: "The group details have been saved.",
@@ -453,6 +454,31 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
                     </Card>
                     )}
             </TabsContent>
+            <TabsContent value="about" className="mt-6 space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="font-headline text-xl">About This Group</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">{group.description}</p>
+                  </CardContent>
+                </Card>
+                {group.links && group.links.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="font-headline text-xl">Useful Links</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {group.links.map((link, index) => (
+                        <a key={index} href={link.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-2 rounded-md hover:bg-muted">
+                          <LinkIcon className="h-5 w-5 text-muted-foreground" />
+                          <span className="text-sm font-medium text-primary hover:underline">{link.label}</span>
+                        </a>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
+              </TabsContent>
              <TabsContent value="members" className="mt-6">
                 <Card>
                     <CardHeader>
@@ -536,3 +562,4 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
     </>
   );
 }
+
