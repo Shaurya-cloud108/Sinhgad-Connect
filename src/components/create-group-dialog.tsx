@@ -33,7 +33,8 @@ import { ScrollArea } from "./ui/scroll-area";
 
 const createGroupSchema = z.object({
   name: z.string().min(5, "Group name must be at least 5 characters long."),
-  description: z.string().min(20, "Description must be at least 20 characters long."),
+  summary: z.string().min(10, "Summary must be at least 10 characters long.").max(120, "Summary must be 120 characters or less."),
+  about: z.string().min(20, "About section must be at least 20 characters long."),
   type: z.enum(["public", "private"], {
     required_error: "You need to select a group type.",
   }),
@@ -57,7 +58,8 @@ export function CreateGroupDialog({ open, onOpenChange, onGroupSubmit }: CreateG
     resolver: zodResolver(createGroupSchema),
     defaultValues: {
       name: "",
-      description: "",
+      summary: "",
+      about: "",
       type: "public",
     },
   });
@@ -114,14 +116,27 @@ export function CreateGroupDialog({ open, onOpenChange, onGroupSubmit }: CreateG
                     </FormItem>
                 )}
                 />
-                <FormField
+                 <FormField
                 control={form.control}
-                name="description"
+                name="summary"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>Summary</FormLabel>
                     <FormControl>
-                        <Textarea placeholder="What is the purpose of your group?" {...field} />
+                        <Textarea placeholder="A short, catchy summary for the group directory." rows={2} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+                 <FormField
+                control={form.control}
+                name="about"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>About Section</FormLabel>
+                    <FormControl>
+                        <Textarea placeholder="A detailed description for the group's profile page." rows={5} {...field} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>

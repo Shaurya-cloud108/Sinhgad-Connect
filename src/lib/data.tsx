@@ -16,7 +16,8 @@ export type GroupLink = {
 export type Group = {
   id: string;
   name: string;
-  description: string;
+  summary: string; // Changed from description
+  about: string; // New field for detailed text
   banner: string;
   aiHint: string;
   members: GroupMember[];
@@ -29,7 +30,8 @@ export const initialGroupsData: Group[] = [
   {
     id: "comp-eng-alumni",
     name: "Computer Engineering Alumni",
-    description: "A group for all past and present students of the Computer Engineering department to connect and share opportunities.",
+    summary: "Connect and share opportunities with past and present Computer Engineering students.",
+    about: "This is the official space for all past and present students of the Computer Engineering department. Our goal is to foster a strong community where members can connect, share professional opportunities, ask for advice, and organize tech-related events. All members are encouraged to participate actively and respectfully.",
     banner: "https://placehold.co/600x400.png",
     aiHint: "circuit board",
     members: [
@@ -48,7 +50,8 @@ export const initialGroupsData: Group[] = [
   {
     id: "batch-of-2015",
     name: "Batch of 2015 Reunion",
-    description: "Planning and discussions for the 10-year reunion for the graduating class of 2015. All departments welcome!",
+    summary: "Planning and discussions for the 10-year reunion for the class of 2015.",
+    about: "Welcome, class of 2015! This group is dedicated to planning our 10-year reunion. We'll post updates on dates, venues, and ticketing here. Please share your ideas and old photos to get the nostalgia flowing! All departments are welcome.",
     banner: "https://placehold.co/600x400.png",
     aiHint: "graduation celebration",
     members: [
@@ -60,7 +63,8 @@ export const initialGroupsData: Group[] = [
   {
     id: "bay-area-alumni",
     name: "Bay Area Alumni Chapter",
-    description: "Connect with fellow Sinhgad alumni living and working in the San Francisco Bay Area for networking, meetups, and support.",
+    summary: "Connect with fellow Sinhgad alumni living and working in the San Francisco Bay Area.",
+    about: "A hub for Sinhgad alumni in the SF Bay Area to network, organize professional and social meetups, and support each other in our careers. Whether you're new to the area or a long-time resident, you're welcome here.",
     banner: "https://placehold.co/600x400.png",
     aiHint: "golden gate bridge",
     members: [
@@ -72,7 +76,8 @@ export const initialGroupsData: Group[] = [
   {
     id: "entrepreneur-club",
     name: "Sinhgad Entrepreneur's Club",
-    description: "A group for aspiring and established entrepreneurs to share ideas, find co-founders, and discuss startup life.",
+    summary: "A group for aspiring and established entrepreneurs to share ideas and find co-founders.",
+    about: "This is a community for the entrepreneurs of Sinhgad. Share your startup ideas, seek advice on funding and strategy, find potential co-founders, and discuss the challenges and triumphs of building a business. Let's innovate together!",
     banner: "https://placehold.co/600x400.png",
     aiHint: "lightbulb idea",
     members: [
@@ -86,7 +91,8 @@ export const initialGroupsData: Group[] = [
    {
     id: "photography-enthusiasts",
     name: "Photography Enthusiasts",
-    description: "A casual group for alumni and students who love photography to share their work and organize photo walks.",
+    summary: "A casual group for alumni and students who love photography.",
+    about: "If you have a passion for photography, this is the place for you! Share your work, discuss techniques and gear, and help organize casual photo walks around the city. Amateurs and professionals are all welcome.",
     banner: "https://placehold.co/600x400.png",
     aiHint: "camera lens",
     members: [
@@ -98,7 +104,8 @@ export const initialGroupsData: Group[] = [
   {
     id: "job-seekers-2024",
     name: "Job Seekers - Class of 2024",
-    description: "A support group for the graduating class of 2024 to share job leads, interview tips, and referral requests.",
+    summary: "Support group for the graduating class of 2024 to share job leads and interview tips.",
+    about: "This is a private support group for the graduating class of 2024. Let's help each other land our first jobs by sharing job postings, interview experiences, resume tips, and referral requests. Let's get hired!",
     banner: "https://placehold.co/600x400.png",
     aiHint: "job interview",
     members: [

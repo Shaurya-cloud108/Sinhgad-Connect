@@ -33,7 +33,8 @@ import { Separator } from "./ui/separator";
 
 const editGroupSchema = z.object({
   name: z.string().min(5, "Group name must be at least 5 characters long."),
-  description: z.string().min(20, "Description must be at least 20 characters long."),
+  summary: z.string().min(10, "Summary must be at least 10 characters long.").max(120, "Summary must be 120 characters or less."),
+  about: z.string().min(20, "About section must be at least 20 characters long."),
   links: z.array(z.object({
     label: z.string().min(1, "Label is required."),
     url: z.string().url("Please enter a valid URL."),
@@ -54,7 +55,8 @@ export function EditGroupDialog({ open, onOpenChange, onGroupUpdate, group }: Ed
     resolver: zodResolver(editGroupSchema),
     defaultValues: {
       name: group.name,
-      description: group.description,
+      summary: group.summary,
+      about: group.about,
       links: group.links || [],
     },
   });
@@ -67,7 +69,8 @@ export function EditGroupDialog({ open, onOpenChange, onGroupUpdate, group }: Ed
   useEffect(() => {
     form.reset({
         name: group.name,
-        description: group.description,
+        summary: group.summary,
+        about: group.about,
         links: group.links || [],
     });
   }, [group, form]);
@@ -105,12 +108,25 @@ export function EditGroupDialog({ open, onOpenChange, onGroupUpdate, group }: Ed
                 />
                 <FormField
                 control={form.control}
-                name="description"
+                name="summary"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>Summary</FormLabel>
                     <FormControl>
-                        <Textarea rows={4} {...field} />
+                        <Textarea placeholder="A short, catchy summary for the group directory." rows={2} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+                 <FormField
+                control={form.control}
+                name="about"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>About Section</FormLabel>
+                    <FormControl>
+                        <Textarea placeholder="A detailed description for the group's profile page." rows={5} {...field} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>
@@ -145,4 +161,3 @@ export function EditGroupDialog({ open, onOpenChange, onGroupUpdate, group }: Ed
     </Dialog>
   );
 }
-

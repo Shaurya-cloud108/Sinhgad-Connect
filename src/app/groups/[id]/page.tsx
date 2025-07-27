@@ -146,7 +146,7 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
   
   const handleGroupUpdate = (data: GroupEditFormData) => {
     if (!group) return;
-    setGroups(prevGroups => prevGroups.map(g => g.id === group.id ? { ...g, name: data.name, description: data.description, links: data.links } : g));
+    setGroups(prevGroups => prevGroups.map(g => g.id === group.id ? { ...g, name: data.name, summary: data.summary, about: data.about, links: data.links } : g));
     toast({
       title: "Group Updated",
       description: "The group details have been saved.",
@@ -330,7 +330,7 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
           </div>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground mb-6">{group.description}</p>
+          <p className="text-muted-foreground mb-6">{group.summary}</p>
           <div className="flex flex-wrap gap-2">
             {group.tags.map((tag) => (
               <Badge key={tag} variant="secondary">
@@ -462,7 +462,7 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
                     <CardTitle className="font-headline text-xl">About This Group</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-muted-foreground">{group.description}</p>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{group.about}</p>
                   </CardContent>
                 </Card>
                 {group.links && group.links.length > 0 && (

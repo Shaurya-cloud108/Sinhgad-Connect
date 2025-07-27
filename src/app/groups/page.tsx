@@ -122,7 +122,7 @@ function GroupCard({ group, isMember, onJoinClick, onLeaveClick, currentUserId }
           </CardDescription>
         </CardHeader>
         <CardContent className="flex-grow">
-          <p className="text-sm text-muted-foreground line-clamp-2">{group.description}</p>
+          <p className="text-sm text-muted-foreground line-clamp-2">{group.summary}</p>
           <div className="flex flex-wrap gap-2 mt-4">
             {group.tags.map(tag => (
               <Badge key={tag} variant="secondary">{tag}</Badge>
@@ -201,7 +201,7 @@ function GroupsPageContent() {
     }
     return groups.filter(group =>
       group.name.toLowerCase().includes(lowercasedQuery) ||
-      group.description.toLowerCase().includes(lowercasedQuery) ||
+      group.summary.toLowerCase().includes(lowercasedQuery) ||
       group.tags.some(tag => tag.toLowerCase().includes(lowercasedQuery))
     );
   }, [searchQuery, groups]);
@@ -221,7 +221,8 @@ function GroupsPageContent() {
 
     const newGroup: Omit<Group, 'id' | 'members' | 'tags'> = {
       name: data.name,
-      description: data.description,
+      summary: data.summary,
+      about: data.about,
       type: data.type,
       banner: data.banner || "https://placehold.co/600x400.png",
       aiHint: "community gathering",
