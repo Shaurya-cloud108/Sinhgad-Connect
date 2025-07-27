@@ -45,6 +45,7 @@ type AppContextType = {
 
     groups: Group[];
     setGroups: React.Dispatch<React.SetStateAction<Group[]>>;
+    addGroup: (group: Group) => void;
 
     jobListings: JobListing[];
     setJobListings: React.Dispatch<React.SetStateAction<JobListing[]>>;
@@ -78,6 +79,7 @@ export const AppContext = createContext<AppContextType>({
     addEvent: () => {},
     groups: [],
     setGroups: () => {},
+    addGroup: () => {},
     jobListings: [],
     setJobListings: () => {},
     addJobListing: () => {},
@@ -129,6 +131,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const addEvent = useCallback((event: Event) => {
         setEvents(prev => [event, ...prev]);
+    }, []);
+
+    const addGroup = useCallback((group: Group) => {
+        setGroups(prev => [group, ...prev]);
     }, []);
 
     const addJobListing = useCallback((job: JobListing) => {
@@ -211,6 +217,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         addEvent,
         groups,
         setGroups,
+        addGroup,
         jobListings,
         setJobListings,
         addJobListing,

@@ -19,11 +19,13 @@ import { Users, Lock, Search, PlusCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppContext } from "@/context/AppContext";
 import type { Group } from "@/lib/data";
+import { CreateGroupDialog, GroupFormData } from "@/components/create-group-dialog";
 
 function GroupsPageContent() {
-  const { groups } = useContext(AppContext);
+  const { groups, addGroup } = useContext(AppContext);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredGroups, setFilteredGroups] = useState<Group[]>(groups);
+  const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
 
   useEffect(() => {
     const lowercasedQuery = searchQuery.toLowerCase();
@@ -39,6 +41,20 @@ function GroupsPageContent() {
     setFilteredGroups(results);
   }, [searchQuery, groups]);
 
+  const handleGroupSubmit = (data: GroupFormData) => {
+    const newGroup: Group = {
+      id: data.name.toLowerCase().replace(/\s+/g, '-'),
+      name: data.name,
+      description: data.description,
+      type: data.type,
+      banner: "https://placehold.co/600x400.png",
+      aiHint: "community gathering",
+      memberCount: 1, // Starts with the creator
+      tags: [], // Tags can be added later
+    };
+    addGroup(newGroup);
+  };
+
   return (
     <div className="container py-8 md:py-12">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
@@ -48,10 +64,16 @@ function GroupsPageContent() {
             Connect with alumni and students who share your interests.
           </p>
         </div>
-        <Button className="mt-4 md:mt-0">
+        <Button className="mt-4 md:mt-0" onClick={() => setIsCreateGroupOpen(true)}>
           <PlusCircle className="mr-2 h-4 w-4" /> Create a Group
         </Button>
       </div>
+
+      <CreateGroupDialog 
+        open={isCreateGroupOpen} 
+        onOpenChange={setIsCreateGroupOpen} 
+        onGroupSubmit={handleGroupSubmit} 
+      />
 
       <div className="relative mb-8">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
