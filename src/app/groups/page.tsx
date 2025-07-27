@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useContext, useEffect, useMemo } from "react";
+import { useState, useContext, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -15,7 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Users, Lock, Search, PlusCircle, CheckCircle, MoreHorizontal, LogOut, Crown } from "lucide-react";
+import { Users, Lock, Search, PlusCircle, CheckCircle, MoreHorizontal, LogOut, Crown, Image as ImageIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppContext } from "@/context/AppContext";
 import type { Group } from "@/lib/data";
@@ -38,13 +38,31 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 
 function GroupCard({ group, isMember, onJoinClick, onLeaveClick, currentUserId }: { group: Group, isMember: boolean, onJoinClick: (group: Group) => void, onLeaveClick: (group: Group) => void, currentUserId?: string }) {
   const isAdmin = group.adminHandle === currentUserId;
+  const bannerInputRef = useRef<HTMLInputElement>(null);
+  const { setGroups } = useContext(AppContext);
+
+  const handleBannerUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const newBannerUrl = reader.result as string;
+        setGroups(prevGroups => prevGroups.map(g => g.id === group.id ? { ...g, banner: newBannerUrl } : g));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const triggerBannerUpload = () => {
+    bannerInputRef.current?.click();
+  };
+
 
   return (
     <Card className="flex flex-col hover:shadow-xl transition-shadow duration-300">
@@ -58,18 +76,31 @@ function GroupCard({ group, isMember, onJoinClick, onLeaveClick, currentUserId }
         />
         <div className="absolute top-2 right-2 flex items-center gap-1">
           {isAdmin && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <div className="bg-background/80 p-1.5 rounded-full">
-                    <Crown className="h-4 w-4 text-yellow-500" />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>You are the admin</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <>
+            <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={handleBannerUpload} />
+            <DropdownMenu>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="secondary" size="icon" className="h-8 w-8 rounded-full bg-background/80">
+                        <Crown className="h-4 w-4 text-yellow-500" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Admin Controls</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={triggerBannerUpload}>
+                    <ImageIcon className="mr-2 h-4 w-4" />
+                    Edit Banner
+                  </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            </>
           )}
           {group.type === 'private' && (
             <div className="bg-background/80 p-1.5 rounded-full">
