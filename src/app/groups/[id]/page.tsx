@@ -340,13 +340,13 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
       </Card>
 
       <div className="max-w-4xl mx-auto mt-8">
-        <Tabs defaultValue="posts" className="w-full">
-            <TabsList className="w-full grid grid-cols-2 data-[isAdmin=true]:grid-cols-3">
-                <TabsTrigger value="posts">Feed</TabsTrigger>
+        <Tabs defaultValue="feed" className="w-full">
+            <TabsList className="w-full grid grid-cols-3">
+                <TabsTrigger value="feed">Feed</TabsTrigger>
+                <TabsTrigger value="members">Members</TabsTrigger>
                 <TabsTrigger value="about">About</TabsTrigger>
-                {isAdmin && <TabsTrigger value="members">Members</TabsTrigger>}
             </TabsList>
-            <TabsContent value="posts" className="mt-6 space-y-6">
+            <TabsContent value="feed" className="mt-6 space-y-6">
                  {isMember && canPost && (
                     <Card>
                         <CardContent className="p-3">
@@ -454,19 +454,13 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
                     </Card>
                     )}
             </TabsContent>
-            <TabsContent value="about" className="mt-6">
-                <Card>
-                    <CardContent className="p-6">
-                        <h3 className="font-bold font-headline mb-2 text-lg">About this Group</h3>
-                         <p className="text-sm text-muted-foreground">{group.description}</p>
-                    </CardContent>
-                </Card>
-            </TabsContent>
-            <TabsContent value="members" className="mt-6">
+             <TabsContent value="members" className="mt-6">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Manage Members</CardTitle>
-                        <CardDescription>Promote members to moderators or remove them from the group.</CardDescription>
+                        <CardTitle>Group Members ({group.members.length})</CardTitle>
+                        <CardDescription>
+                            {isAdmin ? "Manage member roles below." : "A list of people in this group."}
+                        </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         {groupMembersWithDetails.map(member => (
@@ -525,6 +519,14 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
                     </CardContent>
                 </Card>
             </TabsContent>
+            <TabsContent value="about" className="mt-6">
+                <Card>
+                    <CardContent className="p-6">
+                        <h3 className="font-bold font-headline mb-2 text-lg">About this Group</h3>
+                         <p className="text-sm text-muted-foreground">{group.description}</p>
+                    </CardContent>
+                </Card>
+            </TabsContent>
         </Tabs>
       </div>
     </div>
@@ -543,5 +545,7 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
     </>
   );
 }
+
+    
 
     
