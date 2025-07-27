@@ -345,8 +345,8 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
         <Tabs value={activeTab} onValueChange={setActiveTab} defaultValue="feed" className="w-full">
             <TabsList className="w-full grid grid-cols-3">
                 <TabsTrigger value="feed">Feed</TabsTrigger>
-                <TabsTrigger value="about">About</TabsTrigger>
                 <TabsTrigger value="members">Members</TabsTrigger>
+                <TabsTrigger value="about">About</TabsTrigger>
             </TabsList>
             <TabsContent value="feed" className="mt-6 space-y-6">
                  {isMember && canPost && (
