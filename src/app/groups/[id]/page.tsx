@@ -341,10 +341,9 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
 
       <div className="max-w-4xl mx-auto mt-8">
         <Tabs defaultValue="feed" className="w-full">
-            <TabsList className="w-full grid grid-cols-3">
+            <TabsList className="w-full grid grid-cols-2">
                 <TabsTrigger value="feed">Feed</TabsTrigger>
                 <TabsTrigger value="members">Members</TabsTrigger>
-                <TabsTrigger value="about">About</TabsTrigger>
             </TabsList>
             <TabsContent value="feed" className="mt-6 space-y-6">
                  {isMember && canPost && (
@@ -519,14 +518,6 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
                     </CardContent>
                 </Card>
             </TabsContent>
-            <TabsContent value="about" className="mt-6">
-                <Card>
-                    <CardContent className="p-6">
-                        <h3 className="font-bold font-headline mb-2 text-lg">About this Group</h3>
-                         <p className="text-sm text-muted-foreground">{group.description}</p>
-                    </CardContent>
-                </Card>
-            </TabsContent>
         </Tabs>
       </div>
     </div>
@@ -545,7 +536,3 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
     </>
   );
 }
-
-    
-
-    
