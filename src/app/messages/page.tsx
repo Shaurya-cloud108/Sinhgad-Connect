@@ -5,7 +5,7 @@ import { useState, useContext, useMemo, useEffect, useRef } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Send, ArrowLeft, MessageSquare, Info } from "lucide-react";
+import { Search, Send, ArrowLeft, MessageSquare, Info, LogOut, MoreHorizontal } from "lucide-react";
 import { cn, getStatusEmoji } from "@/lib/utils";
 import { AppContext, Conversation, Message } from "@/context/AppContext";
 import {
@@ -16,8 +16,25 @@ import {
   DialogTrigger,
   DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { ProfileContext } from "@/context/ProfileContext";
-import { CommunityMember } from "@/lib/data.tsx";
+import { CommunityMember, Group } from "@/lib/data.tsx";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Tooltip,
@@ -32,13 +49,15 @@ import { SharedStoryCard } from "@/components/shared-story-card";
 import { SharedProfileCard } from "@/components/shared-profile-card";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 
 function MessagesPageContent() {
-  const { conversations, setConversations, messagesData, setMessagesData, selectedConversation, setSelectedConversation: setAppContextSelectedConvo } = useContext(AppContext);
-  const { profileData } = useContext(ProfileContext);
+  const { conversations, setConversations, messagesData, setMessagesData, selectedConversation, setSelectedConversation: setAppContextSelectedConvo, groups, removeConversationForGroup } = useContext(AppContext);
+  const { profileData, setCommunityMembers } = useContext(ProfileContext);
   const [newMessage, setNewMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   const setSelectedConversation = (convo: Conversation | null) => {
     setAppContextSelectedConvo(convo);
@@ -97,6 +116,30 @@ function MessagesPageContent() {
         chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [messages]);
+  
+  const handleLeaveGroup = () => {
+    if (!profileData || !selectedConversation || !selectedConversation.isGroup) return;
+
+    const groupToLeave = groups.find(g => g.name === selectedConversation.name);
+    if (!groupToLeave) return;
+    
+    setCommunityMembers(prevMembers => 
+      prevMembers.map(member => 
+        member.handle === profileData.handle 
+          ? { ...member, groups: (member.groups || []).filter(gId => gId !== groupToLeave.id) } 
+          : member
+      )
+    );
+
+    removeConversationForGroup(groupToLeave);
+
+    toast({
+      title: "You have left the group",
+      description: `You are no longer a member of "${groupToLeave.name}".`,
+    });
+    
+    // setSelectedConversation(null) is handled by removeConversationForGroup
+  };
 
   if (!profileData) {
       return (
@@ -161,21 +204,40 @@ function MessagesPageContent() {
         selectedConversation ? "flex" : "hidden md:flex"
       )}>
         {selectedConversation ? (
-          <>
+          <AlertDialog>
             <div className="p-4 border-b flex items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                 <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setSelectedConversation(null)}>
+              <div className="flex items-center gap-4 overflow-hidden">
+                 <Button variant="ghost" size="icon" className="md:hidden flex-shrink-0" onClick={() => setSelectedConversation(null)}>
                   <ArrowLeft />
                 </Button>
-                <Avatar>
+                <Avatar className="flex-shrink-0">
                   <AvatarImage src={selectedConversation.avatar} data-ai-hint={selectedConversation.aiHint}/>
                   <AvatarFallback>{selectedConversation.name.substring(0, 2)}</AvatarFallback>
                 </Avatar>
-                <div>
-                  <p className="font-semibold">{selectedConversation.name}</p>
-                   <p className="text-sm text-muted-foreground">Online</p>
+                <div className="overflow-hidden">
+                  <p className="font-semibold truncate">{selectedConversation.name}</p>
+                   <p className="text-sm text-muted-foreground">
+                    {selectedConversation.isGroup ? `${groups.find(g => g.name === selectedConversation.name)?.memberCount} members` : "Online"}
+                   </p>
                 </div>
               </div>
+               {selectedConversation.isGroup && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <MoreHorizontal />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <AlertDialogTrigger asChild>
+                      <DropdownMenuItem className="text-destructive cursor-pointer">
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Leave Group
+                      </DropdownMenuItem>
+                    </AlertDialogTrigger>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
             <div className="flex-grow p-4 overflow-y-auto bg-secondary/30 relative" ref={chatContainerRef}>
               <div className="space-y-4">
@@ -217,7 +279,21 @@ function MessagesPageContent() {
                 </Button>
               </div>
             </div>
-          </>
+             <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Leave "{selectedConversation.name}"?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  You will no longer be able to see messages or post in this group. Are you sure?
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleLeaveGroup}>
+                  Leave
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         ) : (
            <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
             <MessageSquare className="h-20 w-20 mb-4" />
@@ -272,3 +348,5 @@ export default function MessagesPage() {
     
     return <MessagesPageContent />;
 }
+
+    
