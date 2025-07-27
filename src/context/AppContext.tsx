@@ -47,6 +47,7 @@ type AppContextType = {
     setGroups: React.Dispatch<React.SetStateAction<Group[]>>;
     addGroup: (group: Group) => void;
     addConversationForGroup: (group: Group) => void;
+    removeConversationForGroup: (group: Group) => void;
 
     jobListings: JobListing[];
     setJobListings: React.Dispatch<React.SetStateAction<JobListing[]>>;
@@ -82,6 +83,7 @@ export const AppContext = createContext<AppContextType>({
     setGroups: () => {},
     addGroup: () => {},
     addConversationForGroup: () => {},
+    removeConversationForGroup: () => {},
     jobListings: [],
     setJobListings: () => {},
     addJobListing: () => {},
@@ -165,6 +167,22 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             }]
         }));
     }, [conversations]);
+    
+    const removeConversationForGroup = useCallback((group: Group) => {
+        setConversations(prev => prev.filter(c => c.name !== group.name));
+        
+        // Also clear the selected conversation if it's the one being left
+        setSelectedConversation(prev => (prev?.name === group.name ? null : prev));
+        
+        // We can choose to keep or delete the message history. 
+        // For now, we'll keep it, but one could delete it like this:
+        // setMessagesData(prev => {
+        //   const newMessages = { ...prev };
+        //   delete newMessages[group.name];
+        //   return newMessages;
+        // });
+    }, []);
+
 
     const addJobListing = useCallback((job: JobListing) => {
         setJobListings(prev => [job, ...prev]);
@@ -248,6 +266,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setGroups,
         addGroup,
         addConversationForGroup,
+        removeConversationForGroup,
         jobListings,
         setJobListings,
         addJobListing,

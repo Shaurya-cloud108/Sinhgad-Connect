@@ -15,7 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Users, Lock, Search, PlusCircle, CheckCircle } from "lucide-react";
+import { Users, Lock, Search, PlusCircle, CheckCircle, MoreHorizontal, LogOut } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppContext } from "@/context/AppContext";
 import type { Group } from "@/lib/data";
@@ -23,57 +23,107 @@ import { CreateGroupDialog, GroupFormData } from "@/components/create-group-dial
 import { useToast } from "@/hooks/use-toast";
 import { ProfileContext } from "@/context/ProfileContext";
 import { Separator } from "@/components/ui/separator";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
-function GroupCard({ group, isMember, onJoinClick }: { group: Group, isMember: boolean, onJoinClick: (group: Group) => void }) {
+function GroupCard({ group, isMember, onJoinClick, onLeaveClick }: { group: Group, isMember: boolean, onJoinClick: (group: Group) => void, onLeaveClick: (group: Group) => void }) {
   return (
-    <Card className="flex flex-col hover:shadow-xl transition-shadow duration-300">
-      <div className="relative h-40 w-full">
-        <Image
-          src={group.banner}
-          alt={`${group.name} banner`}
-          fill
-          className="object-cover"
-          data-ai-hint={group.aiHint}
-        />
-        {group.type === 'private' && (
-          <div className="absolute top-2 right-2 bg-background/80 p-1.5 rounded-full">
-            <Lock className="h-4 w-4" />
-          </div>
-        )}
-      </div>
-      <CardHeader>
-        <CardTitle className="font-headline text-xl">{group.name}</CardTitle>
-        <CardDescription className="flex items-center gap-2 text-sm">
-          <Users className="h-4 w-4" />
-          {group.memberCount} Members
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex-grow">
-        <p className="text-sm text-muted-foreground line-clamp-2">{group.description}</p>
-        <div className="flex flex-wrap gap-2 mt-4">
-          {group.tags.map(tag => (
-            <Badge key={tag} variant="secondary">{tag}</Badge>
-          ))}
-        </div>
-      </CardContent>
-      <CardFooter>
-        <Button className="w-full" onClick={() => onJoinClick(group)} disabled={isMember}>
-          {isMember ? (
-            <>
-              <CheckCircle className="mr-2 h-4 w-4" />
-              Joined
-            </>
-          ) : (
-            group.type === 'private' ? 'Request to Join' : 'Join Group'
+     <AlertDialog>
+      <Card className="flex flex-col hover:shadow-xl transition-shadow duration-300">
+        <div className="relative h-40 w-full">
+          <Image
+            src={group.banner}
+            alt={`${group.name} banner`}
+            fill
+            className="object-cover"
+            data-ai-hint={group.aiHint}
+          />
+          {group.type === 'private' && (
+            <div className="absolute top-2 right-2 bg-background/80 p-1.5 rounded-full">
+              <Lock className="h-4 w-4" />
+            </div>
           )}
-        </Button>
-      </CardFooter>
-    </Card>
+        </div>
+        <CardHeader>
+          <CardTitle className="font-headline text-xl">{group.name}</CardTitle>
+          <CardDescription className="flex items-center gap-2 text-sm">
+            <Users className="h-4 w-4" />
+            {group.memberCount} Members
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex-grow">
+          <p className="text-sm text-muted-foreground line-clamp-2">{group.description}</p>
+          <div className="flex flex-wrap gap-2 mt-4">
+            {group.tags.map(tag => (
+              <Badge key={tag} variant="secondary">{tag}</Badge>
+            ))}
+          </div>
+        </CardContent>
+        <CardFooter>
+          {isMember ? (
+            <div className="w-full flex items-center gap-2">
+               <Button className="w-full" disabled>
+                  <CheckCircle className="mr-2 h-4 w-4" />
+                  Joined
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <AlertDialogTrigger asChild>
+                    <DropdownMenuItem className="text-destructive cursor-pointer">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Leave Group
+                    </DropdownMenuItem>
+                  </AlertDialogTrigger>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          ) : (
+            <Button className="w-full" onClick={() => onJoinClick(group)}>
+                {group.type === 'private' ? 'Request to Join' : 'Join Group'}
+            </Button>
+          )}
+        </CardFooter>
+      </Card>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Leave "{group.name}"?</AlertDialogTitle>
+          <AlertDialogDescription>
+            You will need to request to join again if this is a private group. Are you sure you want to leave?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={() => onLeaveClick(group)}>
+            Leave
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
 
 function GroupsPageContent() {
-  const { groups, addGroup, addConversationForGroup } = useContext(AppContext);
+  const { groups, addGroup, addConversationForGroup, removeConversationForGroup } = useContext(AppContext);
   const { profileData, setCommunityMembers } = useContext(ProfileContext);
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
@@ -115,6 +165,8 @@ function GroupsPageContent() {
       tags: [], // Tags can be added later
     };
     addGroup(newGroup);
+    // Also join the group you created
+    handleJoinClick(newGroup);
   };
   
   const handleJoinClick = (group: Group) => {
@@ -142,6 +194,26 @@ function GroupsPageContent() {
         description: `You are now a member of "${group.name}".`,
       });
     }
+  };
+
+  const handleLeaveClick = (group: Group) => {
+    if (!profileData) return;
+    
+    // Logic for leaving a group
+    setCommunityMembers(prevMembers => 
+      prevMembers.map(member => 
+        member.handle === profileData.handle 
+          ? { ...member, groups: (member.groups || []).filter(gId => gId !== group.id) } 
+          : member
+      )
+    );
+
+    removeConversationForGroup(group);
+
+    toast({
+      title: "You have left the group",
+      description: `You are no longer a member of "${group.name}".`,
+    });
   };
 
   return (
@@ -185,6 +257,7 @@ function GroupsPageContent() {
                   group={group}
                   isMember={true}
                   onJoinClick={handleJoinClick}
+                  onLeaveClick={handleLeaveClick}
                 />
               ))}
             </div>
@@ -205,6 +278,7 @@ function GroupsPageContent() {
                     group={group}
                     isMember={false}
                     onJoinClick={handleJoinClick}
+                    onLeaveClick={handleLeaveClick}
                   />
               ))}
             </div>
