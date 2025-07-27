@@ -15,7 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Users, Lock, Search, PlusCircle, CheckCircle, MoreHorizontal, LogOut } from "lucide-react";
+import { Users, Lock, Search, PlusCircle, CheckCircle, MoreHorizontal, LogOut, Crown } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppContext } from "@/context/AppContext";
 import type { Group } from "@/lib/data";
@@ -40,47 +40,67 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-function GroupCard({ group, isMember, onJoinClick, onLeaveClick }: { group: Group, isMember: boolean, onJoinClick: (group: Group) => void, onLeaveClick: (group: Group) => void }) {
+
+function GroupCard({ group, isMember, onJoinClick, onLeaveClick, currentUserId }: { group: Group, isMember: boolean, onJoinClick: (group: Group) => void, onLeaveClick: (group: Group) => void, currentUserId?: string }) {
+  const isAdmin = group.adminHandle === currentUserId;
+
   return (
-     <AlertDialog>
-      <Card className="flex flex-col hover:shadow-xl transition-shadow duration-300">
-        <div className="relative h-40 w-full">
-          <Image
-            src={group.banner}
-            alt={`${group.name} banner`}
-            fill
-            className="object-cover"
-            data-ai-hint={group.aiHint}
-          />
+    <Card className="flex flex-col hover:shadow-xl transition-shadow duration-300">
+      <div className="relative h-40 w-full">
+        <Image
+          src={group.banner}
+          alt={`${group.name} banner`}
+          fill
+          className="object-cover"
+          data-ai-hint={group.aiHint}
+        />
+        <div className="absolute top-2 right-2 flex items-center gap-1">
+          {isAdmin && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <div className="bg-background/80 p-1.5 rounded-full">
+                    <Crown className="h-4 w-4 text-yellow-500" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>You are the admin</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
           {group.type === 'private' && (
-            <div className="absolute top-2 right-2 bg-background/80 p-1.5 rounded-full">
+            <div className="bg-background/80 p-1.5 rounded-full">
               <Lock className="h-4 w-4" />
             </div>
           )}
         </div>
-        <CardHeader>
-          <CardTitle className="font-headline text-xl">{group.name}</CardTitle>
-          <CardDescription className="flex items-center gap-2 text-sm">
-            <Users className="h-4 w-4" />
-            {group.memberCount} Members
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex-grow">
-          <p className="text-sm text-muted-foreground line-clamp-2">{group.description}</p>
-          <div className="flex flex-wrap gap-2 mt-4">
-            {group.tags.map(tag => (
-              <Badge key={tag} variant="secondary">{tag}</Badge>
-            ))}
-          </div>
-        </CardContent>
-        <CardFooter>
-          {isMember ? (
-            <div className="w-full flex items-center gap-2">
-               <Button className="w-full" disabled>
-                  <CheckCircle className="mr-2 h-4 w-4" />
-                  Joined
-              </Button>
+      </div>
+      <CardHeader>
+        <CardTitle className="font-headline text-xl">{group.name}</CardTitle>
+        <CardDescription className="flex items-center gap-2 text-sm">
+          <Users className="h-4 w-4" />
+          {group.memberCount} Members
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex-grow">
+        <p className="text-sm text-muted-foreground line-clamp-2">{group.description}</p>
+        <div className="flex flex-wrap gap-2 mt-4">
+          {group.tags.map(tag => (
+            <Badge key={tag} variant="secondary">{tag}</Badge>
+          ))}
+        </div>
+      </CardContent>
+      <CardFooter>
+        {isMember ? (
+          <div className="w-full flex items-center gap-2">
+            <Button className="w-full" disabled>
+              <CheckCircle className="mr-2 h-4 w-4" />
+              Joined
+            </Button>
+            <AlertDialog>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="icon">
@@ -96,29 +116,29 @@ function GroupCard({ group, isMember, onJoinClick, onLeaveClick }: { group: Grou
                   </AlertDialogTrigger>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </div>
-          ) : (
-            <Button className="w-full" onClick={() => onJoinClick(group)}>
-                {group.type === 'private' ? 'Request to Join' : 'Join Group'}
-            </Button>
-          )}
-        </CardFooter>
-      </Card>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Leave "{group.name}"?</AlertDialogTitle>
-          <AlertDialogDescription>
-            You will need to request to join again if this is a private group. Are you sure you want to leave?
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={() => onLeaveClick(group)}>
-            Leave
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Leave "{group.name}"?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    You will need to request to join again if this is a private group. Are you sure you want to leave?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => onLeaveClick(group)}>
+                    Leave
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        ) : (
+          <Button className="w-full" onClick={() => onJoinClick(group)}>
+            {group.type === 'private' ? 'Request to Join' : 'Join Group'}
+          </Button>
+        )}
+      </CardFooter>
+    </Card>
   );
 }
 
@@ -154,19 +174,21 @@ function GroupsPageContent() {
   );
 
   const handleGroupSubmit = (data: GroupFormData) => {
-    const newGroup: Group = {
-      id: data.name.toLowerCase().replace(/\s+/g, '-'),
+    if (!profileData) return;
+
+    const newGroup: Omit<Group, 'id' | 'memberCount' | 'tags'> = {
       name: data.name,
       description: data.description,
       type: data.type,
       banner: "https://placehold.co/600x400.png",
       aiHint: "community gathering",
-      memberCount: 1, // Starts with the creator
-      tags: [], // Tags can be added later
+      adminHandle: profileData.handle,
     };
-    addGroup(newGroup);
+
+    const addedGroup = addGroup(newGroup);
+    
     // Also join the group you created
-    handleJoinClick(newGroup);
+    handleJoinClick(addedGroup);
   };
   
   const handleJoinClick = (group: Group) => {
@@ -239,6 +261,7 @@ function GroupsPageContent() {
                   isMember={true}
                   onJoinClick={handleJoinClick}
                   onLeaveClick={handleLeaveClick}
+                  currentUserId={profileData?.handle}
                 />
               ))}
             </div>
@@ -260,6 +283,7 @@ function GroupsPageContent() {
                     isMember={false}
                     onJoinClick={handleJoinClick}
                     onLeaveClick={handleLeaveClick}
+                    currentUserId={profileData?.handle}
                   />
               ))}
             </div>

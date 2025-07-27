@@ -46,7 +46,7 @@ type AppContextType = {
 
     groups: Group[];
     setGroups: React.Dispatch<React.SetStateAction<Group[]>>;
-    addGroup: (group: Group) => void;
+    addGroup: (groupData: Omit<Group, 'id' | 'memberCount' | 'tags'>) => Group;
     joinGroup: (group: Group, profile: CommunityMember) => void;
     leaveGroup: (group: Group, profile: CommunityMember) => void;
 
@@ -82,7 +82,7 @@ export const AppContext = createContext<AppContextType>({
     addEvent: () => {},
     groups: [],
     setGroups: () => {},
-    addGroup: () => {},
+    addGroup: () => { throw new Error('addGroup function not implemented'); },
     joinGroup: () => {},
     leaveGroup: () => {},
     jobListings: [],
@@ -162,8 +162,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setEvents(prev => [event, ...prev]);
     }, []);
 
-    const addGroup = useCallback((group: Group) => {
-        setGroups(prev => [group, ...prev]);
+    const addGroup = useCallback((groupData: Omit<Group, 'id' | 'memberCount' | 'tags'>): Group => {
+        const newGroup: Group = {
+            ...groupData,
+            id: groupData.name.toLowerCase().replace(/\s+/g, '-'),
+            memberCount: 1, // Starts with the creator
+            tags: [], // Tags can be added later
+        };
+        setGroups(prev => [newGroup, ...prev]);
+        return newGroup;
     }, []);
     
     const joinGroup = useCallback((group: Group, profile: CommunityMember) => {
@@ -310,3 +317,5 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         </AppContext.Provider>
     );
 };
+
+    

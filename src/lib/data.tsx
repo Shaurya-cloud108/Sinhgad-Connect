@@ -12,6 +12,7 @@ export type Group = {
   memberCount: number;
   type: 'public' | 'private';
   tags: string[];
+  adminHandle: string;
 };
 
 export const initialGroupsData: Group[] = [
@@ -23,7 +24,8 @@ export const initialGroupsData: Group[] = [
     aiHint: "circuit board",
     memberCount: 1250,
     type: 'public',
-    tags: ["#hiring", "#mentorship", "#tech-talks"]
+    tags: ["#hiring", "#mentorship", "#tech-talks"],
+    adminHandle: "priya-sharma"
   },
   {
     id: "batch-of-2015",
@@ -33,7 +35,8 @@ export const initialGroupsData: Group[] = [
     aiHint: "graduation celebration",
     memberCount: 180,
     type: 'private',
-    tags: ["#reunion", "#events", "#nostalgia"]
+    tags: ["#reunion", "#events", "#nostalgia"],
+    adminHandle: "anjali-mehta"
   },
   {
     id: "bay-area-alumni",
@@ -43,7 +46,8 @@ export const initialGroupsData: Group[] = [
     aiHint: "golden gate bridge",
     memberCount: 230,
     type: 'public',
-    tags: ["#networking", "#bay-area", "#meetups"]
+    tags: ["#networking", "#bay-area", "#meetups"],
+    adminHandle: "priya-sharma"
   },
   {
     id: "entrepreneur-club",
@@ -53,7 +57,8 @@ export const initialGroupsData: Group[] = [
     aiHint: "lightbulb idea",
     memberCount: 450,
     type: 'public',
-    tags: ["#startup", "#funding", "#innovation"]
+    tags: ["#startup", "#funding", "#innovation"],
+    adminHandle: "sunita-narayan"
   },
    {
     id: "photography-enthusiasts",
@@ -63,7 +68,8 @@ export const initialGroupsData: Group[] = [
     aiHint: "camera lens",
     memberCount: 95,
     type: 'public',
-    tags: ["#hobby", "#photography", "#art"]
+    tags: ["#hobby", "#photography", "#art"],
+    adminHandle: "kavya-iyer"
   },
   {
     id: "job-seekers-2024",
@@ -73,7 +79,8 @@ export const initialGroupsData: Group[] = [
     aiHint: "job interview",
     memberCount: 310,
     type: 'private',
-    tags: ["#jobs", "#career-advice", "#referrals"]
+    tags: ["#jobs", "#career-advice", "#referrals"],
+    adminHandle: "alumni-network"
   },
 ];
 
@@ -903,3 +910,5 @@ export const notifications: Notification[] = [
         aiHint: "briefcase icon"
     },
 ];
+
+    
