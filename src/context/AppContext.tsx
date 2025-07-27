@@ -9,7 +9,8 @@ import {
     initialCommunityMembers, 
     initialFeedItems, 
     initialStories,
-    initialEventsData
+    initialEventsData,
+    initialGroupsData
 } from '@/lib/data';
 import type { 
     Conversation as ConvType, 
@@ -20,7 +21,8 @@ import type {
     Story, 
     Message, 
     StoryItem,
-    Event
+    Event,
+    Group
 } from '@/lib/data';
 
 // Types
@@ -40,6 +42,9 @@ type AppContextType = {
     events: Event[];
     setEvents: React.Dispatch<React.SetStateAction<Event[]>>;
     addEvent: (event: Event) => void;
+
+    groups: Group[];
+    setGroups: React.Dispatch<React.SetStateAction<Group[]>>;
 
     jobListings: JobListing[];
     setJobListings: React.Dispatch<React.SetStateAction<JobListing[]>>;
@@ -71,6 +76,8 @@ export const AppContext = createContext<AppContextType>({
     events: [],
     setEvents: () => {},
     addEvent: () => {},
+    groups: [],
+    setGroups: () => {},
     jobListings: [],
     setJobListings: () => {},
     addJobListing: () => {},
@@ -92,6 +99,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [messagesData, setMessagesData] = useState<MessagesData>(initialMessages);
     const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
     const [events, setEvents] = useState<Event[]>(initialEventsData);
+    const [groups, setGroups] = useState<Group[]>(initialGroupsData);
     const [jobListings, setJobListings] = useState<JobListing[]>(initialJobListings);
     const [communityMembers, setCommunityMembers] = useState<CommunityMember[]>(initialCommunityMembers);
     const [feedItems, setFeedItems] = useState<FeedItem[]>(initialFeedItems);
@@ -201,6 +209,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         events,
         setEvents,
         addEvent,
+        groups,
+        setGroups,
         jobListings,
         setJobListings,
         addJobListing,

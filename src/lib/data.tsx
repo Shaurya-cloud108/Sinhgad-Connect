@@ -3,6 +3,81 @@
 
 import React from 'react';
 
+export type Group = {
+  id: string;
+  name: string;
+  description: string;
+  banner: string;
+  aiHint: string;
+  memberCount: number;
+  type: 'public' | 'private';
+  tags: string[];
+};
+
+export const initialGroupsData: Group[] = [
+  {
+    id: "comp-eng-alumni",
+    name: "Computer Engineering Alumni",
+    description: "A group for all past and present students of the Computer Engineering department to connect and share opportunities.",
+    banner: "https://placehold.co/600x400.png",
+    aiHint: "circuit board",
+    memberCount: 1250,
+    type: 'public',
+    tags: ["#hiring", "#mentorship", "#tech-talks"]
+  },
+  {
+    id: "batch-of-2015",
+    name: "Batch of 2015 Reunion",
+    description: "Planning and discussions for the 10-year reunion for the graduating class of 2015. All departments welcome!",
+    banner: "https://placehold.co/600x400.png",
+    aiHint: "graduation celebration",
+    memberCount: 180,
+    type: 'private',
+    tags: ["#reunion", "#events", "#nostalgia"]
+  },
+  {
+    id: "bay-area-alumni",
+    name: "Bay Area Alumni Chapter",
+    description: "Connect with fellow Sinhgad alumni living and working in the San Francisco Bay Area for networking, meetups, and support.",
+    banner: "https://placehold.co/600x400.png",
+    aiHint: "golden gate bridge",
+    memberCount: 230,
+    type: 'public',
+    tags: ["#networking", "#bay-area", "#meetups"]
+  },
+  {
+    id: "entrepreneur-club",
+    name: "Sinhgad Entrepreneur's Club",
+    description: "A group for aspiring and established entrepreneurs to share ideas, find co-founders, and discuss startup life.",
+    banner: "https://placehold.co/600x400.png",
+    aiHint: "lightbulb idea",
+    memberCount: 450,
+    type: 'public',
+    tags: ["#startup", "#funding", "#innovation"]
+  },
+   {
+    id: "photography-enthusiasts",
+    name: "Photography Enthusiasts",
+    description: "A casual group for alumni and students who love photography to share their work and organize photo walks.",
+    banner: "https://placehold.co/600x400.png",
+    aiHint: "camera lens",
+    memberCount: 95,
+    type: 'public',
+    tags: ["#hobby", "#photography", "#art"]
+  },
+  {
+    id: "job-seekers-2024",
+    name: "Job Seekers - Class of 2024",
+    description: "A support group for the graduating class of 2024 to share job leads, interview tips, and referral requests.",
+    banner: "https://placehold.co/600x400.png",
+    aiHint: "job interview",
+    memberCount: 310,
+    type: 'private',
+    tags: ["#jobs", "#career-advice", "#referrals"]
+  },
+];
+
+
 export type Event = {
   id: string;
   title: string;
@@ -328,6 +403,7 @@ export type CommunityMember = {
         email: string;
         website?: string;
     };
+    groups?: string[]; // Array of group IDs
 };
 
 export type ProfileData = CommunityMember;
@@ -361,6 +437,7 @@ export const initialCommunityMembers: CommunityMember[] = [
     field: "Computer Engineering",
     industry: "Technology",
     company: "Google",
+    groups: ["comp-eng-alumni", "bay-area-alumni", "entrepreneur-club"],
   },
   {
     name: "Rohan Verma",
@@ -384,6 +461,7 @@ export const initialCommunityMembers: CommunityMember[] = [
     education: [{ degree: "B.E. Mechanical Engineering", college: "Sinhgad College of Engineering", yearRange: "2008 - 2012", graduationYear: 2012, graduationMonth: 6 }],
     socials: { linkedin: "https://www.linkedin.com/", github: "https://github.com/"},
     contact: { email: "rohan.verma@example.com" },
+    groups: ["entrepreneur-club"],
   },
   {
     name: "Anjali Mehta",
@@ -407,6 +485,7 @@ export const initialCommunityMembers: CommunityMember[] = [
     education: [{ degree: "B.E. Electronics & Telecommunication", college: "Sinhgad College of Engineering", yearRange: "2011 - 2015", graduationYear: 2015, graduationMonth: 6 }],
     socials: { linkedin: "https://www.linkedin.com/", github: "https://github.com/"},
     contact: { email: "anjali.mehta@example.com" },
+    groups: ["batch-of-2015"],
   },
   {
     name: "Kavya Iyer",
@@ -430,6 +509,7 @@ export const initialCommunityMembers: CommunityMember[] = [
     education: [{ degree: "B.E. Information Technology", college: "Sinhgad College of Engineering", yearRange: "2021 - 2025", graduationYear: 2025, graduationMonth: 6 }],
     socials: { linkedin: "https://www.linkedin.com/", github: "https://github.com/"},
     contact: { email: "kavya.iyer@example.com" },
+    groups: ["job-seekers-2024", "photography-enthusiasts"],
   },
   {
     name: "Vikram Singh",
@@ -476,6 +556,7 @@ export const initialCommunityMembers: CommunityMember[] = [
     education: [{ degree: "B.E. Computer Engineering", college: "Sinhgad College of Engineering", yearRange: "2014 - 2018", graduationYear: 2018, graduationMonth: 6 }],
     socials: { linkedin: "https://www.linkedin.com/", github: "https://github.com/"},
     contact: { email: "sneha.reddy@example.com" },
+    groups: ["comp-eng-alumni"],
   },
   {
     name: "Arjun Desai",
@@ -499,6 +580,7 @@ export const initialCommunityMembers: CommunityMember[] = [
     education: [{ degree: "B.E. Computer Engineering", college: "Sinhgad College of Engineering", yearRange: "2022 - 2026", graduationYear: 2026, graduationMonth: 6 }],
     socials: { linkedin: "https://www.linkedin.com/", github: "https://github.com/"},
     contact: { email: "arjun.desai@example.com" },
+    groups: ["comp-eng-alumni"],
   },
   {
     name: "Amit Patel",
@@ -545,6 +627,7 @@ export const initialCommunityMembers: CommunityMember[] = [
     education: [{ degree: "B.E. Computer Engineering", college: "Sinhgad College of Engineering", yearRange: "2005 - 2009", graduationYear: 2009, graduationMonth: 6 }],
     socials: { linkedin: "https://www.linkedin.com/", github: "https://github.com/"},
     contact: { email: "sunita.narayan@example.com" },
+    groups: ["comp-eng-alumni", "entrepreneur-club"],
   },
   {
     name: "Alumni Events Committee",
