@@ -20,12 +20,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AppContext } from "@/context/AppContext";
 import type { Group } from "@/lib/data";
 import { CreateGroupDialog, GroupFormData } from "@/components/create-group-dialog";
+import { useToast } from "@/hooks/use-toast";
 
 function GroupsPageContent() {
-  const { groups, addGroup } = useContext(AppContext);
+  const { groups, addGroup, setGroups } = useContext(AppContext);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredGroups, setFilteredGroups] = useState<Group[]>(groups);
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const lowercasedQuery = searchQuery.toLowerCase();
@@ -53,6 +55,24 @@ function GroupsPageContent() {
       tags: [], // Tags can be added later
     };
     addGroup(newGroup);
+  };
+  
+  const handleJoinClick = (group: Group) => {
+    if (group.type === 'private') {
+      toast({
+        title: "Request Sent",
+        description: `Your request to join "${group.name}" has been sent for approval.`,
+      });
+    } else {
+       toast({
+        title: "Joined Group!",
+        description: `You are now a member of "${group.name}".`,
+      });
+      // As a visual feedback, we can increment the member count locally
+      setGroups(prevGroups => prevGroups.map(g => 
+        g.id === group.id ? { ...g, memberCount: g.memberCount + 1 } : g
+      ));
+    }
   };
 
   return (
@@ -118,7 +138,7 @@ function GroupsPageContent() {
               </div>
             </CardContent>
             <CardFooter>
-              <Button className="w-full">
+              <Button className="w-full" onClick={() => handleJoinClick(group)}>
                 {group.type === 'private' ? 'Request to Join' : 'Join Group'}
               </Button>
             </CardFooter>
