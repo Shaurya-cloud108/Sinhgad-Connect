@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -22,30 +22,86 @@ import type { Group } from "@/lib/data";
 import { CreateGroupDialog, GroupFormData } from "@/components/create-group-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { ProfileContext } from "@/context/ProfileContext";
+import { Separator } from "@/components/ui/separator";
+
+function GroupCard({ group, isMember, onJoinClick }: { group: Group, isMember: boolean, onJoinClick: (group: Group) => void }) {
+  return (
+    <Card className="flex flex-col hover:shadow-xl transition-shadow duration-300">
+      <div className="relative h-40 w-full">
+        <Image
+          src={group.banner}
+          alt={`${group.name} banner`}
+          fill
+          className="object-cover"
+          data-ai-hint={group.aiHint}
+        />
+        {group.type === 'private' && (
+          <div className="absolute top-2 right-2 bg-background/80 p-1.5 rounded-full">
+            <Lock className="h-4 w-4" />
+          </div>
+        )}
+      </div>
+      <CardHeader>
+        <CardTitle className="font-headline text-xl">{group.name}</CardTitle>
+        <CardDescription className="flex items-center gap-2 text-sm">
+          <Users className="h-4 w-4" />
+          {group.memberCount} Members
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex-grow">
+        <p className="text-sm text-muted-foreground line-clamp-2">{group.description}</p>
+        <div className="flex flex-wrap gap-2 mt-4">
+          {group.tags.map(tag => (
+            <Badge key={tag} variant="secondary">{tag}</Badge>
+          ))}
+        </div>
+      </CardContent>
+      <CardFooter>
+        <Button className="w-full" onClick={() => onJoinClick(group)} disabled={isMember}>
+          {isMember ? (
+            <>
+              <CheckCircle className="mr-2 h-4 w-4" />
+              Joined
+            </>
+          ) : (
+            group.type === 'private' ? 'Request to Join' : 'Join Group'
+          )}
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}
 
 function GroupsPageContent() {
   const { groups, addGroup, addConversationForGroup } = useContext(AppContext);
   const { profileData, setCommunityMembers } = useContext(ProfileContext);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredGroups, setFilteredGroups] = useState<Group[]>(groups);
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
   const { toast } = useToast();
 
-  const userGroups = profileData?.groups || [];
+  const userGroupIds = profileData?.groups || [];
 
-  useEffect(() => {
+  const filteredGroups = useMemo(() => {
     const lowercasedQuery = searchQuery.toLowerCase();
     if (!lowercasedQuery) {
-      setFilteredGroups(groups);
-      return;
+      return groups;
     }
-    const results = groups.filter(group =>
+    return groups.filter(group =>
       group.name.toLowerCase().includes(lowercasedQuery) ||
       group.description.toLowerCase().includes(lowercasedQuery) ||
       group.tags.some(tag => tag.toLowerCase().includes(lowercasedQuery))
     );
-    setFilteredGroups(results);
   }, [searchQuery, groups]);
+
+  const myGroups = useMemo(() => 
+    filteredGroups.filter(g => userGroupIds.includes(g.id)), 
+    [filteredGroups, userGroupIds]
+  );
+  
+  const discoverGroups = useMemo(() => 
+    filteredGroups.filter(g => !userGroupIds.includes(g.id)), 
+    [filteredGroups, userGroupIds]
+  );
 
   const handleGroupSubmit = (data: GroupFormData) => {
     const newGroup: Group = {
@@ -118,56 +174,44 @@ function GroupsPageContent() {
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {filteredGroups.map(group => {
-          const isMember = userGroups.includes(group.id);
-          return (
-            <Card key={group.id} className="flex flex-col hover:shadow-xl transition-shadow duration-300">
-              <div className="relative h-40 w-full">
-                <Image
-                  src={group.banner}
-                  alt={`${group.name} banner`}
-                  fill
-                  className="object-cover"
-                  data-ai-hint={group.aiHint}
+      <div className="space-y-12">
+        {myGroups.length > 0 && (
+          <div>
+            <h2 className="text-2xl font-headline font-bold mb-6">My Groups</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {myGroups.map(group => (
+                <GroupCard 
+                  key={group.id}
+                  group={group}
+                  isMember={true}
+                  onJoinClick={handleJoinClick}
                 />
-                {group.type === 'private' && (
-                  <div className="absolute top-2 right-2 bg-background/80 p-1.5 rounded-full">
-                    <Lock className="h-4 w-4" />
-                  </div>
-                )}
-              </div>
-              <CardHeader>
-                <CardTitle className="font-headline text-xl">{group.name}</CardTitle>
-                <CardDescription className="flex items-center gap-2 text-sm">
-                  <Users className="h-4 w-4" />
-                  {group.memberCount} Members
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex-grow">
-                <p className="text-sm text-muted-foreground line-clamp-2">{group.description}</p>
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {group.tags.map(tag => (
-                    <Badge key={tag} variant="secondary">{tag}</Badge>
-                  ))}
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button className="w-full" onClick={() => handleJoinClick(group)} disabled={isMember}>
-                  {isMember ? (
-                    <>
-                      <CheckCircle className="mr-2 h-4 w-4" />
-                      Joined
-                    </>
-                  ) : (
-                    group.type === 'private' ? 'Request to Join' : 'Join Group'
-                  )}
-                </Button>
-              </CardFooter>
-            </Card>
-          )
-        })}
+              ))}
+            </div>
+          </div>
+        )}
+
+        {myGroups.length > 0 && discoverGroups.length > 0 && (
+          <Separator />
+        )}
+
+        {discoverGroups.length > 0 && (
+           <div>
+            <h2 className="text-2xl font-headline font-bold mb-6">Discover Groups</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {discoverGroups.map(group => (
+                  <GroupCard 
+                    key={group.id}
+                    group={group}
+                    isMember={false}
+                    onJoinClick={handleJoinClick}
+                  />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
+
       {filteredGroups.length === 0 && (
         <p className="text-center text-muted-foreground md:col-span-3 py-12">
           No groups found matching your search. Try creating one!
