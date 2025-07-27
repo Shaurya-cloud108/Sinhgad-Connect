@@ -15,19 +15,23 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Users, Lock, Search, PlusCircle } from "lucide-react";
+import { Users, Lock, Search, PlusCircle, CheckCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppContext } from "@/context/AppContext";
 import type { Group } from "@/lib/data";
 import { CreateGroupDialog, GroupFormData } from "@/components/create-group-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { ProfileContext } from "@/context/ProfileContext";
 
 function GroupsPageContent() {
-  const { groups, addGroup, setGroups } = useContext(AppContext);
+  const { groups, addGroup, addConversationForGroup } = useContext(AppContext);
+  const { profileData, setCommunityMembers } = useContext(ProfileContext);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredGroups, setFilteredGroups] = useState<Group[]>(groups);
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
   const { toast } = useToast();
+
+  const userGroups = profileData?.groups || [];
 
   useEffect(() => {
     const lowercasedQuery = searchQuery.toLowerCase();
@@ -58,20 +62,29 @@ function GroupsPageContent() {
   };
   
   const handleJoinClick = (group: Group) => {
+    if (!profileData) return;
+
     if (group.type === 'private') {
       toast({
         title: "Request Sent",
         description: `Your request to join "${group.name}" has been sent for approval.`,
       });
     } else {
-       toast({
+      // Logic for joining a public group
+      setCommunityMembers(prevMembers => 
+        prevMembers.map(member => 
+          member.handle === profileData.handle 
+            ? { ...member, groups: [...(member.groups || []), group.id] } 
+            : member
+        )
+      );
+
+      addConversationForGroup(group);
+
+      toast({
         title: "Joined Group!",
         description: `You are now a member of "${group.name}".`,
       });
-      // As a visual feedback, we can increment the member count locally
-      setGroups(prevGroups => prevGroups.map(g => 
-        g.id === group.id ? { ...g, memberCount: g.memberCount + 1 } : g
-      ));
     }
   };
 
@@ -106,44 +119,54 @@ function GroupsPageContent() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {filteredGroups.map(group => (
-          <Card key={group.id} className="flex flex-col hover:shadow-xl transition-shadow duration-300">
-            <div className="relative h-40 w-full">
-              <Image
-                src={group.banner}
-                alt={`${group.name} banner`}
-                fill
-                className="object-cover"
-                data-ai-hint={group.aiHint}
-              />
-              {group.type === 'private' && (
-                <div className="absolute top-2 right-2 bg-background/80 p-1.5 rounded-full">
-                  <Lock className="h-4 w-4" />
-                </div>
-              )}
-            </div>
-            <CardHeader>
-              <CardTitle className="font-headline text-xl">{group.name}</CardTitle>
-              <CardDescription className="flex items-center gap-2 text-sm">
-                <Users className="h-4 w-4" />
-                {group.memberCount} Members
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-grow">
-              <p className="text-sm text-muted-foreground line-clamp-2">{group.description}</p>
-              <div className="flex flex-wrap gap-2 mt-4">
-                {group.tags.map(tag => (
-                  <Badge key={tag} variant="secondary">{tag}</Badge>
-                ))}
+        {filteredGroups.map(group => {
+          const isMember = userGroups.includes(group.id);
+          return (
+            <Card key={group.id} className="flex flex-col hover:shadow-xl transition-shadow duration-300">
+              <div className="relative h-40 w-full">
+                <Image
+                  src={group.banner}
+                  alt={`${group.name} banner`}
+                  fill
+                  className="object-cover"
+                  data-ai-hint={group.aiHint}
+                />
+                {group.type === 'private' && (
+                  <div className="absolute top-2 right-2 bg-background/80 p-1.5 rounded-full">
+                    <Lock className="h-4 w-4" />
+                  </div>
+                )}
               </div>
-            </CardContent>
-            <CardFooter>
-              <Button className="w-full" onClick={() => handleJoinClick(group)}>
-                {group.type === 'private' ? 'Request to Join' : 'Join Group'}
-              </Button>
-            </CardFooter>
-          </Card>
-        ))}
+              <CardHeader>
+                <CardTitle className="font-headline text-xl">{group.name}</CardTitle>
+                <CardDescription className="flex items-center gap-2 text-sm">
+                  <Users className="h-4 w-4" />
+                  {group.memberCount} Members
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex-grow">
+                <p className="text-sm text-muted-foreground line-clamp-2">{group.description}</p>
+                <div className="flex flex-wrap gap-2 mt-4">
+                  {group.tags.map(tag => (
+                    <Badge key={tag} variant="secondary">{tag}</Badge>
+                  ))}
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button className="w-full" onClick={() => handleJoinClick(group)} disabled={isMember}>
+                  {isMember ? (
+                    <>
+                      <CheckCircle className="mr-2 h-4 w-4" />
+                      Joined
+                    </>
+                  ) : (
+                    group.type === 'private' ? 'Request to Join' : 'Join Group'
+                  )}
+                </Button>
+              </CardFooter>
+            </Card>
+          )
+        })}
       </div>
       {filteredGroups.length === 0 && (
         <p className="text-center text-muted-foreground md:col-span-3 py-12">

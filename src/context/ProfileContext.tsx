@@ -10,19 +10,21 @@ type ProfileContextType = {
     loggedInUserHandle: string | null;
     setLoggedInUserHandle: React.Dispatch<React.SetStateAction<string | null>>;
     profileData: CommunityMember | null;
+    setCommunityMembers: React.Dispatch<React.SetStateAction<CommunityMember[]>>;
 };
 
 export const ProfileContext = createContext<ProfileContextType>({
     loggedInUserHandle: null,
     setLoggedInUserHandle: () => {},
     profileData: null,
+    setCommunityMembers: () => {},
 });
 
 const MOCK_LOGGED_IN_USER_HANDLE = 'priya-sharma';
 
 export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     const [loggedInUserHandle, setLoggedInUserHandle] = useState<string | null>(null);
-    const { communityMembers } = useContext(AppContext);
+    const { communityMembers, setCommunityMembers } = useContext(AppContext);
     const router = useRouter();
 
      useEffect(() => {
@@ -40,7 +42,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
 
 
     return (
-        <ProfileContext.Provider value={{ loggedInUserHandle, setLoggedInUserHandle, profileData }}>
+        <ProfileContext.Provider value={{ loggedInUserHandle, setLoggedInUserHandle, profileData, setCommunityMembers }}>
             {children}
         </ProfileContext.Provider>
     );

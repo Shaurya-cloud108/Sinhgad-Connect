@@ -46,6 +46,7 @@ type AppContextType = {
     groups: Group[];
     setGroups: React.Dispatch<React.SetStateAction<Group[]>>;
     addGroup: (group: Group) => void;
+    addConversationForGroup: (group: Group) => void;
 
     jobListings: JobListing[];
     setJobListings: React.Dispatch<React.SetStateAction<JobListing[]>>;
@@ -80,6 +81,7 @@ export const AppContext = createContext<AppContextType>({
     groups: [],
     setGroups: () => {},
     addGroup: () => {},
+    addConversationForGroup: () => {},
     jobListings: [],
     setJobListings: () => {},
     addJobListing: () => {},
@@ -136,6 +138,33 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const addGroup = useCallback((group: Group) => {
         setGroups(prev => [group, ...prev]);
     }, []);
+    
+    const addConversationForGroup = useCallback((group: Group) => {
+        const existingConvo = conversations.find(c => c.name === group.name);
+        if (existingConvo) return; // Don't add if it already exists
+
+        const newConversation: Conversation = {
+            name: group.name,
+            avatar: group.banner, 
+            aiHint: group.aiHint,
+            lastMessage: "You joined the group.",
+            time: "Now",
+            unread: 0,
+            isGroup: true,
+        };
+
+        setConversations(prev => [newConversation, ...prev]);
+
+        // Optionally, add a welcome message to the group chat
+        setMessagesData(prev => ({
+            ...prev,
+            [group.name]: [{
+                senderId: 'system',
+                senderName: 'System',
+                text: 'Welcome to the group!'
+            }]
+        }));
+    }, [conversations]);
 
     const addJobListing = useCallback((job: JobListing) => {
         setJobListings(prev => [job, ...prev]);
@@ -218,6 +247,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         groups,
         setGroups,
         addGroup,
+        addConversationForGroup,
         jobListings,
         setJobListings,
         addJobListing,
