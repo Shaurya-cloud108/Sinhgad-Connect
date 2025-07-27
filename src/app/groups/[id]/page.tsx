@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useContext, useEffect, use, useRef, useMemo } from "react";
+import { useState, useContext, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
 import { notFound, useRouter } from "next/navigation";
 import {
@@ -52,9 +52,8 @@ import { Input } from "@/components/ui/input";
 
 export default function GroupProfilePage({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const resolvedParams = use(params);
 
-  const { groups, joinGroup, leaveGroup, setGroups, feedItems, setFeedItems, communityMembers } from useContext(AppContext);
+  const { groups, joinGroup, leaveGroup, setGroups, feedItems, setFeedItems, communityMembers } = useContext(AppContext);
   const { profileData } = useContext(ProfileContext);
   const { toast } = useToast();
   const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -68,13 +67,13 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
   const [memberSearchQuery, setMemberSearchQuery] = useState("");
   
   useEffect(() => {
-    const groupData = groups.find((g) => g.id === resolvedParams.id);
+    const groupData = groups.find((g) => g.id === params.id);
     if (groupData) {
       setGroup(groupData);
     } else {
       notFound();
     }
-  }, [resolvedParams.id, groups]);
+  }, [params.id, groups]);
 
   const userRole = useMemo(() => {
     if (!group || !profileData) return null;
@@ -619,5 +618,3 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
     </>
   );
 }
-
-    
