@@ -26,6 +26,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "./ui/scroll-area";
 import type { Group } from "@/lib/data";
+import { useEffect } from "react";
 
 const editGroupSchema = z.object({
   name: z.string().min(5, "Group name must be at least 5 characters long."),
@@ -50,12 +51,15 @@ export function EditGroupDialog({ open, onOpenChange, onGroupUpdate, group }: Ed
     },
   });
   
-  // Ensure form values are updated if the group prop changes while dialog is open
-  // This is an edge case but good practice
-  form.reset({
-      name: group.name,
-      description: group.description,
-  });
+  useEffect(() => {
+    // Ensure form values are updated if the group prop changes while dialog is open
+    // This is an edge case but good practice
+    form.reset({
+        name: group.name,
+        description: group.description,
+    });
+  }, [group, form]);
+
 
   function onSubmit(values: GroupEditFormData) {
     onGroupUpdate(values);
