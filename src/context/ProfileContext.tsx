@@ -31,7 +31,10 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         // In a real app, this would be determined by an auth session.
         // For this prototype, we'll set a default logged-in user.
         if (communityMembers.length > 0) {
-            setLoggedInUserHandle(MOCK_LOGGED_IN_USER_HANDLE);
+            const userExists = communityMembers.some(m => m.handle === MOCK_LOGGED_IN_USER_HANDLE);
+            if (userExists) {
+                setLoggedInUserHandle(MOCK_LOGGED_IN_USER_HANDLE);
+            }
         }
     }, [communityMembers]);
 

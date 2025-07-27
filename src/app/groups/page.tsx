@@ -123,8 +123,8 @@ function GroupCard({ group, isMember, onJoinClick, onLeaveClick }: { group: Grou
 }
 
 function GroupsPageContent() {
-  const { groups, addGroup, addConversationForGroup, removeConversationForGroup } = useContext(AppContext);
-  const { profileData, setCommunityMembers } = useContext(ProfileContext);
+  const { groups, addGroup, joinGroup, leaveGroup } = useContext(AppContext);
+  const { profileData } = useContext(ProfileContext);
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
   const { toast } = useToast();
@@ -178,17 +178,7 @@ function GroupsPageContent() {
         description: `Your request to join "${group.name}" has been sent for approval.`,
       });
     } else {
-      // Logic for joining a public group
-      setCommunityMembers(prevMembers => 
-        prevMembers.map(member => 
-          member.handle === profileData.handle 
-            ? { ...member, groups: [...(member.groups || []), group.id] } 
-            : member
-        )
-      );
-
-      addConversationForGroup(group);
-
+      joinGroup(group, profileData);
       toast({
         title: "Joined Group!",
         description: `You are now a member of "${group.name}".`,
@@ -199,16 +189,7 @@ function GroupsPageContent() {
   const handleLeaveClick = (group: Group) => {
     if (!profileData) return;
     
-    // Logic for leaving a group
-    setCommunityMembers(prevMembers => 
-      prevMembers.map(member => 
-        member.handle === profileData.handle 
-          ? { ...member, groups: (member.groups || []).filter(gId => gId !== group.id) } 
-          : member
-      )
-    );
-
-    removeConversationForGroup(group);
+    leaveGroup(group, profileData);
 
     toast({
       title: "You have left the group",

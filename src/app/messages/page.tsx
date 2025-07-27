@@ -5,7 +5,7 @@ import { useState, useContext, useMemo, useEffect, useRef } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Send, ArrowLeft, MessageSquare, Info, LogOut, MoreHorizontal } from "lucide-react";
+import { Search, Send, ArrowLeft, MessageSquare, Info, LogOut, MoreHorizontal, Users } from "lucide-react";
 import { cn, getStatusEmoji } from "@/lib/utils";
 import { AppContext, Conversation, Message } from "@/context/AppContext";
 import {
@@ -52,8 +52,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 
 function MessagesPageContent() {
-  const { conversations, setConversations, messagesData, setMessagesData, selectedConversation, setSelectedConversation: setAppContextSelectedConvo, groups, removeConversationForGroup } = useContext(AppContext);
-  const { profileData, setCommunityMembers } = useContext(ProfileContext);
+  const { conversations, setConversations, messagesData, setMessagesData, selectedConversation, setSelectedConversation: setAppContextSelectedConvo, groups, joinGroup, leaveGroup } = useContext(AppContext);
+  const { profileData } = useContext(ProfileContext);
   const [newMessage, setNewMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -123,23 +123,35 @@ function MessagesPageContent() {
     const groupToLeave = groups.find(g => g.name === selectedConversation.name);
     if (!groupToLeave) return;
     
-    setCommunityMembers(prevMembers => 
-      prevMembers.map(member => 
-        member.handle === profileData.handle 
-          ? { ...member, groups: (member.groups || []).filter(gId => gId !== groupToLeave.id) } 
-          : member
-      )
-    );
-
-    removeConversationForGroup(groupToLeave);
+    leaveGroup(groupToLeave, profileData);
 
     toast({
       title: "You have left the group",
       description: `You are no longer a member of "${groupToLeave.name}".`,
     });
-    
-    // setSelectedConversation(null) is handled by removeConversationForGroup
   };
+
+  const handleJoinGroup = () => {
+    if (!profileData || !selectedConversation || !selectedConversation.isGroup) return;
+
+    const groupToJoin = groups.find(g => g.name === selectedConversation.name);
+    if (!groupToJoin) return;
+    
+    joinGroup(groupToJoin, profileData);
+
+    toast({
+      title: "Rejoined Group!",
+      description: `You are a member of "${groupToJoin.name}" again.`,
+    });
+  }
+
+  const isMemberOfSelectedGroup = useMemo(() => {
+    if (!selectedConversation?.isGroup || !profileData?.groups) return true; // Default to true for non-groups
+    const group = groups.find(g => g.name === selectedConversation.name);
+    if (!group) return false;
+    return profileData.groups.includes(group.id);
+  }, [selectedConversation, profileData, groups]);
+
 
   if (!profileData) {
       return (
@@ -240,7 +252,7 @@ function MessagesPageContent() {
               )}
             </div>
             <div className="flex-grow p-4 overflow-y-auto bg-secondary/30 relative" ref={chatContainerRef}>
-              <div className="space-y-4">
+              <div className={cn("space-y-4", !isMemberOfSelectedGroup && "blur-sm pointer-events-none")}>
                 {messages.map((msg, index) => (
                   <div key={index} className={cn("flex", msg.senderId === profileData.handle ? 'justify-end' : 'justify-start')}>
                      <div className={cn("flex items-start gap-2 max-w-xs lg:max-w-md", msg.senderId === profileData.handle && 'flex-row-reverse')}>
@@ -264,26 +276,37 @@ function MessagesPageContent() {
                   </div>
                 ))}
               </div>
+              {!isMemberOfSelectedGroup && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/60">
+                    <p className="text-muted-foreground font-semibold mb-4">You have left this group.</p>
+                    <Button onClick={handleJoinGroup}>
+                        <Users className="mr-2 h-4 w-4" />
+                        Join Group to Continue Chatting
+                    </Button>
+                </div>
+              )}
             </div>
-            <div className="p-4 border-t bg-background">
-              <div className="relative">
-                <Input 
-                    placeholder={"Type a message..."}
-                    className="pr-12"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                />
-                <Button size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-10" onClick={handleSendMessage}>
-                  <Send className="h-5 w-5" />
-                </Button>
-              </div>
-            </div>
+            {isMemberOfSelectedGroup && (
+                <div className="p-4 border-t bg-background">
+                    <div className="relative">
+                        <Input 
+                            placeholder={"Type a message..."}
+                            className="pr-12"
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                        />
+                        <Button size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-10" onClick={handleSendMessage}>
+                        <Send className="h-5 w-5" />
+                        </Button>
+                    </div>
+                </div>
+            )}
              <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Leave "{selectedConversation.name}"?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  You will no longer be able to see messages or post in this group. Are you sure?
+                  You will no longer be able to post messages in this group until you rejoin. Are you sure?
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

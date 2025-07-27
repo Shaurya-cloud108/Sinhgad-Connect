@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { createContext, useState, ReactNode, useCallback } from 'react';
+import React, { createContext, useState, ReactNode, useCallback, useContext } from 'react';
 import { 
     initialConversations, 
     initialMessages,
@@ -24,6 +24,7 @@ import type {
     Event,
     Group
 } from '@/lib/data';
+import { ProfileContext } from './ProfileContext';
 
 // Types
 export type Conversation = ConvType;
@@ -46,8 +47,8 @@ type AppContextType = {
     groups: Group[];
     setGroups: React.Dispatch<React.SetStateAction<Group[]>>;
     addGroup: (group: Group) => void;
-    addConversationForGroup: (group: Group) => void;
-    removeConversationForGroup: (group: Group) => void;
+    joinGroup: (group: Group, profile: CommunityMember) => void;
+    leaveGroup: (group: Group, profile: CommunityMember) => void;
 
     jobListings: JobListing[];
     setJobListings: React.Dispatch<React.SetStateAction<JobListing[]>>;
@@ -82,8 +83,8 @@ export const AppContext = createContext<AppContextType>({
     groups: [],
     setGroups: () => {},
     addGroup: () => {},
-    addConversationForGroup: () => {},
-    removeConversationForGroup: () => {},
+    joinGroup: () => {},
+    leaveGroup: () => {},
     jobListings: [],
     setJobListings: () => {},
     addJobListing: () => {},
@@ -141,48 +142,45 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setGroups(prev => [group, ...prev]);
     }, []);
     
-    const addConversationForGroup = useCallback((group: Group) => {
-        const existingConvo = conversations.find(c => c.name === group.name);
-        if (existingConvo) return; // Don't add if it already exists
-
-        const newConversation: Conversation = {
-            name: group.name,
-            avatar: group.banner, 
-            aiHint: group.aiHint,
-            lastMessage: "You joined the group.",
-            time: "Now",
-            unread: 0,
-            isGroup: true,
-        };
-
-        setConversations(prev => [newConversation, ...prev]);
-
-        // Optionally, add a welcome message to the group chat
-        setMessagesData(prev => ({
-            ...prev,
-            [group.name]: [{
-                senderId: 'system',
-                senderName: 'System',
-                text: 'Welcome to the group!'
-            }]
-        }));
-    }, [conversations]);
+    const joinGroup = useCallback((group: Group, profile: CommunityMember) => {
+      setCommunityMembers(prevMembers =>
+        prevMembers.map(member =>
+          member.handle === profile.handle
+            ? { ...member, groups: [...(member.groups || []), group.id] }
+            : member
+        )
+      );
     
-    const removeConversationForGroup = useCallback((group: Group) => {
-        setConversations(prev => prev.filter(c => c.name !== group.name));
-        
-        // Also clear the selected conversation if it's the one being left
-        setSelectedConversation(prev => (prev?.name === group.name ? null : prev));
-        
-        // We can choose to keep or delete the message history. 
-        // For now, we'll keep it, but one could delete it like this:
-        // setMessagesData(prev => {
-        //   const newMessages = { ...prev };
-        //   delete newMessages[group.name];
-        //   return newMessages;
-        // });
-    }, []);
+      const existingConvo = conversations.find(c => c.name === group.name);
+      if (!existingConvo) {
+        const newConversation: Conversation = {
+          name: group.name,
+          avatar: group.banner,
+          aiHint: group.aiHint,
+          lastMessage: "You joined the group.",
+          time: "Now",
+          unread: 0,
+          isGroup: true,
+        };
+        setConversations(prev => [newConversation, ...prev]);
+        setMessagesData(prev => ({
+          ...prev,
+          [group.name]: [{ senderId: 'system', senderName: 'System', text: 'Welcome to the group!' }]
+        }));
+      }
+    }, [conversations]);
 
+    const leaveGroup = useCallback((group: Group, profile: CommunityMember) => {
+        setCommunityMembers(prevMembers => 
+            prevMembers.map(member => 
+                member.handle === profile.handle
+                ? { ...member, groups: (member.groups || []).filter(gId => gId !== group.id) } 
+                : member
+            )
+        );
+        // The conversation is intentionally not removed from the list,
+        // to allow the user to rejoin from the messages screen.
+    }, []);
 
     const addJobListing = useCallback((job: JobListing) => {
         setJobListings(prev => [job, ...prev]);
@@ -265,8 +263,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         groups,
         setGroups,
         addGroup,
-        addConversationForGroup,
-        removeConversationForGroup,
+        joinGroup,
+        leaveGroup,
         jobListings,
         setJobListings,
         addJobListing,
