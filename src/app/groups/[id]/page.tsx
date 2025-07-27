@@ -342,8 +342,9 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
 
       <div className="max-w-4xl mx-auto mt-8">
         <Tabs defaultValue="feed" className="w-full">
-            <TabsList className="w-full grid grid-cols-2">
+            <TabsList className="w-full grid grid-cols-3">
                 <TabsTrigger value="feed">Feed</TabsTrigger>
+                <TabsTrigger value="about">About</TabsTrigger>
                 <TabsTrigger value="members">Members</TabsTrigger>
             </TabsList>
             <TabsContent value="feed" className="mt-6 space-y-6">
@@ -562,4 +563,3 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
     </>
   );
 }
-
