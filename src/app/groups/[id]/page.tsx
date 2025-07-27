@@ -146,7 +146,7 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
   
   const handleGroupUpdate = (data: GroupEditFormData) => {
     if (!group) return;
-    setGroups(prevGroups => prevGroups.map(g => g.id === group.id ? { ...g, name: data.name, summary: data.summary, about: data.about, links: data.links } : g));
+    setGroups(prevGroups => prevGroups.map(g => g.id === group.id ? { ...g, ...data } : g));
     toast({
       title: "Group Updated",
       description: "The group details have been saved.",

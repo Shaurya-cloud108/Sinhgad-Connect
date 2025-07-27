@@ -17,6 +17,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -35,13 +36,16 @@ const editGroupSchema = z.object({
   name: z.string().min(5, "Group name must be at least 5 characters long."),
   summary: z.string().min(10, "Summary must be at least 10 characters long.").max(120, "Summary must be 120 characters or less."),
   about: z.string().min(20, "About section must be at least 20 characters long."),
+  tags: z.string().optional(),
   links: z.array(z.object({
     label: z.string().min(1, "Label is required."),
     url: z.string().url("Please enter a valid URL."),
   })).optional(),
 });
 
-export type GroupEditFormData = z.infer<typeof editGroupSchema>;
+export type GroupEditFormData = Omit<z.infer<typeof editGroupSchema>, 'tags'> & {
+  tags: string[];
+};
 
 type EditGroupDialogProps = {
   open: boolean;
@@ -51,12 +55,13 @@ type EditGroupDialogProps = {
 };
 
 export function EditGroupDialog({ open, onOpenChange, onGroupUpdate, group }: EditGroupDialogProps) {
-  const form = useForm<GroupEditFormData>({
+  const form = useForm<z.infer<typeof editGroupSchema>>({
     resolver: zodResolver(editGroupSchema),
     defaultValues: {
       name: group.name,
       summary: group.summary,
       about: group.about,
+      tags: group.tags.join(", "),
       links: group.links || [],
     },
   });
@@ -71,13 +76,18 @@ export function EditGroupDialog({ open, onOpenChange, onGroupUpdate, group }: Ed
         name: group.name,
         summary: group.summary,
         about: group.about,
+        tags: group.tags.join(", "),
         links: group.links || [],
     });
   }, [group, form]);
 
 
-  function onSubmit(values: GroupEditFormData) {
-    onGroupUpdate(values);
+  function onSubmit(values: z.infer<typeof editGroupSchema>) {
+    const processedTags = values.tags 
+      ? values.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
+      : [];
+      
+    onGroupUpdate({ ...values, tags: processedTags });
     onOpenChange(false);
   }
 
@@ -132,7 +142,28 @@ export function EditGroupDialog({ open, onOpenChange, onGroupUpdate, group }: Ed
                     </FormItem>
                 )}
                 />
+
                 <Separator />
+
+                <FormField
+                  control={form.control}
+                  name="tags"
+                  render={({ field }) => (
+                      <FormItem>
+                      <FormLabel>Group Tags</FormLabel>
+                      <FormControl>
+                          <Input placeholder="#hiring, #mentorship, #tech-talks" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Enter tags separated by commas.
+                      </FormDescription>
+                      <FormMessage />
+                      </FormItem>
+                  )}
+                />
+                
+                <Separator />
+
                 <div>
                   <FormLabel>Useful Links</FormLabel>
                   <div className="space-y-4 mt-2">
