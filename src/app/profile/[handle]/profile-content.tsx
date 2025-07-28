@@ -152,7 +152,7 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
     }
   };
 
-  const onSubmit = (values: z.infer<typeof profileFormSchema>) => {
+  const onSubmit = (values: z.infer<typeof profileFormSchema>>) => {
     const updatedEducation: EducationEntry[] = values.education.map((edu, index) => {
       const originalEdu = profile.education[index];
       if (originalEdu && originalEdu.graduationYear) {
@@ -390,22 +390,6 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
         return ownProfileData.following.includes(profileData.handle);
     }, [ownProfileData, profileData, isOwnProfile]);
     
-    const mutualGroups = useMemo(() => {
-      if (!ownProfileData || !profileData || isOwnProfile) return [];
-      
-      const ownGroups = new Set(groups.filter(g => g.members.some(m => m.handle === ownProfileData.handle)).map(g => g.id));
-      
-      return groups.filter(g => 
-        ownGroups.has(g.id) && g.members.some(m => m.handle === profileData.handle)
-      );
-    }, [ownProfileData, profileData, isOwnProfile, groups]);
-
-    const canMessage = useMemo(() => {
-      if (!ownProfileData || !profileData || isOwnProfile) return false;
-      return isFollowing || mutualGroups.length > 0;
-    }, [isFollowing, mutualGroups, ownProfileData, profileData, isOwnProfile]);
-
-
     const mutualFollowers = useMemo(() => {
         if (!ownProfileData || !profileData || isOwnProfile) return [];
         
@@ -625,11 +609,9 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
                                {isFollowing ? <Users className="mr-2 h-4 w-4" /> : <UserPlus className="mr-2 h-4 w-4" />}
                                {isFollowing ? 'Following' : 'Follow'}
                             </Button>
-                            {canMessage && (
-                              <Button onClick={handleMessageClick} className="w-full" variant="outline">
-                                 <MessageCircle className="mr-2 h-4 w-4" /> Message
-                              </Button>
-                            )}
+                            <Button onClick={handleMessageClick} className="w-full" variant="outline">
+                                <MessageCircle className="mr-2 h-4 w-4" /> Message
+                            </Button>
                              <ShareDialog contentType="profile" contentId={profileData.handle}>
                                 <Button variant="outline" size="icon">
                                     <Share2 className="h-4 w-4" />
@@ -921,3 +903,5 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
     </>
   );
 }
+
+    

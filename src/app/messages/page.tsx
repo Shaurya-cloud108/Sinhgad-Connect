@@ -300,7 +300,7 @@ function MessagesPageContent() {
                             onChange={(e) => setNewMessage(e.target.value)}
                             onKeyDown={handleKeyDown}
                         />
-                        <Button size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-10" onClick={handleSendMessage}>
+                        <Button size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-10" onClick={handleSendMessage} disabled={!newMessage.trim()}>
                         <Send className="h-5 w-5" />
                         </Button>
                     </div>

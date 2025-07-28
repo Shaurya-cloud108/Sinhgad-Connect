@@ -137,25 +137,28 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }, [profileData, groups]);
 
     const setSelectedConversationByName = useCallback((name: string) => {
-        let conversation = conversations.find(c => c.name === name);
+        const existingConversation = conversations.find(c => c.name === name);
 
-        if (!conversation) {
-            const person = communityMembers.find(m => m.name === name || m.handle === name);
-            if (person) {
-                conversation = {
-                     name: person.name,
-                     avatar: person.avatar,
-                     aiHint: person.aiHint,
-                     lastMessage: "Conversation started.",
-                     time: "Now",
-                     unread: 0,
-                     isGroup: false,
-                };
-                setConversations(prev => [conversation!, ...prev.filter(c => c.name !== name)]);
-            }
+        if (existingConversation) {
+            setSelectedConversation(existingConversation);
+            return;
         }
-        
-        setSelectedConversation(conversation || null);
+
+        // If no conversation exists, create a new one
+        const person = communityMembers.find(m => m.name === name);
+        if (person) {
+            const newConversation: Conversation = {
+                name: person.name,
+                avatar: person.avatar,
+                aiHint: person.aiHint,
+                lastMessage: "New conversation started.",
+                time: "Now",
+                unread: 0,
+                isGroup: false,
+            };
+            setConversations(prev => [newConversation, ...prev]);
+            setSelectedConversation(newConversation);
+        }
     }, [conversations, communityMembers]);
 
     const addEvent = useCallback((event: Event) => {
@@ -322,3 +325,5 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         </AppContext.Provider>
     );
 };
+
+    
