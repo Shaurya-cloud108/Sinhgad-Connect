@@ -12,6 +12,7 @@ const navLinks = [
   { href: "/groups", label: "Groups", icon: Users },
   { href: "/jobs", label: "Jobs", icon: Briefcase },
   { href: "/events", label: "Events", icon: Calendar },
+  { href: "/success-stories", label: "Stories", icon: Award },
 ];
 
 export function BottomNav() {
