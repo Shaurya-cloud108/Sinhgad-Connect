@@ -22,8 +22,7 @@ import type {
     Message, 
     StoryItem,
     Event,
-    Group,
-    GroupMember
+    Group
 } from '@/lib/data';
 import { ProfileContext } from './ProfileContext';
 
@@ -133,7 +132,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             const existingConvoNames = new Set(baseInitialConversations.map(c => c.name));
             const newGroupConvos = groupConversations.filter(gc => !existingConvoNames.has(gc.name));
 
-            setConversations(prev => [...prev, ...newGroupConvos]);
+            setConversations(prev => [...newGroupConvos, ...prev.filter(c => !newGroupConvos.some(ngc => ngc.name === c.name))]);
         }
     }, [profileData, groups]);
 

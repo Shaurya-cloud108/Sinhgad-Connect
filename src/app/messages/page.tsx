@@ -47,6 +47,7 @@ import { SharedJobCard } from "@/components/shared-job-card";
 import { SharedEventCard } from "@/components/shared-event-card";
 import { SharedStoryCard } from "@/components/shared-story-card";
 import { SharedProfileCard } from "@/components/shared-profile-card";
+import { SharedGroupCard } from "@/components/shared-group-card";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
@@ -123,7 +124,7 @@ function MessagesPageContent() {
     const groupToLeave = groups.find(g => g.name === selectedConversation.name);
     if (!groupToLeave) return;
     
-    leaveGroup(groupToLeave, profileData);
+    leaveGroup(groupToLeave.id, profileData.handle);
 
     toast({
       title: "You have left the group",
@@ -137,7 +138,7 @@ function MessagesPageContent() {
     const groupToJoin = groups.find(g => g.name === selectedConversation.name);
     if (!groupToJoin) return;
     
-    joinGroup(groupToJoin, profileData);
+    joinGroup(groupToJoin.id, profileData.handle);
 
     toast({
       title: "Rejoined Group!",
@@ -146,10 +147,10 @@ function MessagesPageContent() {
   }
 
   const isMemberOfSelectedGroup = useMemo(() => {
-    if (!selectedConversation?.isGroup || !profileData?.groups) return true; // Default to true for non-groups
+    if (!selectedConversation?.isGroup || !profileData) return true; // Default to true for non-groups
     const group = groups.find(g => g.name === selectedConversation.name);
     if (!group) return false;
-    return profileData.groups.includes(group.id);
+    return group.members.some(m => m.handle === profileData.handle);
   }, [selectedConversation, profileData, groups]);
 
 
@@ -230,7 +231,7 @@ function MessagesPageContent() {
                   <div className="overflow-hidden">
                     <p className="font-semibold truncate group-hover:underline">{selectedConversation.name}</p>
                     <p className="text-sm text-muted-foreground">
-                      {selectedConversation.isGroup ? `${groups.find(g => g.name === selectedConversation.name)?.memberCount} members` : "Online"}
+                      {selectedConversation.isGroup ? `${groups.find(g => g.name === selectedConversation.name)?.members.length} members` : "Online"}
                     </p>
                   </div>
                 </Link>
@@ -273,6 +274,7 @@ function MessagesPageContent() {
                           {msg.sharedEventId && <SharedEventCard eventId={msg.sharedEventId} />}
                           {msg.sharedStoryId && <SharedStoryCard storyId={msg.sharedStoryId} />}
                           {msg.sharedProfileId && <SharedProfileCard profileId={msg.sharedProfileId} />}
+                          {msg.sharedGroupId && <SharedGroupCard groupId={msg.sharedGroupId} />}
                         </div>
                     </div>
                   </div>

@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppContext } from "@/context/AppContext";
 import { ProfileContext } from "@/context/ProfileContext";
-import { ArrowLeft, Users, Lock, CheckCircle, PlusCircle, LogOut, Crown, ImageIcon, MoreHorizontal, Heart, MessageCircle, Send, Trash2, Award, Briefcase, Edit, UserCog, Link as LinkIcon, Search, UserX, MapPin } from "lucide-react";
+import { ArrowLeft, Users, Lock, CheckCircle, PlusCircle, LogOut, Crown, ImageIcon, MoreHorizontal, Heart, MessageCircle, Send, Trash2, Award, Briefcase, Edit, UserCog, Link as LinkIcon, Search, UserX, MapPin, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import {
@@ -321,6 +321,13 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
                           <ImageIcon className="mr-2 h-4 w-4" />
                           Edit Banner
                         </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <ShareDialog contentType="group" contentId={group.id}>
+                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                <Share2 className="mr-2 h-4 w-4" />
+                                Share Group
+                            </DropdownMenuItem>
+                        </ShareDialog>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </>
@@ -354,6 +361,11 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
                   {group.type === "private" ? "Request to Join" : "Join Group"}
                 </Button>
               )}
+               <ShareDialog contentType="group" contentId={group.id}>
+                 <Button variant="outline" size="icon" aria-label="Share Group">
+                    <Share2 className="h-4 w-4" />
+                 </Button>
+               </ShareDialog>
             </div>
           </div>
         </CardHeader>

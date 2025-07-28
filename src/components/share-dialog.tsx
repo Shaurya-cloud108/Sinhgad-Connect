@@ -18,7 +18,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AppContext, Message, Conversation } from "@/context/AppContext";
 import { ProfileContext } from "@/context/ProfileContext";
-import { Check, Send, Copy } from 'lucide-react';
+import { Check, Send, Copy, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from './ui/separator';
 

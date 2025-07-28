@@ -1,41 +1,53 @@
 
 "use client";
 
-// This component has been removed as the networking page was removed.
-// The component is kept for now to avoid breaking existing message shares.
-
-import { Card, CardContent } from "./ui/card";
+import { Card, CardHeader, CardContent } from "./ui/card";
 import { Users } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
 import { useContext } from "react";
 import { AppContext } from "@/context/AppContext";
-import { useRouter } from "next/navigation";
 
 type SharedGroupCardProps = {
-  groupId: string; // This will be the group title
+  groupId: string;
 };
 
 export function SharedGroupCard({ groupId }: SharedGroupCardProps) {
-  const { setSelectedConversationByName } = useContext(AppContext);
-  const router = useRouter();
+  const { groups } = useContext(AppContext);
+  const group = groups.find((item) => item.id === groupId);
 
-  const handleGoToChat = () => {
-    setSelectedConversationByName(groupId);
-    router.push('/messages');
+  if (!group) {
+    return (
+      <Card className="my-2 bg-background/50">
+        <CardContent className="p-3">
+          <p className="text-sm text-muted-foreground italic">
+            This group is no longer available.
+          </p>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
-    <Card className="bg-background/50 border shadow-none hover:shadow-md transition-shadow cursor-pointer" onClick={handleGoToChat}>
-        <CardContent className="p-3">
-            <div className="flex gap-3">
-                <div className="p-2 bg-muted rounded-md flex-shrink-0">
-                    <Users className="h-6 w-6 text-muted-foreground" />
+    <Link href={`/groups/${group.id}`} className="block my-2">
+        <Card className="bg-background/50 border shadow-none hover:shadow-md transition-shadow">
+            <CardContent className="p-3">
+                <div className="flex gap-3">
+                    <Image
+                        src={group.banner}
+                        alt={group.name}
+                        width={80}
+                        height={80}
+                        className="rounded-md object-cover w-20 h-20"
+                        data-ai-hint={group.aiHint}
+                    />
+                    <div className="space-y-1">
+                        <p className="font-semibold text-sm line-clamp-2">{group.name}</p>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1.5"><Users className="h-3 w-3" />{group.members.length} members</p>
+                    </div>
                 </div>
-                <div className="space-y-1 overflow-hidden">
-                    <p className="font-semibold text-sm line-clamp-1">{groupId}</p>
-                    <p className="text-xs text-muted-foreground line-clamp-2">Shared group chat.</p>
-                </div>
-            </div>
-        </CardContent>
-    </Card>
+            </CardContent>
+        </Card>
+    </Link>
   );
 }
