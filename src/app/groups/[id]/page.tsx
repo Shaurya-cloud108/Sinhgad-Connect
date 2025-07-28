@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useContext, useEffect, useRef, useMemo } from "react";
+import { useState, useContext, useEffect, useRef, useMemo, use } from "react";
 import Image from "next/image";
 import { notFound, useRouter } from "next/navigation";
 import {
@@ -51,6 +51,7 @@ import { Input } from "@/components/ui/input";
 
 
 export default function GroupProfilePage({ params }: { params: { id: string } }) {
+  const resolvedParams = use(params);
   const router = useRouter();
 
   const { groups, joinGroup, leaveGroup, setGroups, feedItems, setFeedItems, communityMembers } = useContext(AppContext);
@@ -67,13 +68,13 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
   const [memberSearchQuery, setMemberSearchQuery] = useState("");
   
   useEffect(() => {
-    const groupData = groups.find((g) => g.id === params.id);
+    const groupData = groups.find((g) => g.id === resolvedParams.id);
     if (groupData) {
       setGroup(groupData);
     } else {
       notFound();
     }
-  }, [params.id, groups]);
+  }, [resolvedParams.id, groups]);
 
   const userRole = useMemo(() => {
     if (!group || !profileData) return null;
