@@ -291,7 +291,7 @@ function GroupsPageContent() {
       <div className="relative mb-8">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
-          placeholder="Search for groups by name, topic, or description..."
+          placeholder="Search groups by name, topic, or keyword..."
           className="pl-10"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -375,3 +375,5 @@ export default function GroupsPage() {
 
     return <GroupsPageContent />;
 }
+
+    

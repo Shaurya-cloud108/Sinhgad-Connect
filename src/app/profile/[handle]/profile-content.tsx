@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2, PlusCircle, Linkedin, Github, Mail, Link as LinkIcon, Camera, Video, UserPlus, ImageIcon, Award, X } from "lucide-react";
+import { Briefcase, GraduationCap, MapPin, Edit, Heart, MessageCircle, Send, LogOut, MoreHorizontal, Trash2, Upload, Users, ArrowLeft, Share2, PlusCircle, Linkedin, Github, Mail, Link as LinkIcon, Camera, Video, UserPlus, ImageIcon, Award, X, CheckCircle, Group } from "lucide-react";
 import type { CommunityMember, FeedItem, EducationEntry, Story, StoryItem, JobListing, Comment } from "@/lib/data.tsx";
 import { useState, useContext, useEffect, useMemo, useRef, use } from "react";
 import { useRouter } from "next/navigation";
@@ -66,6 +66,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { FollowersSheet } from "@/components/followers-sheet";
 import { CreatePostDialog } from "@/components/create-post-dialog";
 import { CommentSheet } from "@/components/comment-sheet";
+import { Badge } from "@/components/ui/badge";
 
 
 const profileFormSchema = z.object({
@@ -384,6 +385,11 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
         return feedItems.filter(item => item.author.handle === profileData.handle);
     }, [feedItems, profileData]);
 
+    const memberGroups = useMemo(() => {
+        if (!profileData) return [];
+        return groups.filter(g => g.members.some(m => m.handle === profileData.handle));
+    }, [groups, profileData]);
+
 
     const isFollowing = useMemo(() => {
         if (!ownProfileData || !profileData || isOwnProfile) return false;
@@ -605,11 +611,11 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
                             </>
                         ) : (
                           <>
-                            <Button variant={isFollowing ? 'secondary' : 'default'} onClick={handleFollowToggle} className="w-full">
-                               {isFollowing ? <Users className="mr-2 h-4 w-4" /> : <UserPlus className="mr-2 h-4 w-4" />}
+                            <Button variant={isFollowing ? 'secondary' : 'default'} onClick={handleFollowToggle} className="flex-1">
+                               {isFollowing ? <CheckCircle className="mr-2 h-4 w-4" /> : <UserPlus className="mr-2 h-4 w-4" />}
                                {isFollowing ? 'Following' : 'Follow'}
                             </Button>
-                            <Button onClick={handleMessageClick} className="w-full" variant="outline">
+                            <Button onClick={handleMessageClick} className="flex-1" variant="outline">
                                 <MessageCircle className="mr-2 h-4 w-4" /> Message
                             </Button>
                              <ShareDialog contentType="profile" contentId={profileData.handle}>
@@ -663,8 +669,9 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="posts" className="w-full">
-              <TabsList className="w-full grid grid-cols-2">
+              <TabsList className="w-full grid grid-cols-3">
                 <TabsTrigger value="posts">Posts ({profileFeedItems.length})</TabsTrigger>
+                <TabsTrigger value="groups">Groups ({memberGroups.length})</TabsTrigger>
                 <TabsTrigger value="about">About</TabsTrigger>
               </TabsList>
               <TabsContent value="posts" className="mt-6 space-y-6">
@@ -788,6 +795,27 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
                     </CardFooter>
                   </Card>
                 )) : <p className="text-center text-muted-foreground py-8">This user hasn't posted anything yet.</p>}
+              </TabsContent>
+               <TabsContent value="groups" className="mt-6 space-y-4">
+                {memberGroups.length > 0 ? (
+                  memberGroups.map(group => (
+                    <Link key={group.id} href={`/groups/${group.id}`} className="block">
+                      <Card className="hover:bg-muted/50 transition-colors">
+                        <CardContent className="p-4 flex items-center gap-4">
+                          <Image src={group.banner} alt={group.name} width={64} height={64} className="w-16 h-16 rounded-md object-cover" />
+                          <div>
+                            <p className="font-semibold">{group.name}</p>
+                            <p className="text-sm text-muted-foreground flex items-center gap-1.5"><Users className="h-4 w-4" />{group.members.length} Members</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ))
+                ) : (
+                  <p className="text-center text-muted-foreground py-8">
+                    {isOwnProfile ? "You haven't" : `${profileData.name} hasn't`} joined any groups yet.
+                  </p>
+                )}
               </TabsContent>
               <TabsContent value="about" className="mt-6 space-y-6">
                 <Card>

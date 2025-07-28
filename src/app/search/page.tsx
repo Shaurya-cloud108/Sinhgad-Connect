@@ -54,7 +54,7 @@ function SearchPageContent() {
       <Card className="mb-8">
         <CardContent className="p-4">
           <Input
-            placeholder="Search by name, company, industry..."
+            placeholder="Search by name, company, industry, or keyword..."
             className="flex-grow"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -120,3 +120,5 @@ export default function SearchPage() {
 
   return <SearchPageContent />;
 }
+
+    

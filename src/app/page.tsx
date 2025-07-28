@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, Send, Plus, Image as ImageIcon, Award, Briefcase, X, MoreHorizontal, Trash2, Eye, Video, Film, MapPin } from "lucide-react";
+import { Heart, MessageCircle, Send, Plus, Image as ImageIcon, Award, Briefcase, X, MoreHorizontal, Trash2, Eye, Video, Film, MapPin, Search } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -607,92 +607,107 @@ function HomePageContent() {
 
       {/* Feed */}
       <div className="space-y-4 py-4">
-        {feedItems.map((item) => (
-          <Card key={item.id} id={`post-${item.id}`} className="rounded-none md:rounded-lg shadow-none md:shadow-sm border-l-0 border-r-0 md:border">
-            <CardHeader className="p-4 flex flex-row items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <Link href={`/profile/${item.author.handle}`} className="flex items-center space-x-3 group">
-                  <Avatar className="w-10 h-10">
-                    <AvatarImage src={item.author.avatar} data-ai-hint={item.author.aiHint} />
-                    <AvatarFallback>{item.author.name.substring(0,2)}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-semibold text-sm group-hover:underline">{item.author.name}</p>
-                    <div className="text-xs text-muted-foreground flex items-center gap-2">
-                        <span>@{item.author.handle}</span>
-                        {item.location && (
-                            <>
-                                <span className="text-muted-foreground/50">·</span>
-                                <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{item.location}</span>
-                            </>
-                        )}
-                    </div>
+        {feedItems.length > 0 ? (
+            feedItems.map((item) => (
+              <Card key={item.id} id={`post-${item.id}`} className="rounded-none md:rounded-lg shadow-none md:shadow-sm border-l-0 border-r-0 md:border">
+                <CardHeader className="p-4 flex flex-row items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <Link href={`/profile/${item.author.handle}`} className="flex items-center space-x-3 group">
+                      <Avatar className="w-10 h-10">
+                        <AvatarImage src={item.author.avatar} data-ai-hint={item.author.aiHint} />
+                        <AvatarFallback>{item.author.name.substring(0,2)}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-semibold text-sm group-hover:underline">{item.author.name}</p>
+                        <div className="text-xs text-muted-foreground flex items-center gap-2">
+                            <span>@{item.author.handle}</span>
+                            {item.location && (
+                                <>
+                                    <span className="text-muted-foreground/50">·</span>
+                                    <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{item.location}</span>
+                                </>
+                            )}
+                        </div>
+                      </div>
+                    </Link>
                   </div>
+                  {item.author.handle === profileData.handle && (
+                    <AlertDialog>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <AlertDialogTrigger asChild>
+                              <DropdownMenuItem className="text-destructive cursor-pointer">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                          </AlertDialogTrigger>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                      <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. This will permanently delete your post.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDeletePost(item.id)}>
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                  )}
+                </CardHeader>
+                <CardContent className="p-0">
+                  <p className="px-4 pb-3 text-sm">{item.content}</p>
+                  {item.image && (
+                    <div className="w-full aspect-video bg-card">
+                      <Image src={item.image} alt="Feed item" className="w-full h-full object-cover" data-ai-hint={item.aiHint} width={600} height={400}/>
+                    </div>
+                  )}
+                </CardContent>
+                <CardFooter className="p-2 flex justify-between items-center">
+                  <div className="flex items-center text-sm text-muted-foreground">
+                      <Button variant="ghost" size="sm" className={cn("flex items-center gap-2", item.liked && "text-destructive")} onClick={() => handleLike(item.id)}>
+                        <Heart className={cn("w-5 h-5", item.liked && "fill-current")} />
+                        <span>{item.likes}</span>
+                      </Button>
+                      <Button variant="ghost" size="sm" className="flex items-center gap-2" onClick={() => setActiveCommentPostId(item.id)}>
+                        <MessageCircle className="w-5 h-5" />
+                        <span>{item.comments.length}</span>
+                      </Button>
+                    </div>
+                    <div>
+                        <ShareDialog contentType="post" contentId={item.id}>
+                          <Button variant="ghost" size="icon">
+                              <Send className="w-5 h-5" />
+                          </Button>
+                        </ShareDialog>
+                    </div>
+                </CardFooter>
+              </Card>
+            ))
+        ) : (
+          <Card>
+            <CardContent className="p-12 text-center text-muted-foreground">
+              <Search className="h-12 w-12 mx-auto mb-4" />
+              <p className="font-semibold">Your feed is empty</p>
+              <p className="text-sm">Find people to follow to see their posts here.</p>
+              <Button asChild className="mt-4">
+                <Link href="/search">
+                  Search for People
                 </Link>
-              </div>
-              {item.author.handle === profileData.handle && (
-                <AlertDialog>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                       <AlertDialogTrigger asChild>
-                          <DropdownMenuItem className="text-destructive cursor-pointer">
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
-                       </AlertDialogTrigger>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                   <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action cannot be undone. This will permanently delete your post.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleDeletePost(item.id)}>
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
-              )}
-            </CardHeader>
-            <CardContent className="p-0">
-              <p className="px-4 pb-3 text-sm">{item.content}</p>
-              {item.image && (
-                <div className="w-full aspect-video bg-card">
-                   <Image src={item.image} alt="Feed item" className="w-full h-full object-cover" data-ai-hint={item.aiHint} width={600} height={400}/>
-                </div>
-              )}
+              </Button>
             </CardContent>
-            <CardFooter className="p-2 flex justify-between items-center">
-               <div className="flex items-center text-sm text-muted-foreground">
-                  <Button variant="ghost" size="sm" className={cn("flex items-center gap-2", item.liked && "text-destructive")} onClick={() => handleLike(item.id)}>
-                    <Heart className={cn("w-5 h-5", item.liked && "fill-current")} />
-                    <span>{item.likes}</span>
-                  </Button>
-                  <Button variant="ghost" size="sm" className="flex items-center gap-2" onClick={() => setActiveCommentPostId(item.id)}>
-                    <MessageCircle className="w-5 h-5" />
-                     <span>{item.comments.length}</span>
-                  </Button>
-                </div>
-                <div>
-                    <ShareDialog contentType="post" contentId={item.id}>
-                      <Button variant="ghost" size="icon">
-                          <Send className="w-5 h-5" />
-                      </Button>
-                    </ShareDialog>
-                </div>
-            </CardFooter>
           </Card>
-        ))}
+        )}
       </div>
     </div>
   );
@@ -722,3 +737,5 @@ export default function Home() {
         </React.Suspense>
     )
 }
+
+    
