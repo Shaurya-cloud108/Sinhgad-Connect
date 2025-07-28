@@ -356,7 +356,8 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
         communityMembers, 
         setCommunityMembers,
         feedItems,
-        setFeedItems
+        setFeedItems,
+        groups
     } = useContext(AppContext);
     
     const router = useRouter();
@@ -388,6 +389,22 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
         if (!ownProfileData || !profileData || isOwnProfile) return false;
         return ownProfileData.following.includes(profileData.handle);
     }, [ownProfileData, profileData, isOwnProfile]);
+    
+    const mutualGroups = useMemo(() => {
+      if (!ownProfileData || !profileData || isOwnProfile) return [];
+      
+      const ownGroups = new Set(groups.filter(g => g.members.some(m => m.handle === ownProfileData.handle)).map(g => g.id));
+      
+      return groups.filter(g => 
+        ownGroups.has(g.id) && g.members.some(m => m.handle === profileData.handle)
+      );
+    }, [ownProfileData, profileData, isOwnProfile, groups]);
+
+    const canMessage = useMemo(() => {
+      if (!ownProfileData || !profileData || isOwnProfile) return false;
+      return isFollowing || mutualGroups.length > 0;
+    }, [isFollowing, mutualGroups, ownProfileData, profileData, isOwnProfile]);
+
 
     const mutualFollowers = useMemo(() => {
         if (!ownProfileData || !profileData || isOwnProfile) return [];
@@ -608,9 +625,11 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
                                {isFollowing ? <Users className="mr-2 h-4 w-4" /> : <UserPlus className="mr-2 h-4 w-4" />}
                                {isFollowing ? 'Following' : 'Follow'}
                             </Button>
-                            <Button onClick={handleMessageClick} className="w-full" variant="outline">
-                               <MessageCircle className="mr-2 h-4 w-4" /> Message
-                            </Button>
+                            {canMessage && (
+                              <Button onClick={handleMessageClick} className="w-full" variant="outline">
+                                 <MessageCircle className="mr-2 h-4 w-4" /> Message
+                              </Button>
+                            )}
                              <ShareDialog contentType="profile" contentId={profileData.handle}>
                                 <Button variant="outline" size="icon">
                                     <Share2 className="h-4 w-4" />
