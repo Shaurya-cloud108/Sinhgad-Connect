@@ -397,6 +397,7 @@ export type FeedItem = {
     };
     content: string;
     image: string | null;
+    location?: string;
     aiHint: string;
     likes: number;
     liked?: boolean;
@@ -729,6 +730,7 @@ export const initialFeedItems: FeedItem[] = [
     },
     content: "The flagship event of the year is just around the corner! Reconnect with old friends, network with peers, and relive your college days. Don't miss out on the Annual Alumni Grand Meet 2024. Register now!",
     image: "https://placehold.co/600x400.png",
+    location: "College Auditorium, Pune",
     aiHint: "people networking",
     likes: 256,
     comments: [],
@@ -780,6 +782,7 @@ export const initialFeedItems: FeedItem[] = [
     },
     content: "Just hit my 5-year anniversary at Google! So grateful for the journey and the amazing people I've worked with. The lessons I learned at Sinhgad continue to be my foundation.",
     image: null,
+    location: "Googleplex, Mountain View, CA",
     aiHint: "",
     likes: 152,
     comments: [],

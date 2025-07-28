@@ -457,7 +457,7 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
     const handleLike = (postId: number) => {
       setFeedItems(prev => prev.map(item => 
           item.id === postId 
-          ? {...item, liked: !item.liked, likes: item.liked ? item.likes - 1 : item.likes + 1}
+          ? {...item, liked: !item.liked, likes: item.liked ? item.liked - 1 : item.likes + 1}
           : item
       ));
     };
@@ -713,7 +713,15 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
                           <Link href={`/profile/${item.author.handle}`} className="hover:underline">
                             <p className="font-semibold text-sm">{item.author.name}</p>
                           </Link>
-                          <p className="text-xs text-muted-foreground">@{item.author.handle}</p>
+                          <div className="text-xs text-muted-foreground flex items-center gap-2">
+                            <span>@{item.author.handle}</span>
+                            {item.location && (
+                                <>
+                                    <span className="text-muted-foreground/50">·</span>
+                                    <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{item.location}</span>
+                                </>
+                            )}
+                          </div>
                         </div>
                       </div>
                       {isOwnProfile && (

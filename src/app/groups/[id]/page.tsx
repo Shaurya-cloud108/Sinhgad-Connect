@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppContext } from "@/context/AppContext";
 import { ProfileContext } from "@/context/ProfileContext";
-import { ArrowLeft, Users, Lock, CheckCircle, PlusCircle, LogOut, Crown, ImageIcon, MoreHorizontal, Heart, MessageCircle, Send, Trash2, Award, Briefcase, Edit, UserCog, Link as LinkIcon, Search, UserX } from "lucide-react";
+import { ArrowLeft, Users, Lock, CheckCircle, PlusCircle, LogOut, Crown, ImageIcon, MoreHorizontal, Heart, MessageCircle, Send, Trash2, Award, Briefcase, Edit, UserCog, Link as LinkIcon, Search, UserX, MapPin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import {
@@ -408,7 +408,15 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
                             </Avatar>
                             <div>
                                 <p className="font-semibold text-sm group-hover:underline">{item.author.name}</p>
-                                <p className="text-xs text-muted-foreground">@{item.author.handle}</p>
+                                <div className="text-xs text-muted-foreground flex items-center gap-2">
+                                    <span>@{item.author.handle}</span>
+                                    {item.location && (
+                                        <>
+                                            <span className="text-muted-foreground/50">·</span>
+                                            <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{item.location}</span>
+                                        </>
+                                    )}
+                                </div>
                             </div>
                             </Link>
                         </div>

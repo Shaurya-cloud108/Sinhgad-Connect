@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, Send, Plus, Image as ImageIcon, Award, Briefcase, X, MoreHorizontal, Trash2, Eye, Video, Film } from "lucide-react";
+import { Heart, MessageCircle, Send, Plus, Image as ImageIcon, Award, Briefcase, X, MoreHorizontal, Trash2, Eye, Video, Film, MapPin } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -348,7 +348,7 @@ function StoryViewerDialog({ story, open, onOpenChange, currentUserId }: { story
                     </DropdownMenu>
                      <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Delete this story item?</AlertDialogTitle>
+                        <DialogTitle>Delete this story item?</DialogTitle>
                         <AlertDialogDescription>This action cannot be undone and will permanently delete this part of your story.</AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
@@ -485,7 +485,7 @@ function HomePageContent() {
   const handleLike = (postId: number) => {
     setFeedItems(prev => prev.map(item => 
         item.id === postId 
-        ? {...item, liked: !item.liked, likes: item.liked ? item.likes - 1 : item.likes + 1}
+        ? {...item, liked: !item.liked, likes: item.liked ? item.liked - 1 : item.likes + 1}
         : item
     ));
   };
@@ -618,7 +618,15 @@ function HomePageContent() {
                   </Avatar>
                   <div>
                     <p className="font-semibold text-sm group-hover:underline">{item.author.name}</p>
-                    <p className="text-xs text-muted-foreground">@{item.author.handle}</p>
+                    <div className="text-xs text-muted-foreground flex items-center gap-2">
+                        <span>@{item.author.handle}</span>
+                        {item.location && (
+                            <>
+                                <span className="text-muted-foreground/50">·</span>
+                                <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{item.location}</span>
+                            </>
+                        )}
+                    </div>
                   </div>
                 </Link>
               </div>
@@ -714,4 +722,3 @@ export default function Home() {
         </React.Suspense>
     )
 }
-

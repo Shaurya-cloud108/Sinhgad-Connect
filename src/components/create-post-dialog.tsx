@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useRef, useContext } from "react";
 import Image from "next/image";
-import { X, ImageIcon } from "lucide-react";
+import { X, ImageIcon, MapPin } from "lucide-react";
 import { AppContext } from "@/context/AppContext";
 import { ProfileContext } from "@/context/ProfileContext";
 import type { FeedItem } from "@/lib/data";
@@ -30,6 +30,7 @@ export function CreatePostDialog({ open, onOpenChange, groupId }: CreatePostDial
   const { toast } = useToast();
   const [postContent, setPostContent] = useState("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [location, setLocation] = useState("");
   const { profileData } = useContext(ProfileContext);
   const { addFeedItem } = useContext(AppContext);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -67,6 +68,7 @@ export function CreatePostDialog({ open, onOpenChange, groupId }: CreatePostDial
         },
         content: postContent,
         image: imagePreview,
+        location: location || undefined,
         aiHint: "user uploaded",
         likes: 0,
         liked: false,
@@ -83,6 +85,7 @@ export function CreatePostDialog({ open, onOpenChange, groupId }: CreatePostDial
 
     setPostContent("");
     setImagePreview(null);
+    setLocation("");
     if(imageInputRef.current) {
         imageInputRef.current.value = "";
     }
@@ -95,15 +98,24 @@ export function CreatePostDialog({ open, onOpenChange, groupId }: CreatePostDial
         <DialogHeader>
           <DialogTitle>Create a Post</DialogTitle>
         </DialogHeader>
-        <div className="py-4">
+        <div className="py-4 space-y-4">
           <Textarea
             placeholder="Share an achievement or ask a question..."
             value={postContent}
             onChange={(e) => setPostContent(e.target.value)}
             rows={5}
           />
+           <div className="relative">
+              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                placeholder="Add a location..."
+                className="pl-10"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+              />
+            </div>
           {imagePreview && (
-            <div className="mt-4 relative">
+            <div className="relative">
               <Image src={imagePreview} alt="Image preview" className="rounded-lg w-full" width={400} height={225} />
                <Button variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => setImagePreview(null)}>
                  <X className="h-4 w-4" />
