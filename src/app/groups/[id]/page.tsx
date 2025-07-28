@@ -54,7 +54,7 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
   const resolvedParams = use(params);
   const router = useRouter();
 
-  const { groups, joinGroup, leaveGroup, setGroups, feedItems, setFeedItems, communityMembers } = useContext(AppContext);
+  const { groups, joinGroup, leaveGroup, setGroups, feedItems, setFeedItems, communityMembers, setSelectedConversationByName } = useContext(AppContext);
   const { profileData } = useContext(ProfileContext);
   const { toast } = useToast();
   const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -164,6 +164,12 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
       description: "The group details have been saved.",
     });
   };
+  
+  const handleMessageClick = () => {
+    if (!group) return;
+    setSelectedConversationByName(group.name);
+    router.push("/messages");
+  }
 
   const triggerBannerUpload = () => {
     bannerInputRef.current?.click();
@@ -295,67 +301,53 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
               </button>
             </div>
             <div className="flex items-center gap-2">
-              {isAdmin && (
-                <>
-                  <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={handleBannerUpload} />
-                  <DropdownMenu>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="icon">
-                              <Crown className="h-4 w-4 text-yellow-500" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Admin Controls</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => setIsEditGroupOpen(true)}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit Group
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={triggerBannerUpload}>
-                          <ImageIcon className="mr-2 h-4 w-4" />
-                          Edit Banner
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <ShareDialog contentType="group" contentId={group.id}>
-                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                <Share2 className="mr-2 h-4 w-4" />
-                                Share Group
-                            </DropdownMenuItem>
-                        </ShareDialog>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </>
-              )}
               {isMember ? (
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                      <Button variant="outline">
-                          <LogOut className="mr-2 h-4 w-4" />
-                          Leave Group
-                      </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Leave "{group.name}"?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        You will need to request to join again if this is a private group. Are you sure you want to leave?
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleLeaveClick}>
-                        Leave
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                  <>
+                    <Button onClick={handleMessageClick}><MessageCircle className="mr-2 h-4 w-4" /> Message</Button>
+                    <AlertDialog>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                {isAdmin && (
+                                    <>
+                                        <DropdownMenuItem onClick={() => setIsEditGroupOpen(true)}>
+                                            <Edit className="mr-2 h-4 w-4" />
+                                            Edit Group
+                                        </DropdownMenuItem>
+                                        <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={handleBannerUpload} />
+                                        <DropdownMenuItem onClick={triggerBannerUpload}>
+                                          <ImageIcon className="mr-2 h-4 w-4" />
+                                          Edit Banner
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                    </>
+                                )}
+                                <AlertDialogTrigger asChild>
+                                    <DropdownMenuItem className="text-destructive cursor-pointer">
+                                        <LogOut className="mr-2 h-4 w-4" />
+                                        Leave Group
+                                    </DropdownMenuItem>
+                                </AlertDialogTrigger>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Leave "{group.name}"?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            You will need to request to join again if this is a private group. Are you sure you want to leave?
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={handleLeaveClick}>
+                            Leave
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </>
               ) : (
                 <Button onClick={handleJoinClick}>
                   <PlusCircle className="mr-2 h-4 w-4" />
@@ -666,4 +658,3 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
   );
 }
 
-    
