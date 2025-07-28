@@ -13,15 +13,33 @@ import {
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, Users, Send, PlusCircle } from "lucide-react";
 import { ShareDialog } from "@/components/share-dialog";
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { PostEventDialog, EventFormData } from "@/components/post-event-dialog";
 import type { Event } from "@/lib/data.tsx";
 import { format } from "date-fns";
 import { AppContext } from "@/context/AppContext";
+import { useSearchParams } from "next/navigation";
 
 export default function EventsPage() {
   const { events, addEvent } = useContext(AppContext);
   const [isPostEventOpen, setIsPostEventOpen] = useState(false);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const eventFragment = window.location.hash;
+    if (eventFragment) {
+        const element = document.getElementById(eventFragment.substring(1));
+        if (element) {
+            setTimeout(() => {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                element.classList.add('bg-primary/10', 'transition-all', 'duration-1000');
+                setTimeout(() => {
+                    element.classList.remove('bg-primary/10');
+                }, 2000);
+            }, 100);
+        }
+    }
+  }, [searchParams]);
 
   const handleEventSubmit = (data: EventFormData) => {
     const newEvent: Event = {
@@ -54,7 +72,7 @@ export default function EventsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
         {events.map((event) => (
-          <Card key={event.id} className="overflow-hidden flex flex-col hover:shadow-xl transition-shadow duration-300">
+          <Card key={event.id} id={`event-${event.id}`} className="overflow-hidden flex flex-col hover:shadow-xl transition-shadow duration-300">
             <div className="relative h-60 w-full">
               <Image
                 src={event.image}

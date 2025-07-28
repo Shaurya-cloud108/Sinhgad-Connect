@@ -18,9 +18,28 @@ import { ShareDialog } from "@/components/share-dialog";
 import { useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { successStories } from "@/lib/data.tsx";
+import { useSearchParams } from "next/navigation";
 
 
 function SuccessStoriesContent() {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const storyFragment = window.location.hash;
+    if (storyFragment) {
+        const element = document.getElementById(storyFragment.substring(1));
+        if (element) {
+            setTimeout(() => {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                element.classList.add('bg-primary/10', 'transition-all', 'duration-1000');
+                setTimeout(() => {
+                    element.classList.remove('bg-primary/10');
+                }, 2000);
+            }, 100);
+        }
+    }
+  }, [searchParams]);
+
   return (
     <div className="container py-8 md:py-12">
        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
@@ -34,7 +53,7 @@ function SuccessStoriesContent() {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
         {successStories.map((story) => (
-          <Card key={story.id} className="flex flex-col md:flex-row overflow-hidden hover:shadow-xl transition-shadow duration-300">
+          <Card key={story.id} id={`story-${story.id}`} className="flex flex-col md:flex-row overflow-hidden hover:shadow-xl transition-shadow duration-300">
             <div className="relative md:w-1/3 h-64 md:h-auto">
               <Image
                 src={story.image}

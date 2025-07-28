@@ -18,8 +18,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AppContext, Message, Conversation } from "@/context/AppContext";
 import { ProfileContext } from "@/context/ProfileContext";
-import { Check, Send } from 'lucide-react';
+import { Check, Send, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Separator } from './ui/separator';
 
 type ShareDialogProps = {
   contentType: 'post' | 'job' | 'event' | 'story' | 'group' | 'profile';
@@ -42,6 +43,45 @@ export function ShareDialog({ contentType, contentId, children }: ShareDialogPro
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTargets, setSelectedTargets] = useState<Set<string>>(new Set());
+
+  const publicLink = useMemo(() => {
+    if (typeof window === 'undefined') return '';
+    
+    const baseUrl = window.location.origin;
+    
+    switch (contentType) {
+      case 'post':
+        return `${baseUrl}/?postId=${contentId}`;
+      case 'job':
+        return `${baseUrl}/jobs#job-${contentId}`;
+      case 'event':
+        return `${baseUrl}/events#event-${contentId}`;
+      case 'story':
+        return `${baseUrl}/success-stories#story-${contentId}`;
+      case 'profile':
+        return `${baseUrl}/profile/${contentId}`;
+      case 'group':
+        return `${baseUrl}/groups/${contentId}`;
+      default:
+        return baseUrl;
+    }
+  }, [contentType, contentId]);
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(publicLink).then(() => {
+      toast({
+        title: "Link Copied!",
+        description: "The public link is now on your clipboard.",
+      });
+    }, (err) => {
+      toast({
+        variant: "destructive",
+        title: "Copy Failed",
+        description: "Could not copy link to clipboard.",
+      });
+      console.error('Could not copy text: ', err);
+    });
+  };
 
   const allShareTargets = useMemo(() => {
     if (!profileData) return [];
@@ -189,48 +229,64 @@ export function ShareDialog({ contentType, contentId, children }: ShareDialogPro
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Share with...</DialogTitle>
-          <DialogDescription>Select people or groups to share this content with.</DialogDescription>
+          <DialogTitle>Share</DialogTitle>
         </DialogHeader>
-        <div className="py-2">
-          <Input 
-            placeholder="Search for people or groups..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        <ScrollArea className="h-64">
-          <div className="py-2 space-y-1 pr-4">
-            {allShareTargets.map(target => (
-              <div 
-                key={target.id}
-                className="flex items-center justify-between p-2 rounded-md hover:bg-muted cursor-pointer"
-                onClick={() => handleSelectTarget(target.name)}
-              >
-                <div className="flex items-center gap-3">
-                  <Avatar>
-                    <AvatarImage src={target.avatar} />
-                    <AvatarFallback>{target.name.substring(0, 2)}</AvatarFallback>
-                  </Avatar>
-                  <p className="font-medium">{target.name}</p>
+        
+        <div className='space-y-4'>
+            <div>
+                <p className="text-sm font-medium mb-2">Share with connections</p>
+                <Input 
+                    placeholder="Search for people or groups..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <ScrollArea className="h-48 mt-2">
+                <div className="py-2 space-y-1 pr-4">
+                    {allShareTargets.map(target => (
+                    <div 
+                        key={target.id}
+                        className="flex items-center justify-between p-2 rounded-md hover:bg-muted cursor-pointer"
+                        onClick={() => handleSelectTarget(target.name)}
+                    >
+                        <div className="flex items-center gap-3">
+                        <Avatar>
+                            <AvatarImage src={target.avatar} />
+                            <AvatarFallback>{target.name.substring(0, 2)}</AvatarFallback>
+                        </Avatar>
+                        <p className="font-medium">{target.name}</p>
+                        </div>
+                        {selectedTargets.has(target.name) && (
+                        <Check className="h-5 w-5 text-primary" />
+                        )}
+                    </div>
+                    ))}
+                    {allShareTargets.length === 0 && (
+                    <p className="text-center text-sm text-muted-foreground pt-4">No matching results found.</p>
+                    )}
                 </div>
-                {selectedTargets.has(target.name) && (
-                  <Check className="h-5 w-5 text-primary" />
-                )}
-              </div>
-            ))}
-             {allShareTargets.length === 0 && (
-              <p className="text-center text-sm text-muted-foreground pt-4">No matching results found.</p>
-            )}
-          </div>
-        </ScrollArea>
+                </ScrollArea>
+                 <Button onClick={handleShare} disabled={selectedTargets.size === 0} className='w-full'>
+                    <Send className="mr-2 h-4 w-4" /> Share ({selectedTargets.size})
+                </Button>
+            </div>
+            
+            <Separator />
+
+            <div>
+                <p className="text-sm font-medium mb-2">Or share externally</p>
+                <div className="flex w-full items-center space-x-2">
+                    <Input value={publicLink} readOnly />
+                    <Button type="button" size="icon" onClick={handleCopyLink}>
+                        <Copy className="h-4 w-4" />
+                    </Button>
+                </div>
+            </div>
+        </div>
+
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="secondary">Cancel</Button>
+            <Button variant="secondary" className='w-full'>Close</Button>
           </DialogClose>
-          <Button onClick={handleShare} disabled={selectedTargets.size === 0}>
-            <Send className="mr-2 h-4 w-4" /> Share ({selectedTargets.size})
-          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

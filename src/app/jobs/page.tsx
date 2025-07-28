@@ -36,6 +36,7 @@ import { PostJobDialog } from "@/components/post-job-dialog";
 import { AppContext } from "@/context/AppContext";
 import { ProfileContext } from "@/context/ProfileContext";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 function JobsPageContent() {
   const [isPostJobOpen, setIsPostJobOpen] = useState(false);
@@ -49,6 +50,7 @@ function JobsPageContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [jobType, setJobType] = useState<string>('all');
   const [location, setLocation] = useState<string>('all');
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     let results = jobListings;
@@ -69,6 +71,21 @@ function JobsPageContent() {
     setFilteredJobListings(results);
   }, [searchQuery, jobType, location, jobListings]);
 
+  useEffect(() => {
+    const jobFragment = window.location.hash;
+    if (jobFragment) {
+        const element = document.getElementById(jobFragment.substring(1));
+        if (element) {
+            setTimeout(() => {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                element.classList.add('bg-primary/10', 'transition-all', 'duration-1000');
+                setTimeout(() => {
+                    element.classList.remove('bg-primary/10');
+                }, 2000);
+            }, 100);
+        }
+    }
+  }, [searchParams]);
 
   function handleJobSubmit(values: Omit<JobListing, 'id' | 'postedBy' | 'postedByHandle'>) {
     if (!profileData) return;
@@ -145,7 +162,7 @@ function JobsPageContent() {
             filteredJobListings.map((job, index) => {
               const poster = communityMembers.find(m => m.handle === job.postedByHandle);
               return (
-                <Card key={`${job.id}-${index}`} className="hover:shadow-md transition-shadow">
+                <Card key={`${job.id}-${index}`} id={`job-${job.id}`} className="hover:shadow-md transition-shadow">
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <div>
