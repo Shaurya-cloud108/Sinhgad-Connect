@@ -561,55 +561,81 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
                                     </div>
                                 </Link>
                                 {isAdmin && profileData.handle !== member.handle && (
-                                    <AlertDialog>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="icon"><MoreHorizontal /></Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                {member.role === 'member' && (
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="ghost" size="icon"><MoreHorizontal /></Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                            {member.role === 'member' && (
+                                                <AlertDialog>
                                                     <AlertDialogTrigger asChild>
-                                                        <DropdownMenuItem>
+                                                        <DropdownMenuItem onSelect={e => e.preventDefault()}>
                                                             <UserCog className="mr-2 h-4 w-4" /> Make Moderator
                                                         </DropdownMenuItem>
                                                     </AlertDialogTrigger>
-                                                )}
-                                                {member.role === 'moderator' && (
-                                                     <AlertDialogTrigger asChild>
-                                                        <DropdownMenuItem>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle>Make Moderator?</AlertDialogTitle>
+                                                            <AlertDialogDescription>
+                                                                Are you sure you want to make {member.name} a moderator? They will be able to post and manage content.
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                            <AlertDialogAction onClick={() => handleSetRole(member.handle!, 'moderator')}>
+                                                                Confirm
+                                                            </AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
+                                            )}
+                                            {member.role === 'moderator' && (
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <DropdownMenuItem onSelect={e => e.preventDefault()}>
                                                             <UserCog className="mr-2 h-4 w-4" /> Revoke Moderator
                                                         </DropdownMenuItem>
                                                     </AlertDialogTrigger>
-                                                )}
-                                                <DropdownMenuSeparator />
+                                                     <AlertDialogContent>
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle>Revoke Moderator?</AlertDialogTitle>
+                                                            <AlertDialogDescription>
+                                                                Are you sure you want to revoke moderator privileges for {member.name}?
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                            <AlertDialogAction onClick={() => handleSetRole(member.handle!, 'member')}>
+                                                                Confirm
+                                                            </AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
+                                            )}
+                                            <DropdownMenuSeparator />
+                                            <AlertDialog>
                                                 <AlertDialogTrigger asChild>
-                                                    <DropdownMenuItem className="text-destructive">
+                                                    <DropdownMenuItem className="text-destructive" onSelect={e => e.preventDefault()}>
                                                         <UserX className="mr-2 h-4 w-4" /> Remove from Group
                                                     </DropdownMenuItem>
                                                 </AlertDialogTrigger>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                        <AlertDialogContent>
-                                            <AlertDialogHeader>
-                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                                <AlertDialogDescription>
-                                                    This action cannot be undone.
-                                                </AlertDialogDescription>
-                                            </AlertDialogHeader>
-                                            <AlertDialogFooter>
-                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                <AlertDialogAction onClick={() => {
-                                                    if (member.role === 'member' || member.role === 'moderator') {
-                                                        handleRemoveMember(member.handle!);
-                                                    } else {
-                                                        handleSetRole(member.handle!, member.role === 'member' ? 'moderator' : 'member')
-                                                    }
-                                                }}>
-                                                    Confirm
-                                                </AlertDialogAction>
-                                            </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                    </AlertDialog>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Remove {member.name}?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            Are you sure you want to remove this member from the group? This action cannot be undone.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => handleRemoveMember(member.handle!)}>
+                                                            Remove
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
                                 )}
                             </div>
                         ))}
@@ -639,3 +665,5 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
     </>
   );
 }
+
+    
