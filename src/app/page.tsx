@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, Send, Plus, Image as ImageIcon, Award, Briefcase, X, MoreHorizontal, Trash2, Eye, Video, Film, MapPin, Search } from "lucide-react";
+import { Heart, MessageCircle, Send, Plus, Image as ImageIcon, Award, Briefcase, X, MoreHorizontal, Trash2, Eye, Video, Film, MapPin, Search, Edit } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -62,6 +62,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { PostJobDialog } from "@/components/post-job-dialog";
 import { AppContext } from "@/context/AppContext";
 import { CreatePostDialog } from "@/components/create-post-dialog";
+import { EditPostDialog, PostEditFormData } from "@/components/edit-post-dialog";
 
 function CreateStoryDialog({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
     const { toast } = useToast();
@@ -383,6 +384,7 @@ function StoryViewerDialog({ story, open, onOpenChange, currentUserId }: { story
 
 function HomePageContent() {
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
+  const [isEditPostDialogOpen, setIsEditPostDialogOpen] = useState(false);
   const [isPostJobDialogOpen, setIsPostJobDialogOpen] = useState(false);
   const [isCreateStoryDialogOpen, setIsCreateStoryDialogOpen] = useState(false);
   
@@ -393,9 +395,11 @@ function HomePageContent() {
     addJobListing, 
     stories, 
     feedItems,
-    setFeedItems
+    setFeedItems,
+    updateFeedItem,
   } = useContext(AppContext);
   const [activeCommentPostId, setActiveCommentPostId] = useState<number | null>(null);
+  const [postToEdit, setPostToEdit] = useState<FeedItem | null>(null);
   
   const searchParams = useSearchParams();
 
@@ -481,7 +485,17 @@ function HomePageContent() {
   const handleDeletePost = (postId: number) => {
     setFeedItems(prev => prev.filter(item => item.id !== postId));
   };
+
+  const handleEditPost = (data: PostEditFormData) => {
+    if(!postToEdit) return;
+    updateFeedItem(postToEdit.id, data);
+  };
   
+  const openEditPostDialog = (post: FeedItem) => {
+    setPostToEdit(post);
+    setIsEditPostDialogOpen(true);
+  };
+
   const handleLike = (postId: number) => {
     setFeedItems(prev => prev.map(item => 
         item.id === postId 
@@ -593,6 +607,7 @@ function HomePageContent() {
       <CreatePostDialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen} />
       <PostJobDialog open={isPostJobDialogOpen} onOpenChange={setIsPostJobDialogOpen} onJobSubmit={handleJobSubmit}/>
       <CreateStoryDialog open={isCreateStoryDialogOpen} onOpenChange={setIsCreateStoryDialogOpen} />
+      {postToEdit && <EditPostDialog open={isEditPostDialogOpen} onOpenChange={setIsEditPostDialogOpen} onPostUpdate={handleEditPost} post={postToEdit} />}
       <StoryViewerDialog story={selectedStory} open={isStoryViewerOpen} onOpenChange={setIsStoryViewerOpen} currentUserId={profileData?.handle}/>
       <CommentSheet
         open={!!activeCommentPostId}
@@ -640,6 +655,10 @@ function HomePageContent() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => openEditPostDialog(item)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit
+                          </DropdownMenuItem>
                           <AlertDialogTrigger asChild>
                               <DropdownMenuItem className="text-destructive cursor-pointer">
                                 <Trash2 className="mr-2 h-4 w-4" />
@@ -737,5 +756,7 @@ export default function Home() {
         </React.Suspense>
     )
 }
+
+    
 
     

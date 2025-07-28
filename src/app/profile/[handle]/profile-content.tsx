@@ -65,6 +65,7 @@ import { PostJobDialog } from "@/components/post-job-dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { FollowersSheet } from "@/components/followers-sheet";
 import { CreatePostDialog } from "@/components/create-post-dialog";
+import { EditPostDialog, PostEditFormData } from "@/components/edit-post-dialog";
 import { CommentSheet } from "@/components/comment-sheet";
 import { Badge } from "@/components/ui/badge";
 
@@ -358,6 +359,7 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
         setCommunityMembers,
         feedItems,
         setFeedItems,
+        updateFeedItem,
         groups
     } = useContext(AppContext);
     
@@ -365,11 +367,13 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
     const { toast } = useToast();
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
+    const [isEditPostDialogOpen, setIsEditPostDialogOpen] = useState(false);
     const [isPostJobDialogOpen, setIsPostJobDialogOpen] = useState(false);
     const [isFollowSheetOpen, setIsFollowSheetOpen] = useState(false);
     const [followSheetTitle, setFollowSheetTitle] = useState<'Followers' | 'Following'>('Followers');
     const [followSheetHandles, setFollowSheetHandles] = useState<string[]>([]);
     const [activeCommentPostId, setActiveCommentPostId] = useState<number | null>(null);
+    const [postToEdit, setPostToEdit] = useState<FeedItem | null>(null);
 
     const isOwnProfile = useMemo(() => {
         return !resolvedParams.handle || resolvedParams.handle === ownProfileData?.handle;
@@ -459,6 +463,16 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
 
     const handleDeletePost = (postId: number) => {
         setFeedItems(prev => prev.filter(item => item.id !== postId));
+    };
+
+    const handleEditPost = (data: PostEditFormData) => {
+        if(!postToEdit) return;
+        updateFeedItem(postToEdit.id, data);
+    };
+    
+    const openEditPostDialog = (post: FeedItem) => {
+        setPostToEdit(post);
+        setIsEditPostDialogOpen(true);
     };
 
     const handleLike = (postId: number) => {
@@ -741,6 +755,10 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
                               </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => openEditPostDialog(item)}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit
+                              </DropdownMenuItem>
                               <AlertDialogTrigger asChild>
                                   <DropdownMenuItem className="text-destructive cursor-pointer">
                                       <Trash2 className="mr-2 h-4 w-4" />
@@ -908,6 +926,7 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
         <>
             <EditProfileDialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} profile={profileData} onProfileUpdate={handleProfileUpdate} />
             <CreatePostDialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen} />
+            {postToEdit && <EditPostDialog open={isEditPostDialogOpen} onOpenChange={setIsEditPostDialogOpen} onPostUpdate={handleEditPost} post={postToEdit} />}
             <PostJobDialog open={isPostJobDialogOpen} onOpenChange={setIsPostJobDialogOpen} onJobSubmit={handleJobSubmit}/>
         </>
       )}
@@ -931,5 +950,7 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
     </>
   );
 }
+
+    
 
     

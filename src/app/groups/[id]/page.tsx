@@ -41,9 +41,10 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CreatePostDialog } from "@/components/create-post-dialog";
+import { EditPostDialog, PostEditFormData } from "@/components/edit-post-dialog";
 import { CommentSheet } from "@/components/comment-sheet";
 import { cn } from "@/lib/utils";
-import type { Comment, Group, GroupLink, GroupMember } from "@/lib/data.tsx";
+import type { Comment, Group, GroupLink, GroupMember, FeedItem } from "@/lib/data.tsx";
 import { ShareDialog } from "@/components/share-dialog";
 import { EditGroupDialog, GroupEditFormData } from "@/components/edit-group-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -54,7 +55,7 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
   const resolvedParams = use(params);
   const router = useRouter();
 
-  const { groups, joinGroup, leaveGroup, setGroups, feedItems, setFeedItems, communityMembers, setSelectedConversationByName } = useContext(AppContext);
+  const { groups, joinGroup, leaveGroup, setGroups, feedItems, setFeedItems, communityMembers, setSelectedConversationByName, updateFeedItem } = useContext(AppContext);
   const { profileData } = useContext(ProfileContext);
   const { toast } = useToast();
   const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -62,10 +63,12 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
   const [group, setGroup] = useState<(typeof groups)[0] | null>(null);
   const [isMember, setIsMember] = useState(false);
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
+  const [isEditPostDialogOpen, setIsEditPostDialogOpen] = useState(false);
   const [isEditGroupOpen, setIsEditGroupOpen] = useState(false);
   const [activeCommentPostId, setActiveCommentPostId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState("feed");
   const [memberSearchQuery, setMemberSearchQuery] = useState("");
+  const [postToEdit, setPostToEdit] = useState<FeedItem | null>(null);
   
   useEffect(() => {
     const groupData = groups.find((g) => g.id === resolvedParams.id);
@@ -211,6 +214,16 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
 
   const handleDeletePost = (postId: number) => {
     setFeedItems(prev => prev.filter(item => item.id !== postId));
+  };
+
+  const handleEditPost = (data: PostEditFormData) => {
+    if(!postToEdit) return;
+    updateFeedItem(postToEdit.id, data);
+  };
+
+  const openEditPostDialog = (post: FeedItem) => {
+    setPostToEdit(post);
+    setIsEditPostDialogOpen(true);
   };
 
   const handleSetRole = (targetHandle: string, newRole: 'moderator' | 'member') => {
@@ -434,6 +447,10 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
                                 </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => openEditPostDialog(item)}>
+                                    <Edit className="mr-2 h-4 w-4" />
+                                    Edit
+                                </DropdownMenuItem>
                                 <AlertDialogTrigger asChild>
                                     <DropdownMenuItem className="text-destructive cursor-pointer">
                                         <Trash2 className="mr-2 h-4 w-4" />
@@ -643,6 +660,7 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
       </div>
     </div>
     <CreatePostDialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen} groupId={group.id} />
+    {postToEdit && <EditPostDialog open={isEditPostDialogOpen} onOpenChange={setIsEditPostDialogOpen} onPostUpdate={handleEditPost} post={postToEdit} />}
     <EditGroupDialog open={isEditGroupOpen} onOpenChange={setIsEditGroupOpen} onGroupUpdate={handleGroupUpdate} group={group} />
     <CommentSheet
       open={!!activeCommentPostId}
@@ -657,5 +675,7 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
     </>
   );
 }
+
+    
 
     

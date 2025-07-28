@@ -25,6 +25,7 @@ import type {
     Group
 } from '@/lib/data';
 import { ProfileContext } from './ProfileContext';
+import { PostEditFormData } from '@/components/edit-post-dialog';
 
 // Types
 export type Conversation = ConvType;
@@ -60,6 +61,7 @@ type AppContextType = {
     feedItems: FeedItem[];
     setFeedItems: React.Dispatch<React.SetStateAction<FeedItem[]>>;
     addFeedItem: (post: FeedItem) => void;
+    updateFeedItem: (postId: number, data: PostEditFormData) => void;
 
     stories: Story[];
     setStories: React.Dispatch<React.SetStateAction<Story[]>>;
@@ -93,6 +95,7 @@ export const AppContext = createContext<AppContextType>({
     feedItems: [],
     setFeedItems: () => {},
     addFeedItem: () => {},
+    updateFeedItem: () => {},
     stories: [],
     setStories: () => {},
     addStoryItem: () => {},
@@ -225,10 +228,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setJobListings(prev => [job, ...prev]);
     }, []);
 
-
-
     const addFeedItem = useCallback((post: FeedItem) => {
         setFeedItems(prev => [post, ...prev]);
+    }, []);
+
+    const updateFeedItem = useCallback((postId: number, data: PostEditFormData) => {
+        setFeedItems(prev => prev.map(item => 
+            item.id === postId ? { ...item, content: data.content, location: data.location || undefined } : item
+        ));
     }, []);
 
     const addStoryItem = useCallback((userHandle: string, item: StoryItem) => {
@@ -312,6 +319,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         feedItems,
         setFeedItems,
         addFeedItem,
+        updateFeedItem,
         stories,
         setStories,
         addStoryItem,
@@ -325,5 +333,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         </AppContext.Provider>
     );
 };
+
+    
 
     
