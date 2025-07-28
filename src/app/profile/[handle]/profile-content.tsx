@@ -154,7 +154,7 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
     }
   };
 
-  const onSubmit = (values: z.infer<typeof profileFormSchema>>) => {
+  const onSubmit = (values: z.infer<typeof profileFormSchema>) => {
     const updatedEducation: EducationEntry[] = values.education.map((edu, index) => {
       const originalEdu = profile.education[index];
       if (originalEdu && originalEdu.graduationYear) {
@@ -950,7 +950,5 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
     </>
   );
 }
-
-    
 
     
