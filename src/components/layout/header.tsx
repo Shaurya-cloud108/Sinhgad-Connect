@@ -32,11 +32,8 @@ export function AppHeader() {
         {/* Logo */}
         <Link href="/" className="flex items-center space-x-2 mr-auto">
           <GraduationCap className="h-6 w-6 text-primary" />
-          <span className="hidden sm:inline-block font-bold font-headline">
+          <span className="font-bold font-headline">
             Sinhgad Connect
-          </span>
-          <span className="sm:hidden font-bold font-headline text-xl">
-            Connect
           </span>
         </Link>
         
