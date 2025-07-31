@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { GraduationCap, Twitter, Linkedin, Facebook } from "lucide-react";
+import { GraduationCap, Linkedin, Facebook } from "lucide-react";
 
 export function AppFooter() {
   return (
@@ -22,9 +22,6 @@ export function AppFooter() {
             </Link>
           </nav>
           <div className="flex items-center space-x-4">
-            <Link href="#" className="text-muted-foreground hover:text-primary">
-              <Twitter className="h-5 w-5" />
-            </Link>
             <Link href="#" className="text-muted-foreground hover:text-primary">
               <Linkedin className="h-5 w-5" />
             </Link>
