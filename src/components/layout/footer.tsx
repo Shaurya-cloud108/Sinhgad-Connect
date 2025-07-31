@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { GraduationCap, Facebook } from "lucide-react";
+import { GraduationCap } from "lucide-react";
 
 export function AppFooter() {
   return (
@@ -22,9 +22,7 @@ export function AppFooter() {
             </Link>
           </nav>
           <div className="flex items-center space-x-4">
-            <Link href="#" className="text-muted-foreground hover:text-primary">
-              <Facebook className="h-5 w-5" />
-            </Link>
+            
           </div>
         </div>
         <div className="mt-8 text-center text-sm text-muted-foreground">
