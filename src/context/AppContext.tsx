@@ -288,7 +288,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const addJobListing = useCallback(async (job: Omit<JobListing, 'id'>) => {
         const newDocId = await addJobListingFs(job);
-        setJobListings(prev => [{...job, id: newDocId}, ...prev]);
+        const newJob = { ...job, id: newDocId };
+        setJobListings(prev => [newJob, ...prev]);
     }, []);
 
     const addFeedItem = useCallback(async (post: Omit<FeedItem, 'id' | 'createdAt' | 'likes' | 'likedBy' | 'comments'>) => {
@@ -490,5 +491,3 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         </AppContext.Provider>
     );
 };
-
-  

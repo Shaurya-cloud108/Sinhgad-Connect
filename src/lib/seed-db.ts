@@ -10,9 +10,9 @@ import {
     initialEventsData,
     initialJobListings,
     initialStories,
-    successStories,
+    initialSuccessStories,
     initialFeedItems,
-    notifications,
+    initialNotifications,
 } from './data-seed'; // Using a new file for seed data
 
 async function seedDatabase() {
@@ -70,18 +70,18 @@ async function seedDatabase() {
         });
 
         // Seed Success Stories
-        console.log(`Seeding ${successStories.length} success stories...`);
+        console.log(`Seeding ${initialSuccessStories.length} success stories...`);
         const successStoriesCollection = collection(db, 'successStories');
-        successStories.forEach(story => {
+        initialSuccessStories.forEach(story => {
             const docRef = doc(successStoriesCollection, story.id);
             batch.set(docRef, story);
         });
 
         // Seed Notifications
-        console.log(`Seeding ${notifications.length} notifications...`);
+        console.log(`Seeding ${initialNotifications.length} notifications...`);
         const notificationsCollection = collection(db, 'notifications');
-        notifications.forEach(notification => {
-            const docRef = doc(notificationsCollection); // Auto-generate ID
+        initialNotifications.forEach(notification => {
+            const docRef = doc(notificationsCollection, notification.id);
             batch.set(docRef, notification);
         });
 

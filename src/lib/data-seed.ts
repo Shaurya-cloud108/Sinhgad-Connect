@@ -294,7 +294,7 @@ export type GroupMember = {
       }
   };
   
-  export const successStories: SuccessStory[] = [
+  export const initialSuccessStories: SuccessStory[] = [
     {
       id: "sunita-narayan",
       name: "Sunita Narayan",
@@ -856,8 +856,8 @@ export type GroupMember = {
       senderId: string;
       senderName: string;
       text?: string;
-      sharedPostId?: number;
-      sharedJobId?: number;
+      sharedPostId?: string;
+      sharedJobId?: string;
       sharedEventId?: string;
       sharedStoryId?: string;
       sharedProfileId?: string;
@@ -886,6 +886,7 @@ export type GroupMember = {
   };
   
   export type Notification = {
+      id: string;
       type: 'connection' | 'message' | 'event' | 'job' | 'like' | 'comment';
       userName?: string; // e.g., "Rohan Verma"
       commentText?: string;
@@ -900,8 +901,9 @@ export type GroupMember = {
       contentPreview?: string;
   };
   
-  export const notifications: Notification[] = [
+  export const initialNotifications: Notification[] = [
       {
+          id: '1',
           type: 'like',
           userName: 'Rohan Verma',
           contentPreview: "Mentoring a final year student on their capstone project...",
@@ -911,6 +913,7 @@ export type GroupMember = {
           actions: [{ label: 'View Post', href: '/?postId=5' }]
       },
       {
+          id: '2',
           type: 'comment',
           userName: 'Anjali Mehta',
           commentText: "This is so inspiring! Congratulations!",
@@ -921,6 +924,7 @@ export type GroupMember = {
           actions: [{ label: 'Reply', href: '/?postId=4' }]
       },
       {
+          id: '3',
           type: "connection",
           userName: 'Vikram Singh',
           time: "2 hours ago",
@@ -932,6 +936,7 @@ export type GroupMember = {
           aiHint: "corporate man"
       },
       {
+          id: '4',
           type: "message",
           userName: 'Kavya Iyer',
           time: "5 hours ago",
@@ -940,6 +945,7 @@ export type GroupMember = {
           aiHint: "female student"
       },
       {
+          id: '5',
           type: "event",
           eventTitle: 'Annual Alumni Grand Meet 2024',
           time: "1 day ago",
@@ -948,6 +954,7 @@ export type GroupMember = {
           aiHint: "university logo"
       },
       {
+          id: '6',
           type: "job",
           jobTitle: "Senior Frontend Engineer",
           companyName: "Innovate Inc.",
