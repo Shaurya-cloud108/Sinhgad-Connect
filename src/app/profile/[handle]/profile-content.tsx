@@ -67,6 +67,7 @@ import { FollowersSheet } from "@/components/followers-sheet";
 import { CreatePostDialog } from "@/components/create-post-dialog";
 import { EditPostDialog, PostEditFormData } from "@/components/edit-post-dialog";
 import { Badge } from "@/components/ui/badge";
+import { CommentSheet } from "@/components/comment-sheet";
 
 
 const profileFormSchema = z.object({
