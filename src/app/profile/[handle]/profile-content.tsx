@@ -153,7 +153,7 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
     }
   };
 
-  const onSubmit = (values: z.infer<typeof profileFormSchema>>) => {
+  const onSubmit = (values: z.infer<typeof profileFormSchema>) => {
     const updatedEducation: EducationEntry[] = values.education.map((edu, index) => {
       const originalEdu = profile.education[index];
       if (originalEdu && originalEdu.graduationYear) {
@@ -458,7 +458,7 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
     const handleJobSubmit = (newJob: Omit<JobListing, 'id' | 'postedBy' | 'postedByHandle'>) => {
         if(!profileData) return;
         const primaryEducation = profileData.education.find(e => e.graduationYear);
-        const gradYearSuffix = primaryEducation?.graduationYear ? `'${primaryEducation.graduationYear.toString().slice(-2)}` : '';
+        const gradYearSuffix = primaryEducation?.graduationYear ? `'${'${primaryEducation.graduationYear.toString().slice(-2)}'}'` : '';
 
         addJobListing({
         ...newJob,
