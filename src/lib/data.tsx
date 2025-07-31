@@ -2,7 +2,18 @@
 
 "use client";
 
-import { initialCommunityMembers, initialFeedItems, initialConversations, initialMessages, initialEvents, initialGroups, initialStories, initialSuccessStories, initialNotifications } from './data-seed';
+import { 
+    initialCommunityMembers, 
+    initialFeedItemsData, 
+    initialConversations,
+    initialMessages,
+    initialEventsData,
+    initialGroupsData,
+    initialStoriesData,
+    initialSuccessStories,
+    initialNotificationsData,
+    initialJobListings,
+} from './data-seed';
 
 // This file now only contains type definitions and exports the initial data.
 // The data itself is defined in `data-seed.ts`.
@@ -217,8 +228,9 @@ const initialFeedItems: FeedItem[] = initialFeedItemsData.map((item, index) => (
 }));
 
 const initialStories: Story[] = initialStoriesData;
-const initialEvents: Event[] = initialEventsData;
 const initialGroups: Group[] = initialGroupsData;
+const initialEvents: Event[] = initialEventsData;
+const initialNotifications: Notification[] = initialNotificationsData;
 
 export {
   initialCommunityMembers,
@@ -230,4 +242,7 @@ export {
   initialStories,
   initialSuccessStories,
   initialNotifications,
+  initialJobListings,
 };
+
+
