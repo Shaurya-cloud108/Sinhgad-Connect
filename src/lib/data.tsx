@@ -123,52 +123,57 @@ export const initialGroups: Group[] = [
 export type Event = {
   id: string;
   title: string;
-  date: string;
+  date: string; // Storing as ISO string 'YYYY-MM-DDTHH:mm:ss.sssZ'
   location: string;
   description: string;
   image: string;
   aiHint: string;
   registrationUrl?: string;
+  postedByHandle: string;
 };
 
 export const initialEvents: Event[] = [
   {
     id: "annual-meet-2024",
     title: "Annual Alumni Grand Meet 2024",
-    date: "October 25, 2024",
+    date: new Date('2024-10-25T10:00:00').toISOString(),
     location: "College Auditorium, Pune",
     description: "The flagship event of the year! Reconnect with old friends, network with peers, and relive your college days.",
     image: "https://placehold.co/600x400.png",
     aiHint: "people networking",
     registrationUrl: "https://forms.gle/example",
+    postedByHandle: "alumni-events",
   },
   {
     id: "tech-talk-ai",
     title: "Tech Talk: AI & The Future",
-    date: "November 12, 2024",
+    date: new Date('2024-11-12T18:00:00').toISOString(),
     location: "Virtual Event (Zoom)",
     description: "Join us for an insightful session with industry experts on the future of Artificial Intelligence.",
     image: "https://placehold.co/600x400.png",
     aiHint: "technology conference",
     registrationUrl: "https://forms.gle/example",
+    postedByHandle: "priya-sharma",
   },
   {
     id: "reunion-2014",
     title: "Batch of 2014: 10-Year Reunion",
-    date: "December 7, 2024",
+    date: new Date('2024-12-07T19:00:00').toISOString(),
     location: "The Westin, Pune",
     description: "A special evening for the class of 2014 to celebrate a decade of memories and achievements.",
     image: "https://placehold.co/600x400.png",
-    aiHint: "formal dinner"
+    aiHint: "formal dinner",
+    postedByHandle: "alumni-events",
   },
   {
     id: "sports-day-2025",
     title: "Alumni Sports Day",
-    date: "January 18, 2025",
+    date: new Date('2025-01-18T09:00:00').toISOString(),
     location: "College Sports Complex",
     description: "Get ready for some friendly competition in cricket, football, and more. Fun for the whole family!",
     image: "https://placehold.co/600x400.png",
-    aiHint: "outdoor sports"
+    aiHint: "outdoor sports",
+    postedByHandle: "priya-sharma"
   },
 ];
 
@@ -982,4 +987,3 @@ export const initialNotifications: Notification[] = [
         aiHint: "briefcase icon"
     },
 ];
-

@@ -25,8 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { X, Calendar as CalendarIcon, Upload, Link as LinkIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -34,6 +33,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ScrollArea } from "./ui/scroll-area";
+import type { Event } from "@/lib/data";
 
 const postEventSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters long."),
@@ -52,10 +52,11 @@ type PostEventDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onEventSubmit: (data: EventFormData) => void;
+  event?: Event;
+  isEditMode?: boolean;
 };
 
-export function PostEventDialog({ open, onOpenChange, onEventSubmit }: PostEventDialogProps) {
-  const { toast } = useToast();
+export function PostEventDialog({ open, onOpenChange, onEventSubmit, event, isEditMode = false }: PostEventDialogProps) {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
@@ -68,6 +69,24 @@ export function PostEventDialog({ open, onOpenChange, onEventSubmit }: PostEvent
       registrationUrl: "",
     },
   });
+  
+  useEffect(() => {
+    if (isEditMode && event) {
+        form.reset({
+            title: event.title,
+            location: event.location,
+            date: new Date(event.date),
+            description: event.description,
+            image: event.image,
+            registrationUrl: event.registrationUrl,
+        });
+        setImagePreview(event.image);
+    } else {
+        form.reset();
+        setImagePreview(null);
+    }
+  }, [event, isEditMode, form, open]);
+
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -84,10 +103,6 @@ export function PostEventDialog({ open, onOpenChange, onEventSubmit }: PostEvent
 
   function onSubmit(values: EventFormData) {
     onEventSubmit(values);
-    toast({
-      title: "Event Posted!",
-      description: "Your event has been shared with the community.",
-    });
     form.reset();
     setImagePreview(null);
     if (imageInputRef.current) {
@@ -100,9 +115,9 @@ export function PostEventDialog({ open, onOpenChange, onEventSubmit }: PostEvent
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="font-headline">Host a New Event</DialogTitle>
+          <DialogTitle className="font-headline">{isEditMode ? "Edit Event" : "Host a New Event"}</DialogTitle>
           <DialogDescription>
-            Fill out the details below to create an event for the community.
+            {isEditMode ? "Update the details for your event below." : "Fill out the details below to create an event for the community."}
           </DialogDescription>
         </DialogHeader>
         <ScrollArea className="pr-6 -mr-6">
@@ -161,7 +176,7 @@ export function PostEventDialog({ open, onOpenChange, onEventSubmit }: PostEvent
                             mode="single"
                             selected={field.value}
                             onSelect={field.onChange}
-                            disabled={(date) => date < new Date() || date < new Date("1900-01-01")}
+                            disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
                             initialFocus
                           />
                         </PopoverContent>
@@ -233,7 +248,7 @@ export function PostEventDialog({ open, onOpenChange, onEventSubmit }: PostEvent
           <DialogClose asChild>
             <Button type="button" variant="secondary">Cancel</Button>
           </DialogClose>
-          <Button type="submit" onClick={form.handleSubmit(onSubmit)}>Post Event</Button>
+          <Button type="submit" onClick={form.handleSubmit(onSubmit)}>{isEditMode ? "Save Changes" : "Post Event"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

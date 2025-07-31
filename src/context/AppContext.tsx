@@ -49,7 +49,9 @@ type AppContextType = {
 
     events: Event[];
     setEvents: React.Dispatch<React.SetStateAction<Event[]>>;
-    addEvent: (event: Event) => void;
+    addEvent: (event: Omit<Event, 'id'>) => void;
+    updateEvent: (event: Event) => void;
+    deleteEvent: (eventId: string) => void;
 
     groups: Group[];
     setGroups: React.Dispatch<React.SetStateAction<Group[]>>;
@@ -99,6 +101,8 @@ export const AppContext = createContext<AppContextType>({
     events: [],
     setEvents: () => {},
     addEvent: () => {},
+    updateEvent: () => {},
+    deleteEvent: () => {},
     groups: [],
     setGroups: () => {},
     addGroup: () => { throw new Error('addGroup function not implemented'); },
@@ -191,8 +195,17 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [conversations, communityMembers]);
 
-    const addEvent = useCallback((event: Event) => {
-        setEvents(prev => [event, ...prev]);
+    const addEvent = useCallback((event: Omit<Event, 'id'>) => {
+        const newEvent = { ...event, id: `event-${Date.now()}`};
+        setEvents(prev => [newEvent, ...prev]);
+    }, []);
+
+    const updateEvent = useCallback((updatedEvent: Event) => {
+        setEvents(prev => prev.map(event => event.id === updatedEvent.id ? updatedEvent : event));
+    }, []);
+    
+    const deleteEvent = useCallback((eventId: string) => {
+        setEvents(prev => prev.filter(event => event.id !== eventId));
     }, []);
 
     const addGroup = useCallback((groupData: Omit<Group, 'id' | 'members' | 'tags'>, adminHandle: string): Group => {
@@ -407,6 +420,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         events,
         setEvents,
         addEvent,
+        updateEvent,
+        deleteEvent,
         groups,
         setGroups,
         addGroup,
