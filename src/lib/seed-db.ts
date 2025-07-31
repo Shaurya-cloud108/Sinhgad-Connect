@@ -2,6 +2,9 @@
 // A script to populate the Firestore database with initial data.
 // To run: `npm run-script seed-db`
 
+import * as dotenv from 'dotenv';
+dotenv.config(); // Load environment variables from .env file
+
 import { db } from './firebase';
 import { collection, writeBatch, doc, serverTimestamp } from 'firebase/firestore';
 import { 
