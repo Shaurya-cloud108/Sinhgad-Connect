@@ -35,6 +35,7 @@ import {
   toggleFollow,
   getNotifications,
   addJobListing as addJobListingFs,
+  addStoryShell,
 } from '@/lib/firebase-services';
 import { serverTimestamp } from 'firebase/firestore';
 
@@ -65,7 +66,7 @@ type AppContextType = {
 
     jobListings: JobListing[];
     setJobListings: React.Dispatch<React.SetStateAction<JobListing[]>>;
-    addJobListing: (job: Omit<JobListing, 'id'>) => void;
+    addJobListing: (job: Omit<JobListing, 'id'>) => Promise<void>;
 
     communityMembers: CommunityMember[];
     setCommunityMembers: React.Dispatch<React.SetStateAction<CommunityMember[]>>;
@@ -73,7 +74,7 @@ type AppContextType = {
 
     feedItems: FeedItem[];
     setFeedItems: React.Dispatch<React.SetStateAction<FeedItem[]>>;
-    addFeedItem: (post: Omit<FeedItem, 'id' | 'createdAt' | 'likes' | 'likedBy' | 'comments'>) => void;
+    addFeedItem: (post: Omit<FeedItem, 'id' | 'createdAt' | 'likes' | 'likedBy' | 'comments'>) => Promise<void>;
     updateFeedItem: (postId: string, data: PostEditFormData) => void;
     deleteFeedItem: (postId: string) => void;
     toggleLike: (postId: string, userId: string) => void;
@@ -85,7 +86,7 @@ type AppContextType = {
     setStories: React.Dispatch<React.SetStateAction<Story[]>>;
     addStoryItem: (userHandle: string, item: StoryItem) => void;
     deleteStoryItem: (userHandle: string, itemId: number) => void;
-    addStoryForUser: (user: CommunityMember) => void;
+    addStoryForUser: (user: CommunityMember) => Promise<void>;
 
     successStories: SuccessStory[];
     setSuccessStories: React.Dispatch<React.SetStateAction<SuccessStory[]>>;
@@ -112,13 +113,13 @@ export const AppContext = createContext<AppContextType>({
     leaveGroup: () => {},
     jobListings: [],
     setJobListings: () => {},
-    addJobListing: () => {},
+    addJobListing: async () => {},
     communityMembers: [],
     setCommunityMembers: () => {},
     handleFollowToggle: () => {},
     feedItems: [],
     setFeedItems: () => {},
-    addFeedItem: () => {},
+    addFeedItem: async () => {},
     updateFeedItem: () => {},
     deleteFeedItem: () => {},
     toggleLike: () => {},
@@ -128,7 +129,7 @@ export const AppContext = createContext<AppContextType>({
     setStories: () => {},
     addStoryItem: () => {},
     deleteStoryItem: () => {},
-    addStoryForUser: () => {},
+    addStoryForUser: async () => {},
     successStories: [],
     setSuccessStories: () => {},
     notifications: [],
@@ -288,21 +289,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const addJobListing = useCallback(async (job: Omit<JobListing, 'id'>) => {
         const newDocId = await addJobListingFs(job);
-        const newJob = { ...job, id: newDocId };
+        const newJob: JobListing = { ...job, id: newDocId };
         setJobListings(prev => [newJob, ...prev]);
     }, []);
 
     const addFeedItem = useCallback(async (post: Omit<FeedItem, 'id' | 'createdAt' | 'likes' | 'likedBy' | 'comments'>) => {
-        const newPostForState: FeedItem = {
-            ...post,
-            id: `temp-${Date.now()}`,
-            createdAt: new Date(),
-            likes: 0,
-            likedBy: [],
-            comments: [],
-        };
-        setFeedItems(prev => [newPostForState, ...prev]);
-    
         const newPostData = {
             ...post,
             createdAt: serverTimestamp(),
@@ -311,7 +302,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             comments: [],
         };
         const newPostId = await addFeedItemFs(newPostData);
-        setFeedItems(prev => prev.map(item => item.id === newPostForState.id ? { ...item, id: newPostId } : item));
+        const finalPost: FeedItem = {
+            ...newPostData,
+            id: newPostId,
+            createdAt: new Date(), // Use local date for immediate feedback
+        }
+        setFeedItems(prev => [finalPost, ...prev]);
     }, []);
 
     const updateFeedItem = useCallback(async (postId: string, data: PostEditFormData) => {
@@ -429,7 +425,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         }));
     }, []);
 
-    const addStoryForUser = useCallback((user: CommunityMember) => {
+    const addStoryForUser = useCallback(async (user: CommunityMember) => {
         const newStory: Story = {
             id: Date.now(),
             author: {
@@ -442,6 +438,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             viewers: [],
         };
         setStories(prev => [...prev, newStory]);
+        await addStoryShell(newStory);
     }, []);
 
     const value = {

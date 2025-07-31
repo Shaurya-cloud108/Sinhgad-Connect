@@ -1,5 +1,6 @@
 
-import { db } from './firebase';
+
+import { db, auth } from './firebase';
 import {
   collection,
   getDocs,
@@ -7,6 +8,7 @@ import {
   updateDoc,
   deleteDoc,
   doc,
+  setDoc,
   query,
   orderBy,
   serverTimestamp,
@@ -15,6 +17,7 @@ import {
   getDoc,
   runTransaction,
 } from 'firebase/firestore';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import type { FeedItem, Comment, CommunityMember, JobListing, Event, Group, SuccessStory, Notification } from './data';
 import type { PostEditFormData } from '@/components/edit-post-dialog';
 
@@ -34,14 +37,13 @@ export const getFeedItems = async (): Promise<FeedItem[]> => {
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FeedItem));
 };
 
-export const addFeedItem = async (item: Omit<FeedItem, 'id' | 'createdAt'>) => {
+export const addFeedItem = async (item: Omit<FeedItem, 'id'>) => {
   const itemData: any = { ...item };
   if (itemData.groupId === undefined) {
     delete itemData.groupId;
   }
   const docRef = await addDoc(feedItemsCollection, {
     ...itemData,
-    createdAt: serverTimestamp(),
   });
   return docRef.id;
 };
@@ -99,6 +101,15 @@ export const getCommunityMembers = async (): Promise<CommunityMember[]> => {
     return snapshot.docs.map(doc => ({ ...doc.data(), handle: doc.id } as CommunityMember));
 };
 
+export const addCommunityMember = async (member: CommunityMember, password: string): Promise<void> => {
+    // Create user in Firebase Authentication
+    await createUserWithEmailAndPassword(auth, member.contact.email, password);
+
+    // Create user profile document in Firestore
+    const docRef = doc(communityMembersCollection, member.handle);
+    await setDoc(docRef, member);
+};
+
 export const toggleFollow = async (currentUserHandle: string, targetUserHandle: string, isFollowing: boolean) => {
     const currentUserRef = doc(db, 'communityMembers', currentUserHandle);
     const targetUserRef = doc(db, 'communityMembers', targetUserHandle);
@@ -152,4 +163,10 @@ export const getNotifications = async (): Promise<Notification[]> => {
     const q = query(notificationsCollection); // Can be ordered by a timestamp later
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Notification));
+};
+
+// Story Services
+export const addStoryShell = async (story: any) => {
+    const docRef = doc(db, 'stories', story.author.handle);
+    await setDoc(docRef, story);
 };

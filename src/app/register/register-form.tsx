@@ -30,6 +30,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AppContext } from "@/context/AppContext";
 import { ProfileContext } from "@/context/ProfileContext";
 import { CommunityMember } from "@/lib/data";
+import { addCommunityMember } from "@/lib/firebase-services";
 
 
 const formSchema = z.object({
@@ -58,7 +59,7 @@ const degreeMap: { [key: string]: string } = {
 export function RegisterForm() {
   const { toast } = useToast();
   const router = useRouter();
-  const { setCommunityMembers, addStoryForUser } = useContext(AppContext);
+  const { setCommunityMembers, addStoryForUser, communityMembers } = useContext(AppContext);
   const { setLoggedInUserHandle } = useContext(ProfileContext);
 
   const [role, setRole] = useState("student");
@@ -77,9 +78,30 @@ export function RegisterForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    const userHandle = values.fullName.toLowerCase().replace(/\s+/g, '-') + `-${String(values.graduationYear).slice(-2)}`;
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     
+    // Check if email or handle already exists
+    const emailExists = communityMembers.some(m => m.contact.email === values.email);
+    if (emailExists) {
+        toast({
+            variant: "destructive",
+            title: "Registration Failed",
+            description: "An account with this email address already exists.",
+        });
+        return;
+    }
+    
+    const userHandle = values.fullName.toLowerCase().replace(/\s+/g, '-') + `-${String(values.graduationYear).slice(-2)}`;
+    const handleExists = communityMembers.some(m => m.handle === userHandle);
+    if(handleExists) {
+        toast({
+            variant: "destructive",
+            title: "Registration Failed",
+            description: "A user with a very similar name and graduation year already exists. Please contact support if you believe this is an error.",
+        });
+        return;
+    }
+
     const newUser: CommunityMember = {
         name: values.fullName,
         handle: userHandle,
@@ -112,21 +134,32 @@ export function RegisterForm() {
         contact: { email: values.email }
     };
 
-    // Add new user to the local state for immediate UI update
-    setCommunityMembers(prev => [...prev, newUser]);
-    
-    // Add a story placeholder for the new user
-    addStoryForUser(newUser);
+    try {
+        await addCommunityMember(newUser, values.password);
 
-    // "Log in" the new user
-    setLoggedInUserHandle(newUser.handle);
-    
-    toast({
-      title: "Registration Successful!",
-      description: `Welcome to the community, ${values.fullName}!`,
-    });
-    
-    router.push(`/profile/${newUser.handle}`);
+        // Add new user to the local state for immediate UI update
+        setCommunityMembers(prev => [...prev, newUser]);
+        
+        // Add a story placeholder for the new user
+        await addStoryForUser(newUser);
+
+        // "Log in" the new user
+        setLoggedInUserHandle(newUser.handle);
+        
+        toast({
+          title: "Registration Successful!",
+          description: `Welcome to the community, ${values.fullName}!`,
+        });
+        
+        router.push(`/profile/${newUser.handle}`);
+    } catch (error: any) {
+        console.error("Registration error:", error);
+        toast({
+            variant: "destructive",
+            title: "Registration Failed",
+            description: error.message || "An unexpected error occurred. Please try again.",
+        });
+    }
   }
 
   return (
