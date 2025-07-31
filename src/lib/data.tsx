@@ -502,7 +502,7 @@ const initialFeedItemsData: Omit<FeedItem, 'id' | 'createdAt'>[] = [
   }
 ];
 
-const initialFeedItems: FeedItem[] = initialFeedItemsData.map((item, index) => ({
+export const initialFeedItems: FeedItem[] = initialFeedItemsData.map((item, index) => ({
   ...item,
   id: `post-${index + 1}`,
   createdAt: new Date(Date.now() - index * 1000 * 60 * 60 * 24).toISOString(), // Simulate posts over last few days
@@ -971,5 +971,3 @@ export const initialNotifications: Notification[] = [
         aiHint: "briefcase icon"
     },
 ];
-
-    
