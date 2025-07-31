@@ -16,6 +16,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -27,7 +28,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useRef } from "react";
 import Image from "next/image";
-import { X, Calendar as CalendarIcon, Upload } from "lucide-react";
+import { X, Calendar as CalendarIcon, Upload, Link as LinkIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
@@ -42,6 +43,7 @@ const postEventSchema = z.object({
   }),
   description: z.string().min(20, "Description must be at least 20 characters long."),
   image: z.string().optional(),
+  registrationUrl: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
 });
 
 export type EventFormData = z.infer<typeof postEventSchema>;
@@ -63,6 +65,7 @@ export function PostEventDialog({ open, onOpenChange, onEventSubmit }: PostEvent
       title: "",
       location: "",
       description: "",
+      registrationUrl: "",
     },
   });
 
@@ -181,6 +184,22 @@ export function PostEventDialog({ open, onOpenChange, onEventSubmit }: PostEvent
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="registrationUrl"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Registration URL (Optional)</FormLabel>
+                        <FormControl>
+                            <div className="relative">
+                                <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input placeholder="https://forms.gle/your-event" {...field} className="pl-10" />
+                            </div>
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )}
+                />
               <div>
                   <FormLabel>Event Image (Optional)</FormLabel>
                   {imagePreview ? (

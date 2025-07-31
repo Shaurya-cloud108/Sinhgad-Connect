@@ -1,4 +1,5 @@
 
+
 "use client";
 
 // This file contains all the mock data for the application.
@@ -127,6 +128,7 @@ export type Event = {
   description: string;
   image: string;
   aiHint: string;
+  registrationUrl?: string;
 };
 
 export const initialEvents: Event[] = [
@@ -137,7 +139,8 @@ export const initialEvents: Event[] = [
     location: "College Auditorium, Pune",
     description: "The flagship event of the year! Reconnect with old friends, network with peers, and relive your college days.",
     image: "https://placehold.co/600x400.png",
-    aiHint: "people networking"
+    aiHint: "people networking",
+    registrationUrl: "https://forms.gle/example",
   },
   {
     id: "tech-talk-ai",
@@ -146,7 +149,8 @@ export const initialEvents: Event[] = [
     location: "Virtual Event (Zoom)",
     description: "Join us for an insightful session with industry experts on the future of Artificial Intelligence.",
     image: "https://placehold.co/600x400.png",
-    aiHint: "technology conference"
+    aiHint: "technology conference",
+    registrationUrl: "https://forms.gle/example",
   },
   {
     id: "reunion-2014",

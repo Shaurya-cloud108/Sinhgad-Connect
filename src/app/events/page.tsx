@@ -19,6 +19,7 @@ import type { Event } from "@/lib/data.tsx";
 import { format } from "date-fns";
 import { AppContext } from "@/context/AppContext";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 export default function EventsPage() {
   const { events, addEvent } = useContext(AppContext);
@@ -49,7 +50,8 @@ export default function EventsPage() {
       location: data.location,
       description: data.description,
       image: data.image || "https://placehold.co/600x400.png",
-      aiHint: "community event"
+      aiHint: "community event",
+      registrationUrl: data.registrationUrl,
     };
     addEvent(newEvent);
   };
@@ -93,9 +95,17 @@ export default function EventsPage() {
               <CardDescription>{event.description}</CardDescription>
             </CardContent>
             <CardFooter className="gap-2">
-              <Button className="w-full">
-                <Users className="mr-2 h-4 w-4" /> Register Now
-              </Button>
+                <Button className="w-full" asChild={!!event.registrationUrl} disabled={!event.registrationUrl}>
+                  {event.registrationUrl ? (
+                    <a href={event.registrationUrl} target="_blank" rel="noopener noreferrer" className="flex items-center">
+                      <Users className="mr-2 h-4 w-4" /> Register Now
+                    </a>
+                  ) : (
+                    <div className="flex items-center">
+                      <Users className="mr-2 h-4 w-4" /> Register Now
+                    </div>
+                  )}
+                </Button>
               <ShareDialog contentType="event" contentId={event.id}>
                 <Button variant="outline" size="icon">
                     <Send className="h-4 w-4"/>
