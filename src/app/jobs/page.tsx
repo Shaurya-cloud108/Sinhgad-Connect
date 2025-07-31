@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Briefcase, MapPin, PlusCircle, ExternalLink, Send } from "lucide-react";
+import { Briefcase, MapPin, PlusCircle, ExternalLink, Send, MoreHorizontal, Trash2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -29,6 +29,23 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { JobListing } from "@/lib/data.tsx";
 import { ShareDialog } from "@/components/share-dialog";
@@ -42,7 +59,7 @@ function JobsPageContent() {
   const [isPostJobOpen, setIsPostJobOpen] = useState(false);
   const [isViewDetailsOpen, setIsViewDetailsOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<JobListing | null>(null);
-  const { jobListings, addJobListing, communityMembers } = useContext(AppContext);
+  const { jobListings, addJobListing, deleteJobListing, communityMembers } = useContext(AppContext);
   const { profileData } = useContext(ProfileContext);
 
   const [filteredJobListings, setFilteredJobListings] = useState<JobListing[]>(jobListings);
@@ -159,6 +176,7 @@ function JobsPageContent() {
           {filteredJobListings.length > 0 ? (
             filteredJobListings.map((job, index) => {
               const poster = communityMembers.find(m => m.handle === job.postedByHandle);
+              const isOwnPost = profileData?.handle === job.postedByHandle;
               return (
                 <Card key={`${job.id}-${index}`} id={`job-${job.id}`} className="hover:shadow-md transition-shadow">
                   <CardHeader>
@@ -195,6 +213,39 @@ function JobsPageContent() {
                             </Button>
                         </ShareDialog>
                         <Button onClick={() => handleViewDetails(job)}>View Details</Button>
+                        {isOwnPost && (
+                           <AlertDialog>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <AlertDialogTrigger asChild>
+                                    <DropdownMenuItem className="text-destructive cursor-pointer">
+                                      <Trash2 className="mr-2 h-4 w-4" />
+                                      Delete Post
+                                    </DropdownMenuItem>
+                                  </AlertDialogTrigger>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This action cannot be undone. This will permanently delete this job listing.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => deleteJobListing(job.id)}>
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                           </AlertDialog>
+                        )}
                     </div>
                   </CardFooter>
                 </Card>

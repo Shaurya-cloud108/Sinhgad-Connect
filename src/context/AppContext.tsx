@@ -60,6 +60,7 @@ type AppContextType = {
     jobListings: JobListing[];
     setJobListings: React.Dispatch<React.SetStateAction<JobListing[]>>;
     addJobListing: (job: Omit<JobListing, 'id'>) => void;
+    deleteJobListing: (jobId: string) => void;
 
     communityMembers: CommunityMember[];
     setCommunityMembers: React.Dispatch<React.SetStateAction<CommunityMember[]>>;
@@ -106,6 +107,7 @@ export const AppContext = createContext<AppContextType>({
     jobListings: [],
     setJobListings: () => {},
     addJobListing: () => {},
+    deleteJobListing: () => {},
     communityMembers: [],
     setCommunityMembers: () => {},
     handleFollowToggle: () => {},
@@ -252,6 +254,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const addJobListing = useCallback((job: Omit<JobListing, 'id'>) => {
         const newJob: JobListing = { ...job, id: `job-${Date.now()}` };
         setJobListings(prev => [newJob, ...prev]);
+    }, []);
+
+    const deleteJobListing = useCallback((jobId: string) => {
+        setJobListings(prev => prev.filter(job => job.id !== jobId));
     }, []);
 
     const addFeedItem = useCallback((post: Omit<FeedItem, 'id' | 'createdAt' | 'likes' | 'likedBy' | 'comments'>) => {
@@ -409,6 +415,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         jobListings,
         setJobListings,
         addJobListing,
+        deleteJobListing,
         communityMembers,
         setCommunityMembers,
         handleFollowToggle,
