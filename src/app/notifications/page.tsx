@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserPlus, MessageSquare, CalendarCheck, Briefcase, Heart, MessageCircle } from "lucide-react";
 import type { Notification } from "@/lib/data.tsx";
-import { communityMembers } from "@/lib/data-seed";
+import { initialCommunityMembers } from "@/lib/data-seed";
 import Link from "next/link";
 import { AppContext } from "@/context/AppContext";
 import { useContext } from "react";
@@ -33,7 +33,7 @@ const NotificationIcon = ({ type }: { type: Notification['type'] }) => {
 }
 
 const renderNotificationText = (notification: Notification) => {
-    const member = communityMembers.find(m => m.name === notification.userName);
+    const member = initialCommunityMembers.find(m => m.name === notification.userName);
     const userLink = member ? (
         <Link href={`/profile/${member.handle}`} className="font-bold hover:underline">{notification.userName}</Link>
     ) : (
