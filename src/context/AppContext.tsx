@@ -292,6 +292,16 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }, []);
 
     const addFeedItem = useCallback(async (post: Omit<FeedItem, 'id' | 'createdAt' | 'likes' | 'likedBy' | 'comments'>) => {
+        const newPostForState: FeedItem = {
+            ...post,
+            id: `temp-${Date.now()}`,
+            createdAt: new Date(),
+            likes: 0,
+            likedBy: [],
+            comments: [],
+        };
+        setFeedItems(prev => [newPostForState, ...prev]);
+    
         const newPostData = {
             ...post,
             createdAt: serverTimestamp(),
@@ -300,7 +310,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             comments: [],
         };
         const newPostId = await addFeedItemFs(newPostData);
-        setFeedItems(prev => [{ ...newPostData, id: newPostId }, ...prev]);
+        setFeedItems(prev => prev.map(item => item.id === newPostForState.id ? { ...item, id: newPostId } : item));
     }, []);
 
     const updateFeedItem = useCallback(async (postId: string, data: PostEditFormData) => {
@@ -480,3 +490,5 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         </AppContext.Provider>
     );
 };
+
+  
