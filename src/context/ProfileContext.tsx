@@ -20,23 +20,25 @@ export const ProfileContext = createContext<ProfileContextType>({
     setCommunityMembers: () => {},
 });
 
-const MOCK_LOGGED_IN_USER_HANDLE = 'priya-sharma';
-
 export const ProfileProvider = ({ children }: { children: ReactNode }) => {
-    const [loggedInUserHandle, setLoggedInUserHandle] = useState<string | null>(null);
+    const [loggedInUserHandle, setLoggedInUserHandle] = useState<string | null>(() => {
+        // On initial load, try to get the user from localStorage.
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem('loggedInUserHandle');
+        }
+        return null;
+    });
     const { communityMembers, setCommunityMembers } = useContext(AppContext);
     const router = useRouter();
 
      useEffect(() => {
-        // In a real app, this would be determined by an auth session.
-        // For this prototype, we'll set a default logged-in user.
-        if (communityMembers.length > 0) {
-            const userExists = communityMembers.some(m => m.handle === MOCK_LOGGED_IN_USER_HANDLE);
-            if (userExists) {
-                setLoggedInUserHandle(MOCK_LOGGED_IN_USER_HANDLE);
-            }
+        // When loggedInUserHandle changes, update localStorage.
+        if (loggedInUserHandle) {
+            localStorage.setItem('loggedInUserHandle', loggedInUserHandle);
+        } else {
+            localStorage.removeItem('loggedInUserHandle');
         }
-    }, [communityMembers]);
+    }, [loggedInUserHandle]);
 
     const profileData = useMemo(() => {
         if (!loggedInUserHandle) return null;
