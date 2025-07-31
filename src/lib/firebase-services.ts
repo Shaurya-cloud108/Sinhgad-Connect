@@ -35,8 +35,12 @@ export const getFeedItems = async (): Promise<FeedItem[]> => {
 };
 
 export const addFeedItem = async (item: Omit<FeedItem, 'id' | 'createdAt'>) => {
+  const itemData: any = { ...item };
+  if (itemData.groupId === undefined) {
+    delete itemData.groupId;
+  }
   const docRef = await addDoc(feedItemsCollection, {
-    ...item,
+    ...itemData,
     createdAt: serverTimestamp(),
   });
   return docRef.id;
