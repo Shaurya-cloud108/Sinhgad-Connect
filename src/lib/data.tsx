@@ -179,6 +179,7 @@ export type JobListing = {
   postedByHandle: string;
   description: string;
   applicationUrl?: string;
+  status: 'open' | 'closed';
 };
 
 export const initialJobListings: JobListing[] = [
@@ -193,6 +194,7 @@ export const initialJobListings: JobListing[] = [
     postedByHandle: "sunita-narayan",
     description: "Innovate Inc. is seeking a passionate Senior Frontend Engineer to build and scale our next-generation sustainable tech products. You will work with a modern tech stack and a talented team to create beautiful, responsive, and high-performance web applications.",
     applicationUrl: "https://careers.example.com/job/123",
+    status: 'open',
   },
   {
     id: "2",
@@ -205,6 +207,7 @@ export const initialJobListings: JobListing[] = [
     postedByHandle: "rohan-verma",
     description: "Join DataDriven Co. and help us solve complex problems with data. As a Data Scientist, you will be responsible for designing and implementing machine learning models, performing statistical analysis, and communicating insights to stakeholders.",
     applicationUrl: "https://careers.example.com/job/124",
+    status: 'open',
   },
   {
     id: "3",
@@ -215,7 +218,8 @@ export const initialJobListings: JobListing[] = [
     tags: ["Agile", "Roadmap", "UX"],
     postedBy: "Anjali Mehta '15",
     postedByHandle: "anjali-mehta",
-    description: "Connectify is looking for a user-centric Product Manager to lead our product strategy and roadmap. You will work closely with engineering, design, and marketing to deliver products that our users love."
+    description: "Connectify is looking for a user-centric Product Manager to lead our product strategy and roadmap. You will work closely with engineering, design, and marketing to deliver products that our users love.",
+    status: 'closed',
   },
   {
     id: "4",
@@ -228,6 +232,7 @@ export const initialJobListings: JobListing[] = [
     postedByHandle: "alumni-network",
     description: "We are looking for a talented UX/UI Designer to create amazing user experiences. The ideal candidate will have a strong portfolio of design projects and be proficient in Figma, user research, and prototyping.",
     applicationUrl: "https://careers.example.com/job/125",
+    status: 'open',
   },
   {
     id: "5",
@@ -238,7 +243,8 @@ export const initialJobListings: JobListing[] = [
     tags: ["AWS", "Kubernetes", "CI/CD"],
     postedBy: "Vikram Singh '08",
     postedByHandle: "vikram-singh",
-    description: "CloudLeap is hiring a DevOps Engineer to manage and improve our cloud infrastructure. You will be responsible for our CI/CD pipelines, automation, and ensuring the reliability and scalability of our systems."
+    description: "CloudLeap is hiring a DevOps Engineer to manage and improve our cloud infrastructure. You will be responsible for our CI/CD pipelines, automation, and ensuring the reliability and scalability of our systems.",
+    status: 'open',
   },
   {
     id: "6",
@@ -251,6 +257,7 @@ export const initialJobListings: JobListing[] = [
     postedByHandle: "alumni-network",
     description: "Gain hands-on experience in digital marketing with GrowthX! This internship will give you exposure to social media marketing, SEO, content creation, and campaign analysis. A great opportunity for aspiring marketers.",
     applicationUrl: "https://careers.example.com/job/126",
+    status: 'open',
   },
 ];
 
@@ -971,3 +978,4 @@ export const initialNotifications: Notification[] = [
         aiHint: "briefcase icon"
     },
 ];
+

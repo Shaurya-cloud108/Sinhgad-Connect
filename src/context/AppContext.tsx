@@ -59,7 +59,7 @@ type AppContextType = {
 
     jobListings: JobListing[];
     setJobListings: React.Dispatch<React.SetStateAction<JobListing[]>>;
-    addJobListing: (job: Omit<JobListing, 'id'>) => void;
+    addJobListing: (job: Omit<JobListing, 'id' | 'status'>) => void;
     deleteJobListing: (jobId: string) => void;
 
     communityMembers: CommunityMember[];
@@ -251,8 +251,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       }));
     }, []);
 
-    const addJobListing = useCallback((job: Omit<JobListing, 'id'>) => {
-        const newJob: JobListing = { ...job, id: `job-${Date.now()}` };
+    const addJobListing = useCallback((job: Omit<JobListing, 'id' | 'status'>) => {
+        const newJob: JobListing = { ...job, id: `job-${Date.now()}`, status: 'open' };
         setJobListings(prev => [newJob, ...prev]);
     }, []);
 

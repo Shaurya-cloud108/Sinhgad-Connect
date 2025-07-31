@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Briefcase, MapPin, PlusCircle, ExternalLink, Send, MoreHorizontal, Trash2 } from "lucide-react";
+import { Briefcase, MapPin, PlusCircle, ExternalLink, Send, MoreHorizontal, Trash2, XCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -45,6 +45,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { JobListing } from "@/lib/data.tsx";
@@ -54,13 +55,15 @@ import { AppContext } from "@/context/AppContext";
 import { ProfileContext } from "@/context/ProfileContext";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 
 function JobsPageContent() {
   const [isPostJobOpen, setIsPostJobOpen] = useState(false);
   const [isViewDetailsOpen, setIsViewDetailsOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<JobListing | null>(null);
-  const { jobListings, addJobListing, deleteJobListing, communityMembers } = useContext(AppContext);
+  const { jobListings, addJobListing, deleteJobListing, setJobListings, communityMembers } = useContext(AppContext);
   const { profileData } = useContext(ProfileContext);
+  const { toast } = useToast();
 
   const [filteredJobListings, setFilteredJobListings] = useState<JobListing[]>(jobListings);
 
@@ -104,7 +107,7 @@ function JobsPageContent() {
     }
   }, [searchParams]);
 
-  function handleJobSubmit(values: Omit<JobListing, 'id' | 'postedBy' | 'postedByHandle'>) {
+  function handleJobSubmit(values: Omit<JobListing, 'id' | 'postedBy' | 'postedByHandle' | 'status'>) {
     if (!profileData) return;
     const primaryEducation = profileData.education.find(e => e.graduationYear);
     const gradYearSuffix = primaryEducation?.graduationYear ? `'${primaryEducation.graduationYear.toString().slice(-2)}` : '';
@@ -113,6 +116,26 @@ function JobsPageContent() {
         ...values,
         postedBy: `${profileData.name} ${gradYearSuffix}`.trim(),
         postedByHandle: profileData.handle
+    });
+  }
+
+  const handleCloseJob = (jobId: string) => {
+    setJobListings(prev => prev.map(job => 
+      job.id === jobId ? { ...job, status: 'closed' } : job
+    ));
+    toast({
+        title: "Job Closed",
+        description: "The job listing is now closed to new applications.",
+    });
+  };
+
+  const handleOpenJob = (jobId: string) => {
+    setJobListings(prev => prev.map(job => 
+      job.id === jobId ? { ...job, status: 'open' } : job
+    ));
+    toast({
+        title: "Job Re-opened",
+        description: "The job listing is now open for applications again.",
     });
   }
 
@@ -212,7 +235,13 @@ function JobsPageContent() {
                                 <Send className="h-4 w-4" />
                             </Button>
                         </ShareDialog>
-                        <Button onClick={() => handleViewDetails(job)}>View Details</Button>
+
+                        {job.status === 'closed' ? (
+                            <Button disabled variant="outline">Applications Closed</Button>
+                        ) : (
+                            <Button onClick={() => handleViewDetails(job)}>View Details</Button>
+                        )}
+                        
                         {isOwnPost && (
                            <AlertDialog>
                               <DropdownMenu>
@@ -222,6 +251,17 @@ function JobsPageContent() {
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
+                                  {job.status === 'open' ? (
+                                    <DropdownMenuItem onSelect={() => handleCloseJob(job.id)}>
+                                        <XCircle className="mr-2 h-4 w-4" /> Close Job
+                                    </DropdownMenuItem>
+                                  ) : (
+                                    <DropdownMenuItem onSelect={() => handleOpenJob(job.id)}>
+                                        <PlusCircle className="mr-2 h-4 w-4" /> Re-open Job
+                                    </DropdownMenuItem>
+                                  )}
+
+                                  <DropdownMenuSeparator />
                                   <AlertDialogTrigger asChild>
                                     <DropdownMenuItem className="text-destructive cursor-pointer">
                                       <Trash2 className="mr-2 h-4 w-4" />
@@ -285,13 +325,15 @@ function JobsPageContent() {
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsViewDetailsOpen(false)}>Close</Button>
-                         {selectedJob.applicationUrl && (
+                         {selectedJob.status === 'closed' ? (
+                            <Button disabled>Applications Closed</Button>
+                         ) : selectedJob.applicationUrl ? (
                           <Button asChild>
                             <a href={selectedJob.applicationUrl} target="_blank" rel="noopener noreferrer">
                               Explore <ExternalLink className="ml-2 h-4 w-4" />
                             </a>
                           </Button>
-                        )}
+                        ) : null}
                     </DialogFooter>
                 </>
             )}
@@ -329,3 +371,4 @@ export default function JobsPage() {
 
   return <JobsPageContent />;
 }
+

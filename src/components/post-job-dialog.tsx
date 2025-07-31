@@ -49,7 +49,7 @@ const postJobSchema = z.object({
 type PostJobDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onJobSubmit: (job: Omit<JobListing, 'id' | 'postedBy' | 'postedByHandle'>) => void;
+  onJobSubmit: (job: Omit<JobListing, 'id' | 'postedBy' | 'postedByHandle' | 'status'>) => void;
 };
 
 export function PostJobDialog({ open, onOpenChange, onJobSubmit }: PostJobDialogProps) {
