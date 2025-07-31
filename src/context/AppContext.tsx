@@ -10,34 +10,27 @@ import type {
     FeedItem,
     Story,
     Message,
-    StoryItem,
     Event,
     Group,
     Comment,
     SuccessStory,
     Notification,
+    StoryItem,
+} from '@/lib/data';
+import { 
+    initialConversations, 
+    initialMessages,
+    initialJobListings,
+    initialCommunityMembers,
+    initialFeedItems,
+    initialStories,
+    initialEvents,
+    initialGroups,
+    initialSuccessStories,
+    initialNotifications,
 } from '@/lib/data';
 import { ProfileContext } from './ProfileContext';
 import { PostEditFormData } from '@/components/edit-post-dialog';
-import {
-  addFeedItem as addFeedItemFs,
-  getFeedItems,
-  updateFeedItem as updateFeedItemFs,
-  deleteFeedItem as deleteFeedItemFs,
-  toggleLike as toggleLikeFs,
-  addComment as addCommentFs,
-  deleteComment as deleteCommentFs,
-  getCommunityMembers,
-  getEvents,
-  getGroups,
-  getJobListings,
-  getSuccessStories,
-  toggleFollow,
-  getNotifications,
-  addJobListing as addJobListingFs,
-  addStoryShell,
-} from '@/lib/firebase-services';
-import { serverTimestamp } from 'firebase/firestore';
 
 
 // Types
@@ -66,7 +59,7 @@ type AppContextType = {
 
     jobListings: JobListing[];
     setJobListings: React.Dispatch<React.SetStateAction<JobListing[]>>;
-    addJobListing: (job: Omit<JobListing, 'id'>) => Promise<void>;
+    addJobListing: (job: Omit<JobListing, 'id'>) => void;
 
     communityMembers: CommunityMember[];
     setCommunityMembers: React.Dispatch<React.SetStateAction<CommunityMember[]>>;
@@ -74,19 +67,18 @@ type AppContextType = {
 
     feedItems: FeedItem[];
     setFeedItems: React.Dispatch<React.SetStateAction<FeedItem[]>>;
-    addFeedItem: (post: Omit<FeedItem, 'id' | 'createdAt' | 'likes' | 'likedBy' | 'comments'>) => Promise<void>;
+    addFeedItem: (post: Omit<FeedItem, 'id' | 'createdAt' | 'likes' | 'likedBy' | 'comments'>) => void;
     updateFeedItem: (postId: string, data: PostEditFormData) => void;
     deleteFeedItem: (postId: string) => void;
     toggleLike: (postId: string, userId: string) => void;
     addComment: (postId: string, comment: Omit<Comment, 'id'>) => void;
     deleteComment: (postId: string, commentId: number) => void;
 
-
     stories: Story[];
     setStories: React.Dispatch<React.SetStateAction<Story[]>>;
+    addStoryForUser: (user: CommunityMember) => void;
     addStoryItem: (userHandle: string, item: StoryItem) => void;
     deleteStoryItem: (userHandle: string, itemId: number) => void;
-    addStoryForUser: (user: CommunityMember) => Promise<void>;
 
     successStories: SuccessStory[];
     setSuccessStories: React.Dispatch<React.SetStateAction<SuccessStory[]>>;
@@ -113,13 +105,13 @@ export const AppContext = createContext<AppContextType>({
     leaveGroup: () => {},
     jobListings: [],
     setJobListings: () => {},
-    addJobListing: async () => {},
+    addJobListing: () => {},
     communityMembers: [],
     setCommunityMembers: () => {},
     handleFollowToggle: () => {},
     feedItems: [],
     setFeedItems: () => {},
-    addFeedItem: async () => {},
+    addFeedItem: () => {},
     updateFeedItem: () => {},
     deleteFeedItem: () => {},
     toggleLike: () => {},
@@ -127,9 +119,9 @@ export const AppContext = createContext<AppContextType>({
     deleteComment: () => {},
     stories: [],
     setStories: () => {},
+    addStoryForUser: () => {},
     addStoryItem: () => {},
     deleteStoryItem: () => {},
-    addStoryForUser: async () => {},
     successStories: [],
     setSuccessStories: () => {},
     notifications: [],
@@ -139,48 +131,18 @@ export const AppContext = createContext<AppContextType>({
 // Provider
 export const AppProvider = ({ children }: { children: ReactNode }) => {
     const { profileData } = useContext(ProfileContext);
-    const [conversations, setConversations] = useState<Conversation[]>([]);
-    const [messagesData, setMessagesData] = useState<MessagesData>({});
+    const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
+    const [messagesData, setMessagesData] = useState<MessagesData>(initialMessages);
     const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
-    const [events, setEvents] = useState<Event[]>([]);
-    const [groups, setGroups] = useState<Group[]>([]);
-    const [jobListings, setJobListings] = useState<JobListing[]>([]);
-    const [communityMembers, setCommunityMembers] = useState<CommunityMember[]>([]);
-    const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
-    const [stories, setStories] = useState<Story[]>([]);
-    const [successStories, setSuccessStories] = useState<SuccessStory[]>([]);
-    const [notifications, setNotifications] = useState<Notification[]>([]);
-
-    useEffect(() => {
-        const fetchAllData = async () => {
-            const [
-                feedItemsData, 
-                membersData, 
-                groupsData, 
-                eventsData, 
-                jobsData,
-                successStoriesData,
-                notificationsData,
-            ] = await Promise.all([
-                getFeedItems(),
-                getCommunityMembers(),
-                getGroups(),
-                getEvents(),
-                getJobListings(),
-                getSuccessStories(),
-                getNotifications(),
-            ]);
-            setFeedItems(feedItemsData);
-            setCommunityMembers(membersData);
-            setGroups(groupsData);
-            setEvents(eventsData);
-            setJobListings(jobsData);
-            setSuccessStories(successStoriesData);
-            setNotifications(notificationsData);
-        };
-        fetchAllData();
-    }, []);
-
+    const [events, setEvents] = useState<Event[]>(initialEvents);
+    const [groups, setGroups] = useState<Group[]>(initialGroups);
+    const [jobListings, setJobListings] = useState<JobListing[]>(initialJobListings);
+    const [communityMembers, setCommunityMembers] = useState<CommunityMember[]>(initialCommunityMembers);
+    const [feedItems, setFeedItems] = useState<FeedItem[]>(initialFeedItems);
+    const [stories, setStories] = useState<Story[]>(initialStories);
+    const [successStories, setSuccessStories] = useState<SuccessStory[]>(initialSuccessStories);
+    const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
+    
     useEffect(() => {
         if (profileData && groups.length > 0) {
             const userGroupIds = new Set(groups.filter(g => g.members.some(m => m.handle === profileData.handle)).map(g => g.id));
@@ -287,101 +249,104 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       }));
     }, []);
 
-    const addJobListing = useCallback(async (job: Omit<JobListing, 'id'>) => {
-        const newDocId = await addJobListingFs(job);
-        const newJob: JobListing = { ...job, id: newDocId };
+    const addJobListing = useCallback((job: Omit<JobListing, 'id'>) => {
+        const newJob: JobListing = { ...job, id: `job-${Date.now()}` };
         setJobListings(prev => [newJob, ...prev]);
     }, []);
 
-    const addFeedItem = useCallback(async (post: Omit<FeedItem, 'id' | 'createdAt' | 'likes' | 'likedBy' | 'comments'>) => {
-        const newPostData = {
-            ...post,
-            createdAt: serverTimestamp(),
+    const addFeedItem = useCallback((post: Omit<FeedItem, 'id' | 'createdAt' | 'likes' | 'likedBy' | 'comments'>) => {
+        const newPost: FeedItem = {
+            id: `post-${Date.now()}`,
+            createdAt: new Date().toISOString(),
             likes: 0,
             likedBy: [],
             comments: [],
+            ...post
         };
-        const newPostId = await addFeedItemFs(newPostData);
-        const finalPost: FeedItem = {
-            ...newPostData,
-            id: newPostId,
-            createdAt: new Date(), // Use local date for immediate feedback
-        }
-        setFeedItems(prev => [finalPost, ...prev]);
+        setFeedItems(prev => [newPost, ...prev]);
     }, []);
 
-    const updateFeedItem = useCallback(async (postId: string, data: PostEditFormData) => {
-        await updateFeedItemFs(postId, data);
+    const updateFeedItem = useCallback((postId: string, data: PostEditFormData) => {
         setFeedItems(prev => prev.map(item =>
             item.id === postId ? { ...item, content: data.content, location: data.location || undefined } : item
         ));
     }, []);
 
-    const deleteFeedItem = useCallback(async (postId: string) => {
-        await deleteFeedItemFs(postId);
+    const deleteFeedItem = useCallback((postId: string) => {
         setFeedItems(prev => prev.filter(item => item.id !== postId));
     }, []);
 
-    const toggleLike = useCallback(async (postId: string, userHandle: string) => {
-        const item = feedItems.find(i => i.id === postId);
-        if (!item) return;
-        const isLiked = item.likedBy.includes(userHandle);
-
-        setFeedItems(prev => prev.map(i =>
-            i.id === postId
-                ? {
-                    ...i,
-                    likedBy: isLiked ? i.likedBy.filter(h => h !== userHandle) : [...i.likedBy, userHandle],
-                    likes: isLiked ? i.likes - 1 : i.likes + 1,
-                  }
-                : i
-        ));
-        await toggleLikeFs(postId, userHandle, isLiked);
-    }, [feedItems]);
-
-    const addComment = useCallback(async (postId: string, comment: Omit<Comment, 'id'>) => {
-      const newComment = await addCommentFs(postId, comment);
-      setFeedItems(prev => prev.map(item =>
-        item.id === postId
-          ? { ...item, comments: [...item.comments, newComment] }
-          : item
-      ));
+    const toggleLike = useCallback((postId: string, userHandle: string) => {
+        setFeedItems(prev => prev.map(item => {
+            if (item.id === postId) {
+                const isLiked = item.likedBy.includes(userHandle);
+                return {
+                    ...item,
+                    likedBy: isLiked ? item.likedBy.filter(h => h !== userHandle) : [...item.likedBy, userHandle],
+                    likes: isLiked ? item.likes - 1 : item.likes + 1,
+                };
+            }
+            return item;
+        }));
     }, []);
 
-    const deleteComment = useCallback(async (postId: string, commentId: number) => {
-      await deleteCommentFs(postId, commentId);
-      setFeedItems(prev => prev.map(item =>
-        item.id === postId
-          ? { ...item, comments: item.comments.filter(c => c.id !== commentId) }
-          : item
-      ));
+    const addComment = useCallback((postId: string, comment: Omit<Comment, 'id'>) => {
+        setFeedItems(prev => prev.map(item => {
+            if (item.id === postId) {
+                const newComment = { ...comment, id: Date.now() };
+                return { ...item, comments: [...item.comments, newComment] };
+            }
+            return item;
+        }));
     }, []);
 
-    const handleFollowToggle = useCallback(async (targetUserHandle: string) => {
-      if (!profileData) return;
-      const loggedInUserHandle = profileData.handle;
-      const isCurrentlyFollowing = profileData.following.includes(targetUserHandle);
-  
-      setCommunityMembers(prevMembers =>
-        prevMembers.map(member => {
-          if (member.handle === loggedInUserHandle) {
-            const newFollowing = isCurrentlyFollowing
-              ? member.following.filter(h => h !== targetUserHandle)
-              : [...member.following, targetUserHandle];
-            return { ...member, following: newFollowing };
-          }
-          if (member.handle === targetUserHandle) {
-            const newFollowers = isCurrentlyFollowing
-              ? member.followers.filter(h => h !== loggedInUserHandle)
-              : [...member.followers, loggedInUserHandle];
-            return { ...member, followers: newFollowers };
-          }
-          return member;
-        })
-      );
-      
-      await toggleFollow(loggedInUserHandle, targetUserHandle, isCurrentlyFollowing);
+    const deleteComment = useCallback((postId: string, commentId: number) => {
+        setFeedItems(prev => prev.map(item => {
+            if (item.id === postId) {
+                return { ...item, comments: item.comments.filter(c => c.id !== commentId) };
+            }
+            return item;
+        }));
+    }, []);
+
+    const handleFollowToggle = useCallback((targetUserHandle: string) => {
+        if (!profileData) return;
+        const loggedInUserHandle = profileData.handle;
+        const isCurrentlyFollowing = profileData.following.includes(targetUserHandle);
+
+        setCommunityMembers(prevMembers =>
+            prevMembers.map(member => {
+            if (member.handle === loggedInUserHandle) {
+                const newFollowing = isCurrentlyFollowing
+                ? member.following.filter(h => h !== targetUserHandle)
+                : [...member.following, targetUserHandle];
+                return { ...member, following: newFollowing };
+            }
+            if (member.handle === targetUserHandle) {
+                const newFollowers = isCurrentlyFollowing
+                ? member.followers.filter(h => h !== loggedInUserHandle)
+                : [...member.followers, loggedInUserHandle];
+                return { ...member, followers: newFollowers };
+            }
+            return member;
+            })
+        );
     }, [profileData, setCommunityMembers]);
+    
+    const addStoryForUser = useCallback((user: CommunityMember) => {
+        const newStory: Story = {
+            id: Date.now(),
+            author: {
+                name: user.name,
+                avatar: user.avatar,
+                handle: user.handle,
+                aiHint: user.aiHint,
+            },
+            items: [],
+            viewers: [],
+        };
+        setStories(prev => [...prev, newStory]);
+    }, []);
 
     const addStoryItem = useCallback((userHandle: string, item: StoryItem) => {
         setStories(prevStories => {
@@ -425,22 +390,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         }));
     }, []);
 
-    const addStoryForUser = useCallback(async (user: CommunityMember) => {
-        const newStory: Story = {
-            id: Date.now(),
-            author: {
-                name: user.name,
-                avatar: user.avatar,
-                handle: user.handle,
-                aiHint: user.aiHint,
-            },
-            items: [],
-            viewers: [],
-        };
-        setStories(prev => [...prev, newStory]);
-        await addStoryShell(newStory);
-    }, []);
-
     const value = {
         conversations,
         setConversations,
@@ -473,9 +422,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         deleteComment,
         stories,
         setStories,
+        addStoryForUser,
         addStoryItem,
         deleteStoryItem,
-        addStoryForUser,
         successStories,
         setSuccessStories,
         notifications,

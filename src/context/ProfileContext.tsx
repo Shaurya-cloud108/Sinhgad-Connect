@@ -29,7 +29,6 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         return null;
     });
     const { communityMembers, setCommunityMembers } = useContext(AppContext);
-    const router = useRouter();
 
      useEffect(() => {
         // When loggedInUserHandle changes, update localStorage.

@@ -7,8 +7,6 @@ import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { useState, useContext } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
-import { auth } from "@/lib/firebase";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -52,23 +50,15 @@ function ForgotPasswordDialog({ open, onOpenChange }: { open: boolean; onOpenCha
         },
     });
 
-    async function onSubmit(values: z.infer<typeof forgotPasswordSchema>) {
-        try {
-            await sendPasswordResetEmail(auth, values.email);
-            toast({
-                title: "Password Reset Link Sent",
-                description: `If an account exists for ${values.email}, a reset link has been sent.`,
-            });
-            onOpenChange(false);
-            form.reset();
-        } catch (error: any) {
-            console.error("Password reset error:", error);
-            toast({
-                variant: "destructive",
-                title: "Error Sending Reset Email",
-                description: "There was a problem sending the reset email. Please check the address and try again.",
-            });
-        }
+    function onSubmit(values: z.infer<typeof forgotPasswordSchema>) {
+        // This is a mock function for the prototype.
+        // In a real app, you would use Firebase Auth to send a password reset email.
+        toast({
+            title: "Password Reset Link Sent",
+            description: `If an account exists for ${values.email}, a reset link has been sent.`,
+        });
+        onOpenChange(false);
+        form.reset();
     }
     
     return (
@@ -124,37 +114,21 @@ export function LoginForm() {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof loginFormSchema>) {
-    try {
-        const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
-        const user = communityMembers.find(m => m.contact.email === values.email);
+  function onSubmit(values: z.infer<typeof loginFormSchema>) {
+    const user = communityMembers.find(m => m.contact.email === values.email);
 
-        if (user) {
-            setLoggedInUserHandle(user.handle);
-            toast({
-                title: "Login Successful!",
-                description: `Welcome back, ${user.name.split(' ')[0]}!`,
-            });
-            router.push(`/profile/${user.handle}`);
-        } else {
-            // This case might happen if user exists in Firebase Auth but not in our mock DB
-            // In a real app, user profile would be fetched from a database
-            toast({
-                variant: "destructive",
-                title: "Login Failed",
-                description: "Could not find a matching profile for this user.",
-            });
-        }
-    } catch (error: any) {
-        console.error("Login Error:", error.code);
-        let description = "An unknown error occurred. Please try again.";
-        if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-            description = "Invalid email or password. Please check your credentials and try again.";
-        }
+    if (user) {
+        setLoggedInUserHandle(user.handle);
+        toast({
+            title: "Login Successful!",
+            description: `Welcome back, ${user.name.split(' ')[0]}!`,
+        });
+        router.push(`/profile/${user.handle}`);
+    } else {
         toast({
             variant: "destructive",
             title: "Login Failed",
-            description,
+            description: "Invalid email or password. Please try again.",
         });
     }
   }

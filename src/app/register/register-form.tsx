@@ -30,8 +30,6 @@ import { useToast } from "@/hooks/use-toast";
 import { AppContext } from "@/context/AppContext";
 import { ProfileContext } from "@/context/ProfileContext";
 import { CommunityMember } from "@/lib/data";
-import { addCommunityMember } from "@/lib/firebase-services";
-
 
 const formSchema = z.object({
   role: z.enum(["student", "alumni"], { required_error: "Please select your role." }),
@@ -78,7 +76,7 @@ export function RegisterForm() {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: z.infer<typeof formSchema>) {
     
     // Check if email or handle already exists
     const emailExists = communityMembers.some(m => m.contact.email === values.email);
@@ -134,32 +132,21 @@ export function RegisterForm() {
         contact: { email: values.email }
     };
 
-    try {
-        await addCommunityMember(newUser, values.password);
+    // Add new user to the local state for immediate UI update
+    setCommunityMembers(prev => [...prev, newUser]);
+    
+    // Add a story placeholder for the new user
+    addStoryForUser(newUser);
 
-        // Add new user to the local state for immediate UI update
-        setCommunityMembers(prev => [...prev, newUser]);
-        
-        // Add a story placeholder for the new user
-        await addStoryForUser(newUser);
-
-        // "Log in" the new user
-        setLoggedInUserHandle(newUser.handle);
-        
-        toast({
-          title: "Registration Successful!",
-          description: `Welcome to the community, ${values.fullName}!`,
-        });
-        
-        router.push(`/profile/${newUser.handle}`);
-    } catch (error: any) {
-        console.error("Registration error:", error);
-        toast({
-            variant: "destructive",
-            title: "Registration Failed",
-            description: error.message || "An unexpected error occurred. Please try again.",
-        });
-    }
+    // "Log in" the new user
+    setLoggedInUserHandle(newUser.handle);
+    
+    toast({
+      title: "Registration Successful!",
+      description: `Welcome to the community, ${values.fullName}!`,
+    });
+    
+    router.push(`/profile/${newUser.handle}`);
   }
 
   return (

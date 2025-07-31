@@ -406,7 +406,7 @@ export type GroupMember = {
       createdAt: any; // For Firestore timestamp
   }
 
-  export const initialFeedItems: Omit<FeedItem, 'id' | 'createdAt'>[] = [
+  export const initialFeedItemsData: Omit<FeedItem, 'id' | 'createdAt'>[] = [
     {
         author: {
             name: "Sunita Narayan",
@@ -815,7 +815,7 @@ export type GroupMember = {
     },
   ];
   
-  export const initialStories: Story[] = initialCommunityMembers.map((member, index) => ({
+  export const initialStoriesData: Story[] = initialCommunityMembers.map((member, index) => ({
       id: index + 1,
       author: {
           name: member.name,
@@ -828,7 +828,7 @@ export type GroupMember = {
   }));
   
   // Add a demo story item for Rohan Verma
-  const rohanVermaStory = initialStories.find(s => s.author.handle === 'rohan-verma');
+  const rohanVermaStory = initialStoriesData.find(s => s.author.handle === 'rohan-verma');
   if (rohanVermaStory) {
       rohanVermaStory.items.push({
           id: Date.now(),
@@ -901,7 +901,7 @@ export type GroupMember = {
       contentPreview?: string;
   };
   
-  export const initialNotifications: Notification[] = [
+  export const initialNotificationsData: Notification[] = [
       {
           id: '1',
           type: 'like',
@@ -964,4 +964,3 @@ export type GroupMember = {
           aiHint: "briefcase icon"
       },
   ];
-

@@ -1,8 +1,11 @@
 
+
 "use client";
 
-// This file now only contains type definitions. 
-// The initial data has been moved to `data-seed.ts` for database seeding.
+import { initialCommunityMembers, initialFeedItems, initialConversations, initialMessages, initialEvents, initialGroups, initialStories, initialSuccessStories, initialNotifications } from './data-seed';
+
+// This file now only contains type definitions and exports the initial data.
+// The data itself is defined in `data-seed.ts`.
 
 export type GroupMember = {
   handle: string;
@@ -38,7 +41,7 @@ export type Event = {
 };
 
 export type JobListing = {
-  id: string; // Changed to string for Firestore consistency
+  id: string;
   title: string;
   company: string;
   location: string;
@@ -117,7 +120,7 @@ export type FeedItem = {
     likedBy: string[];
     comments: Comment[];
     groupId?: string;
-    createdAt: any; // For Firestore timestamp
+    createdAt: any;
 }
 
 export type EducationEntry = {
@@ -138,8 +141,8 @@ export type CommunityMember = {
     industry: string;
     company: string;
     location: string;
-    followers: string[]; // Array of user handles
-    following: string[]; // Array of user handles
+    followers: string[];
+    following: string[];
     aiHint: string;
     handle: string;
     banner: string;
@@ -160,7 +163,7 @@ export type CommunityMember = {
         email: string;
         website?: string;
     };
-    groups?: string[]; // Array of group IDs
+    groups?: string[];
 };
 
 export type ProfileData = CommunityMember;
@@ -207,4 +210,24 @@ export type Notification = {
     contentPreview?: string;
 };
 
-  
+const initialFeedItems: FeedItem[] = initialFeedItemsData.map((item, index) => ({
+  ...item,
+  id: `post-${index + 1}`,
+  createdAt: new Date(Date.now() - index * 1000 * 60 * 60 * 24).toISOString(), // Simulate posts over last few days
+}));
+
+const initialStories: Story[] = initialStoriesData;
+const initialEvents: Event[] = initialEventsData;
+const initialGroups: Group[] = initialGroupsData;
+
+export {
+  initialCommunityMembers,
+  initialFeedItems,
+  initialConversations,
+  initialMessages,
+  initialEvents,
+  initialGroups,
+  initialStories,
+  initialSuccessStories,
+  initialNotifications,
+};
