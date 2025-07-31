@@ -395,10 +395,13 @@ function HomePageContent() {
     addJobListing, 
     stories, 
     feedItems,
-    setFeedItems,
+    deleteFeedItem,
     updateFeedItem,
+    toggleLike,
+    addComment,
+    deleteComment,
   } = useContext(AppContext);
-  const [activeCommentPostId, setActiveCommentPostId] = useState<number | null>(null);
+  const [activeCommentPostId, setActiveCommentPostId] = useState<string | null>(null);
   const [postToEdit, setPostToEdit] = useState<FeedItem | null>(null);
   
   const searchParams = useSearchParams();
@@ -406,7 +409,6 @@ function HomePageContent() {
   const storiesForFeed = useMemo(() => {
     if (!profileData) return [];
     
-    // Filter stories to only include the user's own story and stories from people they follow
     const followedHandles = new Set(profileData.following);
     const filteredStories = stories.filter(story => {
       const handle = story.author.handle;
@@ -414,13 +416,11 @@ function HomePageContent() {
       return (handle === profileData.handle) || (followedHandles.has(handle) && hasActiveStory);
     });
 
-    // Ensure the user's story is always first
     const myStoryIndex = filteredStories.findIndex(story => story.author.handle === profileData.handle);
     if (myStoryIndex > 0) {
       const [myStory] = filteredStories.splice(myStoryIndex, 1);
       filteredStories.unshift(myStory);
     } else if (myStoryIndex === -1) {
-        // If the user has no story, create a placeholder for them
         const myStoryPlaceholder = stories.find(s => s.author.handle === profileData.handle);
         if (myStoryPlaceholder) {
             filteredStories.unshift(myStoryPlaceholder);
@@ -482,10 +482,6 @@ function HomePageContent() {
     }
   };
 
-  const handleDeletePost = (postId: number) => {
-    setFeedItems(prev => prev.filter(item => item.id !== postId));
-  };
-
   const handleEditPost = (data: PostEditFormData) => {
     if(!postToEdit) return;
     updateFeedItem(postToEdit.id, data);
@@ -496,18 +492,9 @@ function HomePageContent() {
     setIsEditPostDialogOpen(true);
   };
 
-  const handleLike = (postId: number) => {
-    setFeedItems(prev => prev.map(item => 
-        item.id === postId 
-        ? {...item, liked: !item.liked, likes: item.liked ? item.liked - 1 : item.likes + 1}
-        : item
-    ));
-  };
-
-  const handleAddComment = (postId: number, commentText: string) => {
+  const handleAddComment = (postId: string, commentText: string) => {
     if (!profileData) return;
-    const newComment: Comment = {
-      id: Date.now(),
+    const newComment = {
       author: {
         name: profileData.name,
         avatar: profileData.avatar,
@@ -515,19 +502,11 @@ function HomePageContent() {
       },
       text: commentText,
     };
-    setFeedItems(prev => prev.map(item =>
-      item.id === postId
-        ? { ...item, comments: [...item.comments, newComment] }
-        : item
-    ));
+    addComment(postId, newComment);
   };
 
-  const handleDeleteComment = (postId: number, commentId: number) => {
-    setFeedItems(prev => prev.map(item =>
-      item.id === postId
-        ? { ...item, comments: item.comments.filter(c => c.id !== commentId) }
-        : item
-    ));
+  const handleDeleteComment = (postId: string, commentId: number) => {
+    deleteComment(postId, commentId);
   };
 
   const activePostForComments = feedItems.find(item => item.id === activeCommentPostId);
@@ -676,7 +655,7 @@ function HomePageContent() {
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDeletePost(item.id)}>
+                            <AlertDialogAction onClick={() => deleteFeedItem(item.id)}>
                               Delete
                             </AlertDialogAction>
                           </AlertDialogFooter>
@@ -694,8 +673,8 @@ function HomePageContent() {
                 </CardContent>
                 <CardFooter className="p-2 flex justify-between items-center">
                   <div className="flex items-center text-sm text-muted-foreground">
-                      <Button variant="ghost" size="sm" className={cn("flex items-center gap-2", item.liked && "text-destructive")} onClick={() => handleLike(item.id)}>
-                        <Heart className={cn("w-5 h-5", item.liked && "fill-current")} />
+                      <Button variant="ghost" size="sm" className={cn("flex items-center gap-2", item.likedBy.includes(profileData.handle) && "text-destructive")} onClick={() => toggleLike(item.id, profileData.handle)}>
+                        <Heart className={cn("w-5 h-5", item.likedBy.includes(profileData.handle) && "fill-current")} />
                         <span>{item.likes}</span>
                       </Button>
                       <Button variant="ghost" size="sm" className="flex items-center gap-2" onClick={() => setActiveCommentPostId(item.id)}>
@@ -756,7 +735,5 @@ export default function Home() {
         </React.Suspense>
     )
 }
-
-    
 
     

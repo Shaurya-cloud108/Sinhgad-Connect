@@ -39,8 +39,8 @@ type CommentSheetProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   post: FeedItem | undefined;
-  onCommentSubmit: (postId: number, commentText: string) => void;
-  onCommentDelete: (postId: number, commentId: number) => void;
+  onCommentSubmit: (postId: string, commentText: string) => void;
+  onCommentDelete: (postId: string, commentId: number) => void;
   currentProfile: ProfileData;
 };
 

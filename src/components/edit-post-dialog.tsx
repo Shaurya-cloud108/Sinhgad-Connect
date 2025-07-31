@@ -14,10 +14,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useContext, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { MapPin } from "lucide-react";
-import { AppContext } from "@/context/AppContext";
-import { ProfileContext } from "@/context/ProfileContext";
 import type { FeedItem } from "@/lib/data";
 
 export type PostEditFormData = {
@@ -102,5 +100,3 @@ export function EditPostDialog({ open, onOpenChange, onPostUpdate, post }: EditP
     </Dialog>
   );
 }
-
-    

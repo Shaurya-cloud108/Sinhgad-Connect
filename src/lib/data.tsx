@@ -388,7 +388,7 @@ export type Comment = {
 };
 
 export type FeedItem = {
-    id: number;
+    id: string; // Changed to string for Firestore
     author: {
       name: string;
       avatar: string;
@@ -400,9 +400,10 @@ export type FeedItem = {
     location?: string;
     aiHint: string;
     likes: number;
-    liked?: boolean;
+    likedBy: string[]; // Changed from liked and likes
     comments: Comment[];
     groupId?: string;
+    createdAt: any; // For Firestore timestamp
 }
 
 export type EducationEntry = {
@@ -719,108 +720,6 @@ export const initialCommunityMembers: CommunityMember[] = [
   },
 ];
 
-export const initialFeedItems: FeedItem[] = [
-  {
-    id: 1,
-    author: {
-      name: "Alumni Events Committee",
-      avatar: "https://placehold.co/100x100.png",
-      handle: "alumni-events",
-      aiHint: "university logo"
-    },
-    content: "The flagship event of the year is just around the corner! Reconnect with old friends, network with peers, and relive your college days. Don't miss out on the Annual Alumni Grand Meet 2024. Register now!",
-    image: "https://placehold.co/600x400.png",
-    location: "College Auditorium, Pune",
-    aiHint: "people networking",
-    likes: 256,
-    comments: [],
-    liked: false,
-  },
-  {
-    id: 2,
-    author: {
-      name: "Sunita Narayan",
-      avatar: "https://placehold.co/100x100.png",
-      handle: "sunita-narayan",
-      aiHint: "professional woman portrait"
-    },
-    content: "Thrilled to share that Innovate Inc. just launched a new line of sustainable tech products! A huge thanks to the team and the foundation I got from Sinhgad. Looking to hire fellow alumni for a Senior Frontend role - check the jobs board!",
-    image: null,
-    aiHint: "",
-    likes: 189,
-    comments: [
-        {
-            id: 101,
-            author: { name: "Rohan Verma", avatar: "https://placehold.co/100x100.png", handle: "rohan-verma" },
-            text: "Congratulations, Sunita! This is huge."
-        }
-    ],
-    liked: true,
-  },
-  {
-    id: 3,
-    author: {
-      name: "Alumni Network Job Board",
-      avatar: "https://placehold.co/100x100.png",
-      handle: "alumni-network",
-      aiHint: "briefcase icon"
-    },
-    content: "New Opportunity! DataDriven Co. is hiring a Data Scientist in Pune. This role was posted by Rohan Verma '12. Apply now and take the next step in your career.",
-    image: "https://placehold.co/600x400.png",
-    aiHint: "modern office",
-    likes: 98,
-    comments: [],
-    liked: false,
-  },
-  {
-    id: 4,
-    author: {
-      name: "Priya Sharma",
-      avatar: "https://placehold.co/150x150.png",
-      handle: "priya-sharma",
-      aiHint: "professional woman"
-    },
-    content: "Just hit my 5-year anniversary at Google! So grateful for the journey and the amazing people I've worked with. The lessons I learned at Sinhgad continue to be my foundation.",
-    image: null,
-    location: "Googleplex, Mountain View, CA",
-    aiHint: "",
-    likes: 152,
-    comments: [],
-    liked: true,
-  },
-  {
-    id: 5,
-    author: {
-      name: "Priya Sharma",
-      avatar: "https://placehold.co/150x150.png",
-      handle: "priya-sharma",
-      aiHint: "professional woman"
-    },
-    content: "Mentoring a final year student on their capstone project has been such a rewarding experience. It's amazing to see the talent coming out of our college!",
-    image: "https://placehold.co/600x400.png",
-    aiHint: "mentoring session",
-    likes: 98,
-    comments: [],
-    liked: false,
-  },
-  {
-    id: 6,
-    author: {
-      name: "Priya Sharma",
-      avatar: "https://placehold.co/150x150.png",
-      handle: "priya-sharma",
-      aiHint: "professional woman"
-    },
-    content: "Checking out the new Bay Area Alumni group! Great to connect with folks out here.",
-    image: null,
-    aiHint: "",
-    likes: 45,
-    comments: [],
-    liked: false,
-    groupId: "bay-area-alumni",
-  }
-];
-
 export const initialStories: Story[] = initialCommunityMembers.map((member, index) => ({
     id: index + 1,
     author: {
@@ -965,3 +864,4 @@ export const notifications: Notification[] = [
 ];
 
     
+

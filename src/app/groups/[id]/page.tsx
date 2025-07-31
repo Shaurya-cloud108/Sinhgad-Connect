@@ -55,7 +55,7 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
   const resolvedParams = use(params);
   const router = useRouter();
 
-  const { groups, joinGroup, leaveGroup, setGroups, feedItems, setFeedItems, communityMembers, setSelectedConversationByName, updateFeedItem } = useContext(AppContext);
+  const { groups, joinGroup, leaveGroup, setGroups, feedItems, updateFeedItem, deleteFeedItem, toggleLike, addComment, deleteComment, communityMembers, setSelectedConversationByName } = useContext(AppContext);
   const { profileData } = useContext(ProfileContext);
   const { toast } = useToast();
   const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -65,7 +65,7 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
   const [isEditPostDialogOpen, setIsEditPostDialogOpen] = useState(false);
   const [isEditGroupOpen, setIsEditGroupOpen] = useState(false);
-  const [activeCommentPostId, setActiveCommentPostId] = useState<number | null>(null);
+  const [activeCommentPostId, setActiveCommentPostId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("feed");
   const [memberSearchQuery, setMemberSearchQuery] = useState("");
   const [postToEdit, setPostToEdit] = useState<FeedItem | null>(null);
@@ -178,18 +178,9 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
     bannerInputRef.current?.click();
   };
 
-  const handleLike = (postId: number) => {
-    setFeedItems(prev => prev.map(item =>
-        item.id === postId
-        ? {...item, liked: !item.liked, likes: item.liked ? item.liked - 1 : item.likes + 1}
-        : item
-    ));
-  };
-
-  const handleAddComment = (postId: number, commentText: string) => {
+  const handleAddComment = (postId: string, commentText: string) => {
     if (!profileData) return;
-    const newComment: Comment = {
-      id: Date.now(),
+    const newComment = {
       author: {
         name: profileData.name,
         avatar: profileData.avatar,
@@ -197,23 +188,11 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
       },
       text: commentText,
     };
-    setFeedItems(prev => prev.map(item =>
-      item.id === postId
-        ? { ...item, comments: [...item.comments, newComment] }
-        : item
-    ));
+    addComment(postId, newComment);
   };
 
-  const handleDeleteComment = (postId: number, commentId: number) => {
-    setFeedItems(prev => prev.map(item =>
-      item.id === postId
-        ? { ...item, comments: item.comments.filter(c => c.id !== commentId) }
-        : item
-    ));
-  };
-
-  const handleDeletePost = (postId: number) => {
-    setFeedItems(prev => prev.filter(item => item.id !== postId));
+  const handleDeleteComment = (postId: string, commentId: number) => {
+    deleteComment(postId, commentId);
   };
 
   const handleEditPost = (data: PostEditFormData) => {
@@ -468,7 +447,7 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => handleDeletePost(item.id)}>
+                                    <AlertDialogAction onClick={() => deleteFeedItem(item.id)}>
                                     Delete
                                     </AlertDialogAction>
                                 </AlertDialogFooter>
@@ -486,8 +465,8 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
                         </CardContent>
                         <CardFooter className="p-2 flex justify-between items-center">
                         <div className="flex items-center text-sm text-muted-foreground">
-                            <Button variant="ghost" size="sm" className={cn("flex items-center gap-2", item.liked && "text-destructive")} onClick={() => handleLike(item.id)}>
-                                <Heart className={cn("w-5 h-5", item.liked && "fill-current")} />
+                            <Button variant="ghost" size="sm" className={cn("flex items-center gap-2", item.likedBy.includes(profileData.handle) && "text-destructive")} onClick={() => toggleLike(item.id, profileData.handle)}>
+                                <Heart className={cn("w-5 h-5", item.likedBy.includes(profileData.handle) && "fill-current")} />
                                 <span>{item.likes}</span>
                             </Button>
                             <Button variant="ghost" size="sm" className="flex items-center gap-2" onClick={() => setActiveCommentPostId(item.id)}>
@@ -675,7 +654,3 @@ export default function GroupProfilePage({ params }: { params: { id: string } })
     </>
   );
 }
-
-    
-
-    

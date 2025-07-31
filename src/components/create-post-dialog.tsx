@@ -58,8 +58,7 @@ export function CreatePostDialog({ open, onOpenChange, groupId }: CreatePostDial
     
     if (!profileData) return;
 
-    const newPost: FeedItem = {
-        id: Date.now(),
+    const newPost: Omit<FeedItem, 'id' | 'createdAt' | 'likes' | 'likedBy' | 'comments'> = {
         author: {
             name: profileData.name,
             avatar: profileData.avatar,
@@ -70,9 +69,6 @@ export function CreatePostDialog({ open, onOpenChange, groupId }: CreatePostDial
         image: imagePreview,
         location: location || undefined,
         aiHint: "user uploaded",
-        likes: 0,
-        liked: false,
-        comments: [],
         groupId: groupId
     };
 

@@ -2,30 +2,40 @@
 "use client";
 
 import React, { createContext, useState, ReactNode, useCallback, useContext, useEffect, useMemo } from 'react';
-import { 
-    initialConversations as baseInitialConversations, 
+import {
+    initialConversations as baseInitialConversations,
     initialMessages,
-    initialJobListings, 
-    initialCommunityMembers, 
-    initialFeedItems, 
+    initialJobListings,
+    initialCommunityMembers,
     initialStories,
     initialEventsData,
     initialGroupsData
 } from '@/lib/data';
-import type { 
-    Conversation as ConvType, 
-    MessagesData as MsgType, 
-    JobListing, 
-    CommunityMember, 
-    FeedItem, 
-    Story, 
-    Message, 
+import type {
+    Conversation as ConvType,
+    MessagesData as MsgType,
+    JobListing,
+    CommunityMember,
+    FeedItem,
+    Story,
+    Message,
     StoryItem,
     Event,
     Group
 } from '@/lib/data';
 import { ProfileContext } from './ProfileContext';
 import { PostEditFormData } from '@/components/edit-post-dialog';
+import {
+  addFeedItem as addFeedItemFs,
+  getFeedItems,
+  updateFeedItem as updateFeedItemFs,
+  deleteFeedItem as deleteFeedItemFs,
+  toggleLike as toggleLikeFs,
+  addComment as addCommentFs,
+  deleteComment as deleteCommentFs,
+} from '@/lib/firebase-services';
+import { serverTimestamp } from 'firebase/firestore';
+
 
 // Types
 export type Conversation = ConvType;
@@ -40,7 +50,7 @@ type AppContextType = {
     selectedConversation: Conversation | null;
     setSelectedConversation: React.Dispatch<React.SetStateAction<Conversation | null>>;
     setSelectedConversationByName: (name: string) => void;
-    
+
     events: Event[];
     setEvents: React.Dispatch<React.SetStateAction<Event[]>>;
     addEvent: (event: Event) => void;
@@ -54,14 +64,19 @@ type AppContextType = {
     jobListings: JobListing[];
     setJobListings: React.Dispatch<React.SetStateAction<JobListing[]>>;
     addJobListing: (job: JobListing) => void;
-    
+
     communityMembers: CommunityMember[];
     setCommunityMembers: React.Dispatch<React.SetStateAction<CommunityMember[]>>;
 
     feedItems: FeedItem[];
     setFeedItems: React.Dispatch<React.SetStateAction<FeedItem[]>>;
-    addFeedItem: (post: FeedItem) => void;
-    updateFeedItem: (postId: number, data: PostEditFormData) => void;
+    addFeedItem: (post: Omit<FeedItem, 'id' | 'createdAt' | 'likes' | 'likedBy' | 'comments'>) => void;
+    updateFeedItem: (postId: string, data: PostEditFormData) => void;
+    deleteFeedItem: (postId: string) => void;
+    toggleLike: (postId: string, userId: string) => void;
+    addComment: (postId: string, comment: Omit<Comment, 'id'>) => void;
+    deleteComment: (postId: string, commentId: number) => void;
+
 
     stories: Story[];
     setStories: React.Dispatch<React.SetStateAction<Story[]>>;
@@ -96,6 +111,10 @@ export const AppContext = createContext<AppContextType>({
     setFeedItems: () => {},
     addFeedItem: () => {},
     updateFeedItem: () => {},
+    deleteFeedItem: () => {},
+    toggleLike: () => {},
+    addComment: () => {},
+    deleteComment: () => {},
     stories: [],
     setStories: () => {},
     addStoryItem: () => {},
@@ -113,9 +132,17 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [groups, setGroups] = useState<Group[]>(initialGroupsData);
     const [jobListings, setJobListings] = useState<JobListing[]>(initialJobListings);
     const [communityMembers, setCommunityMembers] = useState<CommunityMember[]>(initialCommunityMembers);
-    const [feedItems, setFeedItems] = useState<FeedItem[]>(initialFeedItems);
+    const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
     const [stories, setStories] = useState<Story[]>(initialStories);
-    
+
+    useEffect(() => {
+        const fetchFeed = async () => {
+            const items = await getFeedItems();
+            setFeedItems(items);
+        };
+        fetchFeed();
+    }, []);
+
     useEffect(() => {
         if (profileData) {
             const userGroupIds = new Set(groups.filter(g => g.members.some(m => m.handle === profileData.handle)).map(g => g.id));
@@ -130,8 +157,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                     unread: 0,
                     isGroup: true,
                 }));
-            
-            // Filter out any duplicates that might already be in baseInitialConversations
+
             const existingConvoNames = new Set(baseInitialConversations.map(c => c.name));
             const newGroupConvos = groupConversations.filter(gc => !existingConvoNames.has(gc.name));
 
@@ -147,7 +173,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             return;
         }
 
-        // If no conversation exists, create a new one
         const person = communityMembers.find(m => m.name === name);
         if (person) {
             const newConversation: Conversation = {
@@ -178,7 +203,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setGroups(prev => [newGroup, ...prev]);
         return newGroup;
     }, []);
-    
+
     const joinGroup = useCallback((groupId: string, userHandle: string) => {
       setGroups(prevGroups => prevGroups.map(g => {
         if (g.id === groupId && !g.members.some(m => m.handle === userHandle)) {
@@ -228,21 +253,70 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setJobListings(prev => [job, ...prev]);
     }, []);
 
-    const addFeedItem = useCallback((post: FeedItem) => {
-        setFeedItems(prev => [post, ...prev]);
+    const addFeedItem = useCallback(async (post: Omit<FeedItem, 'id' | 'createdAt' | 'likes' | 'likedBy' | 'comments'>) => {
+        const newPostData = {
+            ...post,
+            createdAt: serverTimestamp(),
+            likes: 0,
+            likedBy: [],
+            comments: [],
+        };
+        const newPostId = await addFeedItemFs(newPostData);
+        setFeedItems(prev => [{ ...newPostData, id: newPostId }, ...prev]);
     }, []);
 
-    const updateFeedItem = useCallback((postId: number, data: PostEditFormData) => {
-        setFeedItems(prev => prev.map(item => 
+    const updateFeedItem = useCallback(async (postId: string, data: PostEditFormData) => {
+        await updateFeedItemFs(postId, data);
+        setFeedItems(prev => prev.map(item =>
             item.id === postId ? { ...item, content: data.content, location: data.location || undefined } : item
         ));
+    }, []);
+
+    const deleteFeedItem = useCallback(async (postId: string) => {
+        await deleteFeedItemFs(postId);
+        setFeedItems(prev => prev.filter(item => item.id !== postId));
+    }, []);
+
+    const toggleLike = useCallback(async (postId: string, userHandle: string) => {
+        const item = feedItems.find(i => i.id === postId);
+        if (!item) return;
+        const isLiked = item.likedBy.includes(userHandle);
+
+        setFeedItems(prev => prev.map(i =>
+            i.id === postId
+                ? {
+                    ...i,
+                    likedBy: isLiked ? i.likedBy.filter(h => h !== userHandle) : [...i.likedBy, userHandle],
+                    likes: isLiked ? i.likes - 1 : i.likes + 1,
+                  }
+                : i
+        ));
+        await toggleLikeFs(postId, userHandle, isLiked);
+    }, [feedItems]);
+
+    const addComment = useCallback(async (postId: string, comment: Omit<Comment, 'id'>) => {
+      const newComment = await addCommentFs(postId, comment);
+      setFeedItems(prev => prev.map(item =>
+        item.id === postId
+          ? { ...item, comments: [...item.comments, newComment] }
+          : item
+      ));
+    }, []);
+
+    const deleteComment = useCallback(async (postId: string, commentId: number) => {
+      await deleteCommentFs(postId, commentId);
+      setFeedItems(prev => prev.map(item =>
+        item.id === postId
+          ? { ...item, comments: item.comments.filter(c => c.id !== commentId) }
+          : item
+      ));
     }, []);
 
     const addStoryItem = useCallback((userHandle: string, item: StoryItem) => {
         setStories(prevStories => {
             const newStories = [...prevStories];
             const userStoryIndex = newStories.findIndex(story => story.author.handle === userHandle);
-            
+
             if (userStoryIndex !== -1) {
                 const updatedStory = {
                     ...newStories[userStoryIndex],
@@ -320,6 +394,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setFeedItems,
         addFeedItem,
         updateFeedItem,
+        deleteFeedItem,
+        toggleLike,
+        addComment,
+        deleteComment,
         stories,
         setStories,
         addStoryItem,
@@ -333,7 +411,3 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         </AppContext.Provider>
     );
 };
-
-    
-
-    
