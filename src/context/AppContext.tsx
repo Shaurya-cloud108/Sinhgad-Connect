@@ -1,16 +1,7 @@
 
 "use client";
 
-import React, { createContext, useState, ReactNode, useCallback, useContext, useEffect, useMemo } from 'react';
-import {
-    initialConversations as baseInitialConversations,
-    initialMessages,
-    initialJobListings,
-    initialCommunityMembers,
-    initialStories,
-    initialEventsData,
-    initialGroupsData
-} from '@/lib/data';
+import React, { createContext, useState, ReactNode, useCallback, useContext, useEffect } from 'react';
 import type {
     Conversation as ConvType,
     MessagesData as MsgType,
@@ -21,7 +12,8 @@ import type {
     Message,
     StoryItem,
     Event,
-    Group
+    Group,
+    Comment
 } from '@/lib/data';
 import { ProfileContext } from './ProfileContext';
 import { PostEditFormData } from '@/components/edit-post-dialog';
@@ -33,6 +25,11 @@ import {
   toggleLike as toggleLikeFs,
   addComment as addCommentFs,
   deleteComment as deleteCommentFs,
+  getCommunityMembers,
+  getEvents,
+  getGroups,
+  getJobListings,
+  toggleFollow
 } from '@/lib/firebase-services';
 import { serverTimestamp } from 'firebase/firestore';
 
@@ -67,6 +64,7 @@ type AppContextType = {
 
     communityMembers: CommunityMember[];
     setCommunityMembers: React.Dispatch<React.SetStateAction<CommunityMember[]>>;
+    handleFollowToggle: (targetUserHandle: string) => void;
 
     feedItems: FeedItem[];
     setFeedItems: React.Dispatch<React.SetStateAction<FeedItem[]>>;
@@ -107,6 +105,7 @@ export const AppContext = createContext<AppContextType>({
     addJobListing: () => {},
     communityMembers: [],
     setCommunityMembers: () => {},
+    handleFollowToggle: () => {},
     feedItems: [],
     setFeedItems: () => {},
     addFeedItem: () => {},
@@ -125,28 +124,44 @@ export const AppContext = createContext<AppContextType>({
 // Provider
 export const AppProvider = ({ children }: { children: ReactNode }) => {
     const { profileData } = useContext(ProfileContext);
-    const [conversations, setConversations] = useState<Conversation[]>(baseInitialConversations);
-    const [messagesData, setMessagesData] = useState<MessagesData>(initialMessages);
+    const [conversations, setConversations] = useState<Conversation[]>([]);
+    const [messagesData, setMessagesData] = useState<MessagesData>({});
     const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
-    const [events, setEvents] = useState<Event[]>(initialEventsData);
-    const [groups, setGroups] = useState<Group[]>(initialGroupsData);
-    const [jobListings, setJobListings] = useState<JobListing[]>(initialJobListings);
-    const [communityMembers, setCommunityMembers] = useState<CommunityMember[]>(initialCommunityMembers);
+    const [events, setEvents] = useState<Event[]>([]);
+    const [groups, setGroups] = useState<Group[]>([]);
+    const [jobListings, setJobListings] = useState<JobListing[]>([]);
+    const [communityMembers, setCommunityMembers] = useState<CommunityMember[]>([]);
     const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
-    const [stories, setStories] = useState<Story[]>(initialStories);
+    const [stories, setStories] = useState<Story[]>([]);
 
     useEffect(() => {
-        const fetchFeed = async () => {
-            const items = await getFeedItems();
-            setFeedItems(items);
+        const fetchAllData = async () => {
+            const [
+                feedItemsData, 
+                membersData, 
+                groupsData, 
+                eventsData, 
+                jobsData
+            ] = await Promise.all([
+                getFeedItems(),
+                getCommunityMembers(),
+                getGroups(),
+                getEvents(),
+                getJobListings(),
+            ]);
+            setFeedItems(feedItemsData);
+            setCommunityMembers(membersData);
+            setGroups(groupsData);
+            setEvents(eventsData);
+            setJobListings(jobsData as JobListing[]);
         };
-        fetchFeed();
+        fetchAllData();
     }, []);
 
     useEffect(() => {
-        if (profileData) {
+        if (profileData && groups.length > 0) {
             const userGroupIds = new Set(groups.filter(g => g.members.some(m => m.handle === profileData.handle)).map(g => g.id));
-            const groupConversations = initialGroupsData
+            const groupConversations = groups
                 .filter(group => userGroupIds.has(group.id))
                 .map(group => ({
                     name: group.name,
@@ -158,7 +173,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                     isGroup: true,
                 }));
 
-            const existingConvoNames = new Set(baseInitialConversations.map(c => c.name));
+            const existingConvoNames = new Set(conversations.map(c => c.name));
             const newGroupConvos = groupConversations.filter(gc => !existingConvoNames.has(gc.name));
 
             setConversations(prev => [...newGroupConvos, ...prev.filter(c => !newGroupConvos.some(ngc => ngc.name === c.name))]);
@@ -312,6 +327,32 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       ));
     }, []);
 
+    const handleFollowToggle = useCallback(async (targetUserHandle: string) => {
+      if (!profileData) return;
+      const loggedInUserHandle = profileData.handle;
+      const isCurrentlyFollowing = profileData.following.includes(targetUserHandle);
+  
+      setCommunityMembers(prevMembers =>
+        prevMembers.map(member => {
+          if (member.handle === loggedInUserHandle) {
+            const newFollowing = isCurrentlyFollowing
+              ? member.following.filter(h => h !== targetUserHandle)
+              : [...member.following, targetUserHandle];
+            return { ...member, following: newFollowing };
+          }
+          if (member.handle === targetUserHandle) {
+            const newFollowers = isCurrentlyFollowing
+              ? member.followers.filter(h => h !== loggedInUserHandle)
+              : [...member.followers, loggedInUserHandle];
+            return { ...member, followers: newFollowers };
+          }
+          return member;
+        })
+      );
+      
+      await toggleFollow(loggedInUserHandle, targetUserHandle, isCurrentlyFollowing);
+    }, [profileData, setCommunityMembers]);
+
     const addStoryItem = useCallback((userHandle: string, item: StoryItem) => {
         setStories(prevStories => {
             const newStories = [...prevStories];
@@ -390,6 +431,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         addJobListing,
         communityMembers,
         setCommunityMembers,
+        handleFollowToggle,
         feedItems,
         setFeedItems,
         addFeedItem,

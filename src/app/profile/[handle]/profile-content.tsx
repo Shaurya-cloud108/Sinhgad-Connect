@@ -66,7 +66,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { FollowersSheet } from "@/components/followers-sheet";
 import { CreatePostDialog } from "@/components/create-post-dialog";
 import { EditPostDialog, PostEditFormData } from "@/components/edit-post-dialog";
-import { CommentSheet } from "@/components/comment-sheet";
 import { Badge } from "@/components/ui/badge";
 
 
@@ -154,7 +153,7 @@ function EditProfileDialog({ open, onOpenChange, profile, onProfileUpdate }: { o
     }
   };
 
-  const onSubmit = (values: z.infer<typeof profileFormSchema>) => {
+  const onSubmit = (values: z.infer<typeof profileFormSchema>>) => {
     const updatedEducation: EducationEntry[] = values.education.map((edu, index) => {
       const originalEdu = profile.education[index];
       if (originalEdu && originalEdu.graduationYear) {
@@ -358,9 +357,13 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
         communityMembers, 
         setCommunityMembers,
         feedItems,
-        setFeedItems,
         updateFeedItem,
-        groups
+        deleteFeedItem,
+        toggleLike,
+        addComment,
+        deleteComment,
+        groups,
+        handleFollowToggle,
     } = useContext(AppContext);
     
     const router = useRouter();
@@ -372,7 +375,7 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
     const [isFollowSheetOpen, setIsFollowSheetOpen] = useState(false);
     const [followSheetTitle, setFollowSheetTitle] = useState<'Followers' | 'Following'>('Followers');
     const [followSheetHandles, setFollowSheetHandles] = useState<string[]>([]);
-    const [activeCommentPostId, setActiveCommentPostId] = useState<number | null>(null);
+    const [activeCommentPostId, setActiveCommentPostId] = useState<string | null>(null);
     const [postToEdit, setPostToEdit] = useState<FeedItem | null>(null);
 
     const isOwnProfile = useMemo(() => {
@@ -429,41 +432,12 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
           ));
       }
     };
-    
-    const handleFollowToggle = () => {
-        if (!ownProfileData || !profileData || isOwnProfile) return;
-        const loggedInUserHandle = ownProfileData.handle;
-        const targetUserHandle = profileData.handle;
-        const currentlyFollowing = ownProfileData.following.includes(targetUserHandle);
-
-        setCommunityMembers(prevMembers => 
-            prevMembers.map(member => {
-                if (member.handle === loggedInUserHandle) {
-                    const newFollowing = currentlyFollowing
-                        ? member.following.filter(h => h !== targetUserHandle)
-                        : [...member.following, targetUserHandle];
-                    return { ...member, following: newFollowing };
-                }
-                if (member.handle === targetUserHandle) {
-                    const newFollowers = currentlyFollowing
-                        ? member.followers.filter(h => h !== loggedInUserHandle)
-                        : [...member.followers, loggedInUserHandle];
-                    return { ...member, followers: newFollowers };
-                }
-                return member;
-            })
-        );
-    };
 
     const handleLogout = () => {
         setLoggedInUserHandle(null);
         toast({ title: "You have been logged out." });
         router.push("/register?tab=login");
     }
-
-    const handleDeletePost = (postId: number) => {
-        setFeedItems(prev => prev.filter(item => item.id !== postId));
-    };
 
     const handleEditPost = (data: PostEditFormData) => {
         if(!postToEdit) return;
@@ -473,40 +447,6 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
     const openEditPostDialog = (post: FeedItem) => {
         setPostToEdit(post);
         setIsEditPostDialogOpen(true);
-    };
-
-    const handleLike = (postId: number) => {
-      setFeedItems(prev => prev.map(item => 
-          item.id === postId 
-          ? {...item, liked: !item.liked, likes: item.liked ? item.liked - 1 : item.likes + 1}
-          : item
-      ));
-    };
-
-    const handleAddComment = (postId: number, commentText: string) => {
-      if (!ownProfileData) return;
-      const newComment: Comment = {
-        id: Date.now(),
-        author: {
-          name: ownProfileData.name,
-          avatar: ownProfileData.avatar,
-          handle: ownProfileData.handle
-        },
-        text: commentText,
-      };
-      setFeedItems(prev => prev.map(item =>
-        item.id === postId
-          ? { ...item, comments: [...item.comments, newComment] }
-          : item
-      ));
-    };
-
-    const handleDeleteComment = (postId: number, commentId: number) => {
-      setFeedItems(prev => prev.map(item =>
-        item.id === postId
-          ? { ...item, comments: item.comments.filter(c => c.id !== commentId) }
-          : item
-      ));
     };
 
     const handleMessageClick = () => {
@@ -522,7 +462,7 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
 
         addJobListing({
         ...newJob,
-        id: Date.now(),
+        id: Date.now().toString(),
         postedBy: `${profileData.name} ${gradYearSuffix}`.trim(),
         postedByHandle: profileData.handle,
         });
@@ -625,7 +565,7 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
                             </>
                         ) : (
                           <>
-                            <Button variant={isFollowing ? 'secondary' : 'default'} onClick={handleFollowToggle} className="flex-1">
+                            <Button variant={isFollowing ? 'secondary' : 'default'} onClick={() => handleFollowToggle(profileData.handle)} className="flex-1">
                                {isFollowing ? <CheckCircle className="mr-2 h-4 w-4" /> : <UserPlus className="mr-2 h-4 w-4" />}
                                {isFollowing ? 'Following' : 'Follow'}
                             </Button>
@@ -776,7 +716,7 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
                               </AlertDialogHeader>
                               <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDeletePost(item.id)}>
+                              <AlertDialogAction onClick={() => deleteFeedItem(item.id)}>
                                   Delete
                               </AlertDialogAction>
                               </AlertDialogFooter>
@@ -794,8 +734,8 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
                     </CardContent>
                     <CardFooter className="p-2 flex justify-between items-center">
                        <div className="flex items-center text-sm text-muted-foreground">
-                           <Button variant="ghost" size="sm" className={cn("flex items-center gap-2", item.liked && "text-destructive")} onClick={() => handleLike(item.id)}>
-                            <Heart className={cn("w-5 h-5", item.liked && "fill-current")} />
+                           <Button variant="ghost" size="sm" className={cn("flex items-center gap-2", ownProfileData && item.likedBy.includes(ownProfileData.handle) && "text-destructive")} onClick={() => ownProfileData && toggleLike(item.id, ownProfileData.handle)}>
+                            <Heart className={cn("w-5 h-5", ownProfileData && item.likedBy.includes(ownProfileData.handle) && "fill-current")} />
                             <span>{item.likes}</span>
                            </Button>
                            <Button variant="ghost" size="sm" className="flex items-center gap-2" onClick={() => setActiveCommentPostId(item.id)}>
@@ -936,8 +876,8 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
           if (!isOpen) setActiveCommentPostId(null);
         }}
         post={activePostForComments}
-        onCommentSubmit={handleAddComment}
-        onCommentDelete={handleDeleteComment}
+        onCommentSubmit={(postId, text) => addComment(postId, { author: { name: ownProfileData!.name, avatar: ownProfileData!.avatar, handle: ownProfileData!.handle }, text })}
+        onCommentDelete={deleteComment}
         currentProfile={ownProfileData!}
       />
     </div>
@@ -950,5 +890,3 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
     </>
   );
 }
-
-    

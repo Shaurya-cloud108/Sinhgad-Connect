@@ -15,19 +15,22 @@ import {
   getDoc,
   runTransaction,
 } from 'firebase/firestore';
-import type { FeedItem, Comment } from './data';
+import type { FeedItem, Comment, CommunityMember, JobListing, Event, Group } from './data';
 import type { PostEditFormData } from '@/components/edit-post-dialog';
 
 const feedItemsCollection = collection(db, 'feedItems');
+const communityMembersCollection = collection(db, 'communityMembers');
+const jobsCollection = collection(db, 'jobListings');
+const eventsCollection = collection(db, 'events');
+const groupsCollection = collection(db, 'groups');
 
-// Get all feed items
+// Feed Item Services
 export const getFeedItems = async (): Promise<FeedItem[]> => {
   const q = query(feedItemsCollection, orderBy('createdAt', 'desc'));
   const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FeedItem));
 };
 
-// Add a new feed item
 export const addFeedItem = async (item: Omit<FeedItem, 'id' | 'createdAt'>) => {
   const docRef = await addDoc(feedItemsCollection, {
     ...item,
@@ -36,7 +39,6 @@ export const addFeedItem = async (item: Omit<FeedItem, 'id' | 'createdAt'>) => {
   return docRef.id;
 };
 
-// Update a feed item
 export const updateFeedItem = async (id: string, data: PostEditFormData) => {
   const docRef = doc(db, 'feedItems', id);
   await updateDoc(docRef, {
@@ -45,13 +47,11 @@ export const updateFeedItem = async (id: string, data: PostEditFormData) => {
   });
 };
 
-// Delete a feed item
 export const deleteFeedItem = async (id: string) => {
   const docRef = doc(db, 'feedItems', id);
   await deleteDoc(docRef);
 };
 
-// Toggle like on a feed item
 export const toggleLike = async (postId: string, userHandle: string, isLiked: boolean) => {
     const docRef = doc(db, 'feedItems', postId);
     await runTransaction(db, async (transaction) => {
@@ -67,7 +67,6 @@ export const toggleLike = async (postId: string, userHandle: string, isLiked: bo
     });
 };
 
-// Add a comment to a feed item
 export const addComment = async (postId: string, comment: Omit<Comment, 'id'>): Promise<Comment> => {
     const postRef = doc(db, 'feedItems', postId);
     const newComment = { ...comment, id: Date.now() }; // Simple unique ID for now
@@ -77,7 +76,6 @@ export const addComment = async (postId: string, comment: Omit<Comment, 'id'>): 
     return newComment;
 };
 
-// Delete a comment from a feed item
 export const deleteComment = async (postId: string, commentId: number) => {
     const postRef = doc(db, 'feedItems', postId);
     const postSnap = await getDoc(postRef);
@@ -87,3 +85,46 @@ export const deleteComment = async (postId: string, commentId: number) => {
         await updateDoc(postRef, { comments: updatedComments });
     }
 };
+
+// Community Member Services
+export const getCommunityMembers = async (): Promise<CommunityMember[]> => {
+    const snapshot = await getDocs(communityMembersCollection);
+    return snapshot.docs.map(doc => ({ ...doc.data(), handle: doc.id } as CommunityMember));
+};
+
+export const toggleFollow = async (currentUserHandle: string, targetUserHandle: string, isFollowing: boolean) => {
+    const currentUserRef = doc(db, 'communityMembers', currentUserHandle);
+    const targetUserRef = doc(db, 'communityMembers', targetUserHandle);
+
+    const batch = runTransaction(db, async (transaction) => {
+        transaction.update(currentUserRef, {
+            following: isFollowing ? arrayRemove(targetUserHandle) : arrayUnion(targetUserHandle)
+        });
+        transaction.update(targetUserRef, {
+            followers: isFollowing ? arrayRemove(currentUserHandle) : arrayUnion(currentUserHandle)
+        });
+    });
+
+    await batch;
+};
+
+
+// Job Listing Services
+export const getJobListings = async (): Promise<JobListing[]> => {
+    const snapshot = await getDocs(jobsCollection);
+    // Note: Assuming jobs don't need a specific order for now.
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as JobListing));
+}
+
+// Event Services
+export const getEvents = async (): Promise<Event[]> => {
+    const snapshot = await getDocs(eventsCollection);
+    // Note: Assuming events don't need a specific order for now. Can be ordered by date later.
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Event));
+}
+
+// Group Services
+export const getGroups = async (): Promise<Group[]> => {
+    const snapshot = await getDocs(groupsCollection);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Group));
+}

@@ -10,7 +10,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "seed-db": "tsx src/lib/seed-db.ts"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.14.1",
@@ -54,6 +55,7 @@
     "recharts": "^2.15.1",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
+    "tsx": "^4.15.7",
     "zod": "^3.24.2"
   },
   "devDependencies": {
