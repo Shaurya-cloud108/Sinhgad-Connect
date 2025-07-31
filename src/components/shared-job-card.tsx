@@ -8,7 +8,7 @@ import Link from "next/link";
 import { useContext } from "react";
 
 type SharedJobCardProps = {
-  jobId: number;
+  jobId: string;
 };
 
 export function SharedJobCard({ jobId }: SharedJobCardProps) {

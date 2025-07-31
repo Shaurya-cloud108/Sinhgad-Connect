@@ -92,13 +92,11 @@ function JobsPageContent() {
     const primaryEducation = profileData.education.find(e => e.graduationYear);
     const gradYearSuffix = primaryEducation?.graduationYear ? `'${primaryEducation.graduationYear.toString().slice(-2)}` : '';
 
-    const newJob: JobListing = {
-        id: Date.now(),
+    addJobListing({
         ...values,
         postedBy: `${profileData.name} ${gradYearSuffix}`.trim(),
         postedByHandle: profileData.handle
-    };
-    addJobListing(newJob);
+    });
   }
 
   function handleViewDetails(job: JobListing) {

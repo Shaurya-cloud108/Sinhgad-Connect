@@ -38,7 +38,7 @@ export type Event = {
 };
 
 export type JobListing = {
-  id: string; // Changed to string for Firestore
+  id: string; // Changed to string for Firestore consistency
   title: string;
   company: string;
   location: string;
@@ -179,8 +179,8 @@ export type Message = {
     senderId: string;
     senderName: string;
     text?: string;
-    sharedPostId?: number;
-    sharedJobId?: number;
+    sharedPostId?: string;
+    sharedJobId?: string;
     sharedEventId?: string;
     sharedStoryId?: string;
     sharedProfileId?: string;
@@ -192,6 +192,7 @@ export type MessagesData = {
 };
 
 export type Notification = {
+    id: string;
     type: 'connection' | 'message' | 'event' | 'job' | 'like' | 'comment';
     userName?: string; 
     commentText?: string;

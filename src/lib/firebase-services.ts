@@ -15,7 +15,7 @@ import {
   getDoc,
   runTransaction,
 } from 'firebase/firestore';
-import type { FeedItem, Comment, CommunityMember, JobListing, Event, Group, SuccessStory } from './data';
+import type { FeedItem, Comment, CommunityMember, JobListing, Event, Group, SuccessStory, Notification } from './data';
 import type { PostEditFormData } from '@/components/edit-post-dialog';
 
 const feedItemsCollection = collection(db, 'feedItems');
@@ -24,6 +24,7 @@ const jobsCollection = collection(db, 'jobListings');
 const eventsCollection = collection(db, 'events');
 const groupsCollection = collection(db, 'groups');
 const successStoriesCollection = collection(db, 'successStories');
+const notificationsCollection = collection(db, 'notifications');
 
 
 // Feed Item Services
@@ -118,6 +119,11 @@ export const getJobListings = async (): Promise<JobListing[]> => {
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as JobListing));
 }
 
+export const addJobListing = async (job: Omit<JobListing, 'id'>): Promise<string> => {
+    const docRef = await addDoc(jobsCollection, job);
+    return docRef.id;
+};
+
 // Event Services
 export const getEvents = async (): Promise<Event[]> => {
     const snapshot = await getDocs(eventsCollection);
@@ -136,3 +142,10 @@ export const getSuccessStories = async (): Promise<SuccessStory[]> => {
     const snapshot = await getDocs(successStoriesCollection);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SuccessStory));
 }
+
+// Notification Services
+export const getNotifications = async (): Promise<Notification[]> => {
+    const q = query(notificationsCollection); // Can be ordered by a timestamp later
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Notification));
+};

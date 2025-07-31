@@ -1,10 +1,17 @@
 
+"use client"
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserPlus, MessageSquare, CalendarCheck, Briefcase, Heart, MessageCircle } from "lucide-react";
-import { notifications as initialNotifications, Notification, communityMembers } from "@/lib/data.tsx";
+import type { Notification } from "@/lib/data.tsx";
+import { communityMembers } from "@/lib/data-seed";
 import Link from "next/link";
+import { AppContext } from "@/context/AppContext";
+import { useContext } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+
 
 const NotificationIcon = ({ type }: { type: Notification['type'] }) => {
     switch (type) {
@@ -52,15 +59,34 @@ const renderNotificationText = (notification: Notification) => {
 }
 
 export default function NotificationsPage() {
+    const { notifications } = useContext(AppContext);
+
+    if (!notifications) {
+        return (
+            <div className="container max-w-2xl mx-auto py-8 md:py-12">
+                <Skeleton className="h-10 w-64 mb-8" />
+                <Card>
+                    <CardContent className="p-0">
+                        <div className="space-y-2 p-4">
+                            <Skeleton className="h-16 w-full" />
+                            <Skeleton className="h-16 w-full" />
+                            <Skeleton className="h-16 w-full" />
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        )
+    }
+
   return (
     <div className="container max-w-2xl mx-auto py-8 md:py-12">
       <h1 className="text-3xl font-headline font-bold mb-8">Notifications</h1>
       <Card>
         <CardContent className="p-0">
           <div className="divide-y">
-            {initialNotifications.length > 0 ? (
-              initialNotifications.map((notification, index) => (
-              <div key={index} className="flex items-start gap-4 p-4 hover:bg-muted/50 transition-colors">
+            {notifications.length > 0 ? (
+              notifications.map((notification, index) => (
+              <div key={notification.id} className="flex items-start gap-4 p-4 hover:bg-muted/50 transition-colors">
                  <Avatar className="h-10 w-10 mt-1 flex-shrink-0">
                   <AvatarImage src={notification.avatar} data-ai-hint={notification.aiHint} />
                   <AvatarFallback><NotificationIcon type={notification.type} /></AvatarFallback>

@@ -9,7 +9,7 @@ import { useContext } from "react";
 import { AppContext } from "@/context/AppContext";
 
 type SharedPostCardProps = {
-  postId: number;
+  postId: string;
 };
 
 export function SharedPostCard({ postId }: SharedPostCardProps) {
@@ -60,5 +60,3 @@ export function SharedPostCard({ postId }: SharedPostCardProps) {
     </Link>
   );
 }
-
-    

@@ -15,6 +15,7 @@ import type {
     Group,
     Comment,
     SuccessStory,
+    Notification,
 } from '@/lib/data';
 import { ProfileContext } from './ProfileContext';
 import { PostEditFormData } from '@/components/edit-post-dialog';
@@ -31,7 +32,9 @@ import {
   getGroups,
   getJobListings,
   getSuccessStories,
-  toggleFollow
+  toggleFollow,
+  getNotifications,
+  addJobListing as addJobListingFs,
 } from '@/lib/firebase-services';
 import { serverTimestamp } from 'firebase/firestore';
 
@@ -62,7 +65,7 @@ type AppContextType = {
 
     jobListings: JobListing[];
     setJobListings: React.Dispatch<React.SetStateAction<JobListing[]>>;
-    addJobListing: (job: JobListing) => void;
+    addJobListing: (job: Omit<JobListing, 'id'>) => void;
 
     communityMembers: CommunityMember[];
     setCommunityMembers: React.Dispatch<React.SetStateAction<CommunityMember[]>>;
@@ -86,6 +89,8 @@ type AppContextType = {
 
     successStories: SuccessStory[];
     setSuccessStories: React.Dispatch<React.SetStateAction<SuccessStory[]>>;
+    notifications: Notification[];
+    setNotifications: React.Dispatch<React.SetStateAction<Notification[]>>;
 };
 
 // Context
@@ -126,6 +131,8 @@ export const AppContext = createContext<AppContextType>({
     addStoryForUser: () => {},
     successStories: [],
     setSuccessStories: () => {},
+    notifications: [],
+    setNotifications: () => {},
 });
 
 // Provider
@@ -141,6 +148,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
     const [stories, setStories] = useState<Story[]>([]);
     const [successStories, setSuccessStories] = useState<SuccessStory[]>([]);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
 
     useEffect(() => {
         const fetchAllData = async () => {
@@ -151,6 +159,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 eventsData, 
                 jobsData,
                 successStoriesData,
+                notificationsData,
             ] = await Promise.all([
                 getFeedItems(),
                 getCommunityMembers(),
@@ -158,13 +167,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 getEvents(),
                 getJobListings(),
                 getSuccessStories(),
+                getNotifications(),
             ]);
             setFeedItems(feedItemsData);
             setCommunityMembers(membersData);
             setGroups(groupsData);
             setEvents(eventsData);
-            setJobListings(jobsData as JobListing[]);
+            setJobListings(jobsData);
             setSuccessStories(successStoriesData);
+            setNotifications(notificationsData);
         };
         fetchAllData();
     }, []);
@@ -275,8 +286,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       }));
     }, []);
 
-    const addJobListing = useCallback((job: JobListing) => {
-        setJobListings(prev => [job, ...prev]);
+    const addJobListing = useCallback(async (job: Omit<JobListing, 'id'>) => {
+        const newDocId = await addJobListingFs(job);
+        setJobListings(prev => [{...job, id: newDocId}, ...prev]);
     }, []);
 
     const addFeedItem = useCallback(async (post: Omit<FeedItem, 'id' | 'createdAt' | 'likes' | 'likedBy' | 'comments'>) => {
@@ -458,6 +470,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         addStoryForUser,
         successStories,
         setSuccessStories,
+        notifications,
+        setNotifications,
     };
 
     return (

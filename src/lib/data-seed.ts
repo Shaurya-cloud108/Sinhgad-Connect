@@ -168,7 +168,7 @@ export type GroupMember = {
   ];
   
   export type JobListing = {
-    id: number;
+    id: string;
     title: string;
     company: string;
     location: string;
@@ -182,7 +182,7 @@ export type GroupMember = {
   
   export const initialJobListings: JobListing[] = [
     {
-      id: 1,
+      id: "1",
       title: "Senior Frontend Engineer",
       company: "Innovate Inc.",
       location: "Remote",
@@ -194,7 +194,7 @@ export type GroupMember = {
       applicationUrl: "https://careers.example.com/job/123",
     },
     {
-      id: 2,
+      id: "2",
       title: "Data Scientist",
       company: "DataDriven Co.",
       location: "Pune",
@@ -206,7 +206,7 @@ export type GroupMember = {
       applicationUrl: "https://careers.example.com/job/124",
     },
     {
-      id: 3,
+      id: "3",
       title: "Product Manager",
       company: "Connectify",
       location: "Bangalore",
@@ -217,7 +217,7 @@ export type GroupMember = {
       description: "Connectify is looking for a user-centric Product Manager to lead our product strategy and roadmap. You will work closely with engineering, design, and marketing to deliver products that our users love."
     },
     {
-      id: 4,
+      id: "4",
       title: "UX/UI Designer",
       company: "Creative Solutions",
       location: "Remote",
@@ -229,7 +229,7 @@ export type GroupMember = {
       applicationUrl: "https://careers.example.com/job/125",
     },
     {
-      id: 5,
+      id: "5",
       title: "DevOps Engineer",
       company: "CloudLeap",
       location: "Hyderabad",
@@ -240,7 +240,7 @@ export type GroupMember = {
       description: "CloudLeap is hiring a DevOps Engineer to manage and improve our cloud infrastructure. You will be responsible for our CI/CD pipelines, automation, and ensuring the reliability and scalability of our systems."
     },
     {
-      id: 6,
+      id: "6",
       title: "Marketing Intern",
       company: "GrowthX",
       location: "Mumbai",
@@ -405,6 +405,101 @@ export type GroupMember = {
       groupId?: string;
       createdAt: any; // For Firestore timestamp
   }
+
+  export const initialFeedItems: Omit<FeedItem, 'id' | 'createdAt'>[] = [
+    {
+        author: {
+            name: "Sunita Narayan",
+            avatar: "https://placehold.co/100x100.png",
+            handle: "sunita-narayan",
+            aiHint: "professional woman portrait"
+        },
+        content: "Thrilled to announce that Innovate Inc. has secured Series B funding! A huge thank you to our amazing team and investors. We're excited to accelerate our mission of creating sustainable technology for everyone. #innovation #greentech",
+        image: "https://placehold.co/600x400.png",
+        aiHint: "team celebration",
+        location: "Remote",
+        likes: 152,
+        likedBy: ["priya-sharma", "rohan-verma", "anjali-mehta"],
+        comments: [
+            { id: 1, author: { name: "Priya Sharma", avatar: "https://placehold.co/100x100.png", handle: "priya-sharma" }, text: "This is fantastic news, Sunita! Congratulations!" },
+            { id: 2, author: { name: "Rohan Verma", avatar: "https://placehold.co/100x100.png", handle: "rohan-verma" }, text: "So well deserved. Inspiring work!" }
+        ]
+    },
+    {
+        author: {
+            name: "Anjali Mehta",
+            avatar: "https://placehold.co/100x100.png",
+            handle: "anjali-mehta",
+            aiHint: "corporate woman"
+        },
+        content: "Just hit my 5-year anniversary at Verizon! So grateful for the journey and the incredible people I get to work with. Time flies when you're building the future of communication.",
+        image: null,
+        likes: 78,
+        likedBy: [],
+        comments: [],
+        groupId: "batch-of-2015"
+    },
+    {
+        author: {
+            name: "Rohan Verma",
+            avatar: "https://placehold.co/100x100.png",
+            handle: "rohan-verma",
+            aiHint: "professional man"
+        },
+        content: "Had a great time speaking to the final year Mechanical Engineering students at Sinhgad last week. The future is bright! Thanks to the college for inviting me.",
+        image: "https://placehold.co/600x400.png",
+        aiHint: "lecture hall",
+        location: "Pune, India",
+        likes: 95,
+        likedBy: ["priya-sharma"],
+        comments: [
+             { id: 1, author: { name: "Kavya Iyer", avatar: "https://placehold.co/100x100.png", handle: "kavya-iyer" }, text: "It was a great session, sir! Very informative." }
+        ]
+    },
+    {
+        author: {
+            name: "Priya Sharma",
+            avatar: "https://placehold.co/150x150.png",
+            handle: "priya-sharma",
+            aiHint: "professional woman"
+        },
+        content: "Mentoring a final year student on their capstone project has been such a rewarding experience. It's amazing to see the innovative ideas coming from the next generation of engineers. #mentorship #givingback",
+        image: null,
+        likes: 120,
+        likedBy: [],
+        comments: []
+    },
+    {
+        author: {
+            name: "Kavya Iyer",
+            avatar: "https://placehold.co/100x100.png",
+            handle: "kavya-iyer",
+            aiHint: "female student"
+        },
+        content: "I'm looking for an internship in AI/ML for the upcoming summer. If anyone has any leads or advice, please let me know! My resume is on my profile. #internship #ai #machinelearning",
+        image: null,
+        likes: 45,
+        likedBy: [],
+        comments: [
+            { id: 1, author: { name: "Priya Sharma", avatar: "https://placehold.co/150x150.png", handle: "priya-sharma" }, text: "Sent you a DM, Kavya!" }
+        ],
+        groupId: "job-seekers-2024"
+    },
+    {
+        author: {
+            name: "Sunita Narayan",
+            avatar: "https://placehold.co/100x100.png",
+            handle: "sunita-narayan",
+            aiHint: "professional woman portrait"
+        },
+        content: "We're hiring for multiple roles at Innovate Inc.! Looking for passionate engineers and designers who want to make a difference. Check out the job portal for more details. #hiring #techjobs",
+        image: null,
+        likes: 88,
+        likedBy: ["priya-sharma"],
+        comments: [],
+        groupId: "comp-eng-alumni",
+    }
+  ];
   
   export type EducationEntry = {
     degree: string;
@@ -862,3 +957,4 @@ export type GroupMember = {
           aiHint: "briefcase icon"
       },
   ];
+

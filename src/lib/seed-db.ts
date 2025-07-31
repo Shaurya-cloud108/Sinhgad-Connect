@@ -3,16 +3,15 @@
 // To run: `npm run-script seed-db`
 
 import { db } from './firebase';
-import { collection, writeBatch, doc } from 'firebase/firestore';
+import { collection, writeBatch, doc, serverTimestamp } from 'firebase/firestore';
 import { 
     initialCommunityMembers,
     initialGroupsData,
     initialEventsData,
     initialJobListings,
-    initialConversations,
-    initialMessages,
     initialStories,
     successStories,
+    initialFeedItems,
     notifications,
 } from './data-seed'; // Using a new file for seed data
 
@@ -50,10 +49,18 @@ async function seedDatabase() {
         console.log(`Seeding ${initialJobListings.length} job listings...`);
         const jobsCollection = collection(db, 'jobListings');
         initialJobListings.forEach(job => {
-            const docRef = doc(jobsCollection); // Auto-generate ID
+            const docRef = doc(jobsCollection, job.id); // Use predefined ID
             batch.set(docRef, job);
         });
         
+        // Seed Feed Items
+        console.log(`Seeding ${initialFeedItems.length} feed items...`);
+        const feedItemsCollection = collection(db, 'feedItems');
+        initialFeedItems.forEach(item => {
+            const docRef = doc(feedItemsCollection); // Auto-generate ID
+            batch.set(docRef, { ...item, createdAt: serverTimestamp() });
+        });
+
         // Seed Stories (empty shells for users)
         console.log(`Seeding ${initialStories.length} story shells...`);
         const storiesCollection = collection(db, 'stories');
@@ -70,8 +77,14 @@ async function seedDatabase() {
             batch.set(docRef, story);
         });
 
-        // NOTE: We are not seeding feedItems, conversations, or notifications
-        // as they are better generated through user interaction.
+        // Seed Notifications
+        console.log(`Seeding ${notifications.length} notifications...`);
+        const notificationsCollection = collection(db, 'notifications');
+        notifications.forEach(notification => {
+            const docRef = doc(notificationsCollection); // Auto-generate ID
+            batch.set(docRef, notification);
+        });
+
 
         await batch.commit();
 

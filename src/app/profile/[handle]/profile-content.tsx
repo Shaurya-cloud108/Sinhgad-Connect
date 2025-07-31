@@ -459,13 +459,12 @@ export default function ProfilePageContent({ params }: { params: { handle: strin
     const handleJobSubmit = (newJob: Omit<JobListing, 'id' | 'postedBy' | 'postedByHandle'>) => {
         if(!profileData) return;
         const primaryEducation = profileData.education.find(e => e.graduationYear);
-        const gradYearSuffix = primaryEducation?.graduationYear ? `'${'${primaryEducation.graduationYear.toString().slice(-2)}'}'` : '';
+        const gradYearSuffix = primaryEducation?.graduationYear ? `'${primaryEducation.graduationYear.toString().slice(-2)}'` : '';
 
         addJobListing({
-        ...newJob,
-        id: Date.now().toString(),
-        postedBy: `${profileData.name} ${gradYearSuffix}`.trim(),
-        postedByHandle: profileData.handle,
+            ...newJob,
+            postedBy: `${profileData.name} ${gradYearSuffix}`.trim(),
+            postedByHandle: profileData.handle,
         });
     }
     
