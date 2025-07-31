@@ -15,7 +15,7 @@ import {
   getDoc,
   runTransaction,
 } from 'firebase/firestore';
-import type { FeedItem, Comment, CommunityMember, JobListing, Event, Group } from './data';
+import type { FeedItem, Comment, CommunityMember, JobListing, Event, Group, SuccessStory } from './data';
 import type { PostEditFormData } from '@/components/edit-post-dialog';
 
 const feedItemsCollection = collection(db, 'feedItems');
@@ -23,6 +23,8 @@ const communityMembersCollection = collection(db, 'communityMembers');
 const jobsCollection = collection(db, 'jobListings');
 const eventsCollection = collection(db, 'events');
 const groupsCollection = collection(db, 'groups');
+const successStoriesCollection = collection(db, 'successStories');
+
 
 // Feed Item Services
 export const getFeedItems = async (): Promise<FeedItem[]> => {
@@ -127,4 +129,10 @@ export const getEvents = async (): Promise<Event[]> => {
 export const getGroups = async (): Promise<Group[]> => {
     const snapshot = await getDocs(groupsCollection);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Group));
+}
+
+// Success Story Services
+export const getSuccessStories = async (): Promise<SuccessStory[]> => {
+    const snapshot = await getDocs(successStoriesCollection);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SuccessStory));
 }

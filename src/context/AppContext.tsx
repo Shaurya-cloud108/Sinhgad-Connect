@@ -13,7 +13,8 @@ import type {
     StoryItem,
     Event,
     Group,
-    Comment
+    Comment,
+    SuccessStory,
 } from '@/lib/data';
 import { ProfileContext } from './ProfileContext';
 import { PostEditFormData } from '@/components/edit-post-dialog';
@@ -29,6 +30,7 @@ import {
   getEvents,
   getGroups,
   getJobListings,
+  getSuccessStories,
   toggleFollow
 } from '@/lib/firebase-services';
 import { serverTimestamp } from 'firebase/firestore';
@@ -81,6 +83,9 @@ type AppContextType = {
     addStoryItem: (userHandle: string, item: StoryItem) => void;
     deleteStoryItem: (userHandle: string, itemId: number) => void;
     addStoryForUser: (user: CommunityMember) => void;
+
+    successStories: SuccessStory[];
+    setSuccessStories: React.Dispatch<React.SetStateAction<SuccessStory[]>>;
 };
 
 // Context
@@ -119,6 +124,8 @@ export const AppContext = createContext<AppContextType>({
     addStoryItem: () => {},
     deleteStoryItem: () => {},
     addStoryForUser: () => {},
+    successStories: [],
+    setSuccessStories: () => {},
 });
 
 // Provider
@@ -133,6 +140,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [communityMembers, setCommunityMembers] = useState<CommunityMember[]>([]);
     const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
     const [stories, setStories] = useState<Story[]>([]);
+    const [successStories, setSuccessStories] = useState<SuccessStory[]>([]);
 
     useEffect(() => {
         const fetchAllData = async () => {
@@ -141,19 +149,22 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 membersData, 
                 groupsData, 
                 eventsData, 
-                jobsData
+                jobsData,
+                successStoriesData,
             ] = await Promise.all([
                 getFeedItems(),
                 getCommunityMembers(),
                 getGroups(),
                 getEvents(),
                 getJobListings(),
+                getSuccessStories(),
             ]);
             setFeedItems(feedItemsData);
             setCommunityMembers(membersData);
             setGroups(groupsData);
             setEvents(eventsData);
             setJobListings(jobsData as JobListing[]);
+            setSuccessStories(successStoriesData);
         };
         fetchAllData();
     }, []);
@@ -445,6 +456,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         addStoryItem,
         deleteStoryItem,
         addStoryForUser,
+        successStories,
+        setSuccessStories,
     };
 
     return (

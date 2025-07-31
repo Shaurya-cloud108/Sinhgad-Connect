@@ -15,13 +15,14 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowRight, BrainCircuit, Send } from "lucide-react";
 import Link from "next/link";
 import { ShareDialog } from "@/components/share-dialog";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { successStories } from "@/lib/data.tsx";
 import { useSearchParams } from "next/navigation";
+import { AppContext } from "@/context/AppContext";
 
 
 function SuccessStoriesContent() {
+  const { successStories } = useContext(AppContext);
   const searchParams = useSearchParams();
 
   useEffect(() => {

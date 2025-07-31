@@ -1,8 +1,8 @@
 
 'use client';
 
-import { useState, useEffect, use } from 'react';
-import { successStories, SuccessStory } from '@/lib/data';
+import { useState, useEffect, use, useContext } from 'react';
+import { SuccessStory } from '@/lib/data';
 import { notFound, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,21 +10,24 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, BrainCircuit, Lightbulb, Sparkles, UserCheck } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AppContext } from '@/context/AppContext';
 
 export default function StoryDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [story, setStory] = useState<SuccessStory | null>(null);
-
+  const { successStories } = useContext(AppContext);
   const resolvedParams = use(params);
 
   useEffect(() => {
-    const storyData = successStories.find((s) => s.id === resolvedParams.id);
-    if (storyData) {
-      setStory(storyData);
-    } else {
-      notFound();
+    if (successStories.length > 0) {
+      const storyData = successStories.find((s) => s.id === resolvedParams.id);
+      if (storyData) {
+        setStory(storyData);
+      } else {
+        notFound();
+      }
     }
-  }, [resolvedParams.id]);
+  }, [resolvedParams.id, successStories]);
 
   if (!story) {
     return (
