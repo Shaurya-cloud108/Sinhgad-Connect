@@ -1,0 +1,140 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    function isOwnerOfDocument() {
+      return request.auth.uid == resource.data.uid;
+    }
+
+    // Users collection
+    match /users/{userId} {
+      // Users can read their own profile and profiles of others
+      allow read: if true;
+      
+      // Users can only create/update their own profile
+      allow create: if isAuthenticated() && isOwner(userId) && 
+        request.data.uid == request.auth.uid;
+      allow update: if isAuthenticated() && isOwner(userId);
+      
+      // No deletion allowed
+      allow delete: if false;
+    }
+
+    // Posts collection
+    match /posts/{postId} {
+      // Anyone can read posts
+      allow read: if true;
+      
+      // Authenticated users can create posts
+      allow create: if isAuthenticated() && 
+        request.data.author.handle == request.auth.uid;
+      
+      // Users can update/delete their own posts
+      allow update, delete: if isAuthenticated() && 
+        resource.data.author.handle == request.auth.uid;
+    }
+
+    // Comments subcollection
+    match /posts/{postId}/comments/{commentId} {
+      // Anyone can read comments
+      allow read: if true;
+      
+      // Authenticated users can create comments
+      allow create: if isAuthenticated();
+      
+      // Users can update/delete their own comments
+      allow update, delete: if isAuthenticated() && 
+        resource.data.author.handle == request.auth.uid;
+    }
+
+    // Jobs collection
+    match /jobs/{jobId} {
+      // Anyone can read job listings
+      allow read: if true;
+      
+      // Authenticated users can create jobs
+      allow create: if isAuthenticated() && 
+        request.data.postedByHandle == request.auth.uid;
+      
+      // Users can update/delete their own job postings
+      allow update, delete: if isAuthenticated() && 
+        resource.data.postedByHandle == request.auth.uid;
+    }
+
+    // Events collection
+    match /events/{eventId} {
+      // Anyone can read events
+      allow read: if true;
+      
+      // Authenticated users can create events
+      allow create: if isAuthenticated() && 
+        request.data.createdBy == request.auth.uid;
+      
+      // Event creators can update/delete their events
+      allow update, delete: if isAuthenticated() && 
+        resource.data.createdBy == request.auth.uid;
+    }
+
+    // Groups collection
+    match /groups/{groupId} {
+      // Public groups can be read by anyone, private groups only by members
+      allow read: if resource.data.type == 'public' || 
+        (isAuthenticated() && request.auth.uid in resource.data.members[].handle);
+      
+      // Authenticated users can create groups
+      allow create: if isAuthenticated();
+      
+      // Group admins can update/delete groups
+      allow update, delete: if isAuthenticated() && 
+        isGroupAdmin(resource.data.members, request.auth.uid);
+    }
+
+    // Success Stories collection
+    match /successStories/{storyId} {
+      // Anyone can read success stories
+      allow read: if true;
+      
+      // Authenticated users can create their own success stories
+      allow create: if isAuthenticated() && 
+        request.data.alumniHandle == request.auth.uid;
+      
+      // Users can update/delete their own success stories
+      allow update, delete: if isAuthenticated() && 
+        resource.data.alumniHandle == request.auth.uid;
+    }
+
+    // Notifications collection
+    match /notifications/{notificationId} {
+      // Users can only read their own notifications
+      allow read: if isAuthenticated() && 
+        resource.data.userId == request.auth.uid;
+      
+      // System can create notifications, users can update (mark as read)
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && 
+        resource.data.userId == request.auth.uid;
+      
+      // Users can delete their own notifications
+      allow delete: if isAuthenticated() && 
+        resource.data.userId == request.auth.uid;
+    }
+
+    // Helper function to check if user is group admin
+    function isGroupAdmin(members, userId) {
+      return userId in members.filter(m => m.role == 'admin').map(m => m.handle);
+    }
+
+    // Deny all other reads/writes
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
