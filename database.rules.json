@@ -1,0 +1,100 @@
+{
+  "rules": {
+    // Conversations and Messages
+    "conversations": {
+      "$conversationId": {
+        // Users can read conversations they're part of
+        ".read": "auth != null && (data.child('participants').val().contains(auth.uid))",
+        
+        // Users can write to conversations they're part of
+        ".write": "auth != null && (data.child('participants').val().contains(auth.uid) || !data.exists())",
+        
+        "messages": {
+          "$messageId": {
+            // Users can read messages in conversations they're part of
+            ".read": "auth != null && root.child('conversations').child($conversationId).child('participants').val().contains(auth.uid)",
+            
+            // Users can write messages if they're part of the conversation
+            ".write": "auth != null && root.child('conversations').child($conversationId).child('participants').val().contains(auth.uid) && newData.child('senderId').val() == auth.uid",
+            
+            // Validate message structure
+            ".validate": "newData.hasChildren(['senderId', 'senderName', 'text', 'timestamp']) && newData.child('senderId').val() == auth.uid"
+          }
+        }
+      }
+    },
+    
+    // Real-time Notifications
+    "notifications": {
+      "$userId": {
+        // Users can only read their own notifications
+        ".read": "auth != null && auth.uid == $userId",
+        
+        // System can write notifications, users can update (mark as read)
+        ".write": "auth != null && (auth.uid == $userId || !data.exists())",
+        
+        "$notificationId": {
+          ".validate": "newData.hasChildren(['type', 'title', 'message', 'timestamp'])"
+        }
+      }
+    },
+    
+    // Online Presence
+    "presence": {
+      "$userId": {
+        // Anyone can read presence status
+        ".read": true,
+        
+        // Users can only write their own presence
+        ".write": "auth != null && auth.uid == $userId",
+        
+        ".validate": "newData.hasChildren(['name', 'online', 'lastSeen'])"
+      }
+    },
+    
+    // Typing Indicators
+    "typing": {
+      "$conversationId": {
+        // Users can read typing status for conversations they're in
+        ".read": "auth != null && root.child('conversations').child($conversationId).child('participants').val().contains(auth.uid)",
+        
+        "$userId": {
+          // Users can only write their own typing status
+          ".write": "auth != null && auth.uid == $userId"
+        }
+      }
+    },
+    
+    // Post Engagement (likes, comments count)
+    "postEngagement": {
+      "$postId": {
+        // Anyone can read engagement data
+        ".read": true,
+        
+        // Authenticated users can update engagement
+        ".write": "auth != null",
+        
+        ".validate": "newData.hasChildren(['lastUpdated'])"
+      }
+    },
+    
+    // Story Views
+    "storyViews": {
+      "$storyId": {
+        // Story owner can read views
+        ".read": "auth != null",
+        
+        "$viewerId": {
+          // Users can write their own view
+          ".write": "auth != null && auth.uid == $viewerId",
+          
+          ".validate": "newData.hasChildren(['name', 'avatar', 'timestamp'])"
+        }
+      }
+    },
+    
+    // Default rule - deny access to everything else
+    ".read": false,
+    ".write": false
+  }
+}
