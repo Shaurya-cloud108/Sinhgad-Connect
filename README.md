@@ -19,3 +19,4 @@ To populate your Firestore database with the initial mock data for users, groups
 4.  This will execute the `src/lib/seed-db.ts` script, which uploads all the necessary data. You only need to do this once. After it's done, you can even delete the script file if you wish.
 # Sinhgad-Connect
 # Sinhgad-Connect
+# Sinhgad-Connect
